@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Practice Behavioral Observations with AMSIT</title>
+<style>
+  :root{
+    --bg:#f4f7f5; --card:#ffffff; --ink:#17251d; --muted:#41544a;
+    --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b;
+    box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-padding-top:env(safe-area-inset-top,0px);}
+  body{margin:0; background:var(--bg); color:var(--ink);
+    font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:17px; line-height:1.6;}
+  .wrap{max-width:820px; margin:0 auto; padding:26px 18px 60px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:27px; margin:0 0 6px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:20px; margin:0 0 6px;}
+  p{margin:0 0 12px;}
+  .lede{color:var(--muted);}
+  .warn{background:#fff3e6; border:1px solid #e6c199; border-left:5px solid var(--accent); border-radius:8px; padding:12px 16px; margin:0 0 20px; color:#7a3d00; font-size:15px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:18px 20px; margin:0 0 16px;}
+  .chars{display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 0;}
+  .chars button{font:inherit; font-size:15px; cursor:pointer; border:1px solid #cfe0d7; border-radius:20px; background:#eef4f1; color:var(--green); padding:7px 14px;}
+  .chars button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .setup{font-size:15px; color:var(--teach); background:#f7faf8; border-left:3px solid var(--green); padding:10px 12px; border-radius:6px; margin:10px 0 0;}
+  .field{margin:0 0 14px;}
+  label{display:block; font-weight:600; color:var(--green); font-size:15px; margin:0 0 2px;}
+  .hint{font-size:13px; color:var(--muted); margin:0 0 4px;}
+  textarea{width:100%; min-height:70px; resize:vertical; font:inherit; font-size:15px; color:var(--ink); background:#fbfdfc; border:1px solid var(--line); border-radius:7px; padding:9px 11px;}
+  textarea:focus{outline:2px solid #bcd6c8; border-color:#bcd6c8;}
+  .expert{display:none; margin:6px 0 0; padding:10px 12px; background:#fff7ef; border:1px solid #f0d9c2; border-left:4px solid var(--accent); border-radius:6px; font-size:15px; color:var(--teach);}
+  .expert strong{color:#8a4600;}
+  .show .expert{display:block;}
+  button.main{font:inherit; font-size:16px; cursor:pointer; border:none; border-radius:8px; background:var(--green); color:#eef4f1; padding:12px 20px; margin:6px 8px 6px 0;}
+  button.sec{font:inherit; font-size:16px; cursor:pointer; border-radius:8px; background:#eef4f1; color:var(--green); border:1px solid #cfe0d7; padding:12px 20px; margin:6px 8px 6px 0;}
+  .status{font-size:14px; color:var(--muted);}
+  a.link{color:var(--accent); font-size:14px; cursor:pointer; text-decoration:underline; background:none; border:none; padding:0; font-family:inherit;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Practice behavioral observations with AMSIT</h1>
+  <p class="lede">Watch a character, pause often, and write what you observe under each AMSIT area. Then turn those notes into the Behavioral Observations section of a report, the same section that closes the background in the sample for Nate. Only then compare with the expert notes. Describe what you see and hear. Do not diagnose. Observation practice is about noticing and describing accurately, and a fictional character is a safe, endlessly replayable place to build that skill. Any film works, and the fifth option below is for a character of your own choosing.</p>
+
+  <div class="warn"><strong>This page does not save anything.</strong> Finish in one sitting and use the copy button to keep your notes. You can come back and practice as often as you like.</div>
+
+  <div class="card">
+    <h2>Choose a character</h2>
+    <div class="chars" id="chars"></div>
+    <div class="setup" id="setup"></div>
+  </div>
+
+  <div class="card" id="work">
+    <div class="field" data-f="A"><label>A. Appearance, behavior, and speech</label><p class="hint">Apparent age, grooming, dress, manner of relating to others, psychomotor activity, eye contact, and speech.</p><textarea></textarea><div class="expert"></div></div>
+    <div class="field" data-f="M"><label>M. Mood and affect</label><p class="hint">Mood as the character would describe it, and the affect you observe, its quality, range, stability, and congruence.</p><textarea></textarea><div class="expert"></div></div>
+    <div class="field" data-f="S"><label>S. Sensorium</label><p class="hint">Alertness, orientation, attention, and memory, as shown in what you watch.</p><textarea></textarea><div class="expert"></div></div>
+    <div class="field" data-f="I"><label>I. Intellectual function</label><p class="hint">An estimate, from vocabulary, knowledge, education, and reasoning.</p><textarea></textarea><div class="expert"></div></div>
+    <div class="field" data-f="T"><label>T. Thought, perception, insight, and judgment</label><p class="hint">Thought process and content, any perceptual disturbance, insight, and judgment.</p><textarea></textarea><div class="expert"></div></div>
+    <div class="field" data-f="P"><label>Now write the Behavioral Observations section</label><p class="hint">This is the section as it would appear in a report. Write one continuous paragraph, in past tense, describing how the character presented during the scenes you watched. Follow the order AMSIT gives you, without the letters as headings. Describe only what you observed or heard said, and close with a sentence on what your observations were based on.</p><textarea style="min-height:130px"></textarea><div class="expert"></div></div>
+
+    <button class="main" id="compare">Compare with the expert</button>
+    <button class="sec" id="copy">Copy my notes</button>
+    <span class="status" id="status"></span>
+    <p class="status" id="gate" style="display:none; margin:8px 0 0;">Write something under every area first, since committing to your own observations is the point. <button class="link" id="anyway">Show the expert notes anyway</button></p>
+  </div>
+</div>
+
+<script>
+var CH = {
+  scrooge: {
+    name: "Ebenezer Scrooge",
+    setup: "Use the opening of A Christmas Carol, in the counting-house on Christmas Eve, before any ghost appears. Any film version works, since versions differ in detail, so describe the one you watch.",
+    A: "An elderly man, thin, with sharp features, in plain dark clothing that looks old-fashioned even for his time. He keeps his office cold and rations the coal. His manner toward others is curt, dismissive, and openly hostile, toward his nephew's warmth, toward the men collecting for charity, and toward his clerk. His movements are brisk and stiff. His speech is clipped and sarcastic, with quick, scornful retorts that shut conversation down.",
+    M: "Asked, he would likely say he is perfectly fine and see no problem in himself, so his mood would be recorded in his own dismissive words. His affect is irritable and contemptuous, with a restricted range and almost no warmth, stable across the scene and congruent with the views he expresses.",
+    S: "Alert and fully oriented, with sharp attention to money, time, and detail. His memory is intact, and later in the story his memories of the past turn out to be vivid.",
+    I: "Estimated above average. He is a shrewd, successful businessman, and his retorts are quick and verbally precise.",
+    T: "His thinking is linear and goal-directed. His thought content is preoccupied with money and thrift, with disdain for the holiday and harsh views about the poor. At the opening there is no perceptual disturbance. The ghosts come later, and in a real interview anything like them is something you would ask about directly. His insight is poor, since he sees nothing to change. His judgment is sound in business and poor in his relationships and his own comfort, keeping himself cold and alone.",
+    P: "Mr. S was observed in his place of business on Christmas Eve. He is an elderly man who appeared his stated age, thin and sharp-featured, and dressed in plain, dark, old-fashioned clothing. He was curt and dismissive with each person who approached him, including his nephew, two visitors collecting for charity, and his clerk, and he engaged with each only as long as it took to end the conversation. His movements were brisk and stiff, and his speech was clipped and sarcastic. He expressed no distress about his circumstances, and his affect was irritable and contemptuous, with a restricted range, and congruent with the content of his speech. He was alert and oriented, with close attention to detail. His vocabulary and the speed of his retorts suggested above average intellectual functioning. His thought process was linear and goal-directed, and the content of his speech centered on money, thrift, and disdain for the holiday. No perceptual disturbances were evident during these scenes. He showed little insight into how others experienced him, and his judgment was sound where money was concerned and poor in his dealings with others. These observations are based on the opening scenes of the story and may not reflect his functioning in other settings."
+  },
+  holmes: {
+    name: "Sherlock Holmes",
+    setup: "Use any version, from the original stories to a modern adaptation. Portrayals differ a great deal in dress and manner, so describe what you actually see rather than what you know about the character.",
+    A: "A tall, lean man with sharp features and intense, scrutinizing eye contact. Dress varies by version, so note it as shown. His psychomotor activity swings between restless energy when a problem engages him and languid inactivity when nothing does. His manner is brisk, impatient, and often condescending, warmer only with his closest companion. His speech is rapid, precise, and lecturing, and he interrupts.",
+    M: "Between cases he would describe himself as bored, and he says so often. His affect varies with stimulation, intense and animated when engaged in a problem and flat or irritable when idle. Its range in warmth is restricted, though it is congruent with what occupies him in the moment.",
+    S: "Hyperalert and fully oriented, with exceptional attention to detail and a strong memory for anything relevant to his work.",
+    I: "Estimated to be well above average, with rapid inferential reasoning and deep specialized knowledge. His fund of general knowledge is uneven, though. In the original stories he claims not to know, or care, about ordinary facts outside his work. It is a useful reminder that an estimate of intellect should not rest on a single area.",
+    T: "His thinking is linear, rapid, and goal-directed, sometimes hard for others to follow because he skips steps. His thought content is dominated by the problem in front of him, with disdain for the ordinary. There is no perceptual disturbance. His insight into his own habits is variable. His judgment is excellent in his work and poor in self-care. He neglects food and sleep during a case, and in the original stories he uses cocaine when bored.",
+    P: "Mr. H was observed across several scenes at his lodgings and during an investigation. He is a tall, lean man who appeared his stated age, with sharp features and intense, scrutinizing eye contact, and he was dressed in [describe his clothing as shown in the version you watched]. He was brisk and often condescending with visitors, warmer with his companion, and he frequently interrupted. His psychomotor activity alternated between restlessness when a problem engaged him and marked inactivity when none did. His speech was rapid, precise, and lecturing. He complained of boredom when he had no case, and his affect varied accordingly, animated and intense when engaged and flat or irritable when idle. He was alert and oriented, with exceptional attention to detail. His reasoning suggested intellectual functioning well above average, although his general knowledge appeared uneven. His thought process was rapid, linear, and goal-directed, at times skipping steps that left others unable to follow, and the content of his speech centered on the problem at hand. No perceptual disturbances were evident. His insight into his own habits appeared limited, and his judgment was excellent in his work and poor with respect to his own sleep and meals. These observations are based on the scenes watched and will vary across portrayals."
+  },
+  eeyore: {
+    name: "Eeyore",
+    setup: "Use any Winnie-the-Pooh story or film. Yes, he is a stuffed donkey. The practice works just as well, and it is a good test of describing without diagnosing.",
+    A: "A small gray donkey with a droopy posture, lowered head, and a tail that is pinned on and sometimes missing. He moves slowly. His manner is polite and self-effacing, and he expects to be overlooked. His speech is slow, low, and monotone, punctuated by sighs, with a dry, understated wit.",
+    M: "He would describe his mood as gloomy, and he would not be surprised if you asked. His affect is sad and resigned, with a restricted range, and it is stable, brightening only slightly when friends remember him. It is congruent with his mood and with what he says.",
+    S: "Alert and oriented, and he follows conversations closely.",
+    I: "Estimated to be in the average range. He is articulate, and his dry humor takes some wit.",
+    T: "His thinking is linear and goal-directed. His thought content is pessimistic, expecting bad outcomes and expecting to be forgotten, often with gentle self-deprecation. There is no perceptual disturbance. His insight is limited, since he recognizes his gloom but treats it as simply the way things are. His judgment is adequate. Notice that a consistently sad affect is an observation, not a diagnosis. Your job here is to describe it well.",
+    P: "Mr. E was observed across several scenes with his friends. He is a small gray donkey who moved slowly and held his head low, with a tail that was pinned in place. He was polite but self-effacing with others and appeared to expect to be overlooked. His speech was slow, low in volume, and monotone, with frequent sighs and occasional dry humor. He expressed a consistently gloomy outlook, and his affect was sad and resigned, with a restricted range, brightening only slightly when his friends showed they had remembered him. His affect was stable and congruent with the content of his speech. He was alert and oriented and followed conversations closely. His vocabulary and humor suggested average intellectual functioning. His thought process was linear and goal-directed, and the content of his speech was pessimistic and self-deprecating. No perceptual disturbances were evident. He acknowledged his own gloominess but treated it as unchangeable, and his judgment appeared adequate. These observations are based on the scenes watched and may not reflect his functioning in other settings."
+  },
+  hamlet: {
+    name: "Hamlet",
+    setup: "Use any film or stage version of Hamlet. His presentation changes across the play, so choose a scene or two and describe those, noting which scenes you used.",
+    A: "A young nobleman dressed in black mourning clothes while the court around him celebrates. His manner shifts with the company, guarded and sardonic with the king and the court, warm and open with his friend Horatio, and erratic in public once he decides to feign madness. His psychomotor activity varies from still and brooding to agitated. His speech is highly verbal, full of puns and wordplay, with long reflective passages when alone.",
+    M: "He would describe his mood as grief and disgust, and early in the play he says as much when alone. His affect is labile, moving quickly from biting wit to rage to despair, and at times it is incongruent, as when he jokes in the face of death.",
+    S: "Alert and fully oriented, with sharp attention and intact memory.",
+    I: "Estimated well above average. He is a university student, highly articulate, and given to philosophical reasoning.",
+    T: "His thinking is linear and goal-directed in private and deliberately disorganized in public, and he tells us he will pretend to be mad. That is a lesson in itself, since observed disorganization has to be weighed against context. His thought content is preoccupied with his father's death, his mother's remarriage, revenge, and mortality, and he contemplates death and suicide aloud. In a real interview you would ask about thoughts like these directly. He sees and speaks with his father's ghost. Others see it too in the opening scenes, though his mother cannot see it later, which shows that whether something counts as a perceptual disturbance depends on whether others share the experience. His insight is considerable, since he reflects on himself constantly. His judgment is poor at critical moments, as when he acts on impulse and kills the man behind the curtain.",
+    P: "Mr. H was observed in several scenes, both at court and in private. He is a young man who appeared his stated age, dressed in black mourning clothes that set him apart from the celebrating court. His manner varied with the company, guarded and sardonic with the king and the court, warm and open with a close friend, and erratic in public after he announced privately that he would feign madness. His psychomotor activity ranged from still and brooding to agitated. His speech was highly verbal and full of wordplay. He expressed grief and disgust, and his affect was labile, shifting quickly among biting humor, anger, and despair, and at times it was incongruent with the content of his speech. He was alert and oriented, with intact attention and memory. His vocabulary and reasoning suggested intellectual functioning well above average. His thought process was linear and goal-directed when he was alone or with his friend, and deliberately disorganized in public. The content of his speech centered on his father's death, his mother's remarriage, revenge, and mortality, including thoughts of death and suicide. He spoke with his deceased father, who was also seen by others in early scenes but not by his mother in a later one. He showed considerable insight into his own state, and his judgment was impaired at critical moments, including an impulsive killing. These observations are based on selected scenes, and his presentation changed considerably over the course of the play."
+  },
+  own: {
+    name: "A character of your own",
+    setup: "Pick any character from any film or show you can pause and replay. Note the title and scene. There are no expert notes for this one, so after you write, compare your notes against the AMSIT reveals on the module page and ask yourself what you might have missed. Stay with fictional characters. Writing observations about real people, including public figures, is not appropriate practice.",
+    none: true
+  }
+};
+var order=["scrooge","holmes","eeyore","hamlet","own"], cur=null;
+var chars=document.getElementById('chars');
+order.forEach(function(k){
+  var b=document.createElement('button'); b.textContent=CH[k].name; b.onclick=function(){pick(k);}; b.id='b-'+k; chars.appendChild(b);
+});
+function fields(){ return Array.prototype.slice.call(document.querySelectorAll('.field')); }
+function pick(k){
+  if(cur && fields().some(function(f){return f.querySelector('textarea').value.trim();})){
+    if(!confirm('Switching characters clears your notes. Copy them first if you want to keep them. Switch anyway?')) return;
+  }
+  cur=k;
+  order.forEach(function(x){document.getElementById('b-'+x).classList.toggle('on',x===k);});
+  document.getElementById('setup').textContent=CH[k].setup;
+  fields().forEach(function(f){
+    f.classList.remove('show'); f.querySelector('textarea').value='';
+    var key=f.getAttribute('data-f'), e=f.querySelector('.expert');
+    e.innerHTML = CH[k].none ? '' : (key==='P' ? '<strong>Expert Behavioral Observations section.</strong> ' : '<strong>Expert notes.</strong> ')+CH[k][key];
+  });
+  document.getElementById('compare').style.display = CH[k].none ? 'none' : '';
+  document.getElementById('gate').style.display='none';
+  document.getElementById('status').textContent='';
+}
+function reveal(){ fields().forEach(function(f){ if(!CH[cur].none) f.classList.add('show'); }); document.getElementById('gate').style.display='none'; }
+document.getElementById('compare').onclick=function(){
+  if(!cur) return;
+  var allDone=fields().every(function(f){return f.querySelector('textarea').value.trim().length>=10;});
+  if(allDone) reveal(); else document.getElementById('gate').style.display='block';
+};
+document.getElementById('anyway').onclick=reveal;
+document.getElementById('copy').onclick=function(){
+  if(!cur) return;
+  var labels={A:'A. Appearance, behavior, and speech',M:'M. Mood and affect',S:'S. Sensorium',I:'I. Intellectual function',T:'T. Thought, perception, insight, and judgment',P:'Behavioral Observations section'};
+  var out='AMSIT PRACTICE: '+CH[cur].name.toUpperCase()+'\n\n';
+  fields().forEach(function(f){ var k=f.getAttribute('data-f'); out+=labels[k]+'\n'+(f.querySelector('textarea').value.trim()||'[not completed]')+'\n\n'; });
+  var done=function(){document.getElementById('status').textContent='Copied. Paste it into your own document.';};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(out.trim()).then(done,function(){fallback(out,done);});}else{fallback(out,done);}
+};
+function fallback(t,done){var a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();try{document.execCommand('copy');done();}catch(e){document.getElementById('status').textContent='Copy failed. Select your text manually.';}document.body.removeChild(a);}
+window.addEventListener('beforeunload',function(e){ if(fields().some(function(f){return f.querySelector('textarea').value.trim();})){e.preventDefault();e.returnValue='';} });
+pick('scrooge');
+</script>
+</body>
+</html>
