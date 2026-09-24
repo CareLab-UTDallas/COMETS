@@ -3,214 +3,129 @@
 <head>
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Build Your Own Interview Guide</title>
 <style>
-  :root{
-    --bg:#f4f7f5; --card:#ffffff; --ink:#17251d; --muted:#41544a;
-    --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b;
-    box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
-  }
+  :root{--bg:#ffffff; --card:#f7faf8; --ink:#17251d; --muted:#41544a; --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b;}
   *{box-sizing:border-box;}
-  html{scroll-padding-top:env(safe-area-inset-top,0px);}
-  body{margin:0; background:var(--bg); color:var(--ink);
-    font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
-    font-size:17px; line-height:1.6;}
-  .wrap{max-width:820px; margin:0 auto; padding:26px 18px 60px;}
-  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:27px; margin:0 0 6px;}
-  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:20px; margin:0 0 4px;}
-  h3{font-size:15px; margin:14px 0 4px; color:var(--green);}
-  p{margin:0 0 12px;}
-  .lede{color:var(--muted); margin:0 0 20px;}
-  .warn{background:#fff3e6; border:1px solid #e6c199; border-left:5px solid var(--accent);
-    border-radius:8px; padding:14px 16px; margin:0 0 22px; color:#7a3d00; font-size:15px;}
-  .warn strong{color:#7a3d00;}
-  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:18px 20px; margin:0 0 16px;}
-  .teach{font-size:14px; color:var(--teach); margin:0 0 10px;}
-  .sys{border-left:3px solid var(--line); padding-left:12px; margin:0 0 12px;}
-  .sys .teach{margin:0 0 6px;}
-  label{display:block; font-size:14px; color:var(--green); font-weight:600; margin:0 0 4px;}
-  textarea{width:100%; min-height:76px; resize:vertical; font:inherit; font-size:15px; color:var(--ink);
-    background:#fbfdfc; border:1px solid var(--line); border-radius:7px; padding:9px 11px;}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.55;}
+  .wrap{max-width:820px; margin:0 auto; padding:14px 14px 16px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:22px; margin:0 0 4px;}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
+  .warn{font-size:13px; color:#7a3d00; background:#fff3e6; border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px; margin:0 0 12px;}
+  .bar{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; margin:0 0 8px;}
+  .count{font-size:14px; color:var(--muted);}
+  select{font:inherit; font-size:14px; padding:5px 8px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink); max-width:100%;}
+  .prog{height:6px; background:#e4ebe7; border-radius:99px; overflow:hidden; margin:0 0 12px;}
+  .prog div{height:100%; background:var(--green); width:0; transition:width .2s ease;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px 18px;}
+  .eyebrow{font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:var(--accent); min-height:18px; margin:0 0 2px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:20px; margin:0 0 6px;}
+  .teach{font-size:15px; color:var(--teach); margin:0 0 10px; min-height:96px;}
+  label{display:block; font-size:14px; font-weight:600; color:var(--green); margin:0 0 4px;}
+  textarea{display:block; width:100%; height:190px; resize:none; font:inherit; font-size:15px; color:var(--ink); background:#fff; border:1px solid var(--line); border-radius:7px; padding:9px 11px;}
   textarea:focus{outline:2px solid #bcd6c8; border-color:#bcd6c8;}
-  button{font:inherit; font-size:16px; cursor:pointer; border:none; border-radius:8px;
-    background:var(--green); color:#eef4f1; padding:12px 20px; margin:6px 0;}
-  button.secondary{background:#eef4f1; color:var(--green); border:1px solid #cfe0d7;}
-  #output{width:100%; min-height:280px; font:inherit; font-size:14px; white-space:pre-wrap;
-    background:#f5f7f8; border:1px solid #d5dee2; border-radius:8px; padding:14px 16px; color:#26332c; margin:8px 0;}
-  .row{display:flex; flex-wrap:wrap; gap:10px; align-items:center;}
-  .copied{color:var(--green); font-size:14px; margin-left:4px;}
-  .hidden{display:none;}
+  #out{height:296px; background:#f5f7f8; font-size:14px; white-space:pre-wrap;}
+  .nav{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:12px 0 0;}
+  button{font:inherit; font-size:15px; cursor:pointer; border-radius:8px; padding:10px 18px;}
+  .primary{background:var(--green); color:#eef4f1; border:1px solid var(--green);}
+  .secondary{background:#eef4f1; color:var(--green); border:1px solid #cfe0d7;}
+  button:disabled{opacity:.45; cursor:default;}
+  .status{font-size:14px; color:var(--green);}
+  .hidden{display:none !important;}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Build your own interview guide</h1>
-  <p class="lede">The domains below are the ground an unstructured clinical interview has to cover. Write, in your own words and your own order, how you would open each one and what you would ask. What you assemble here is a starting guide that is yours, and that you will revise for years until the scaffold falls away.</p>
+  <p class="lede">Work through each domain in your own words and your own order of asking. At the end, your answers are assembled into one guide that you copy into your own document.</p>
+  <div class="warn"><strong>Nothing here is saved or submitted.</strong> Finish in one sitting and copy your guide at the end. You can build it again from scratch any time.</div>
+  <div class="bar"><span class="count" id="count"></span><select id="jump" aria-label="Go to step"></select></div>
+  <div class="prog"><div id="prog"></div></div>
 
-  <div class="warn">
-    <strong>Read this first.</strong> This page does not save or submit anything you type. Finish in one sitting and copy your guide out at the end. You can come back and build it again from scratch as often as you like, but you cannot pause and return to a saved draft, and nothing you write here is stored or sent anywhere.
+  <div class="card" id="stepCard">
+    <p class="eyebrow" id="eyebrow"></p>
+    <h2 id="title"></h2>
+    <p class="teach" id="teach"></p>
+    <label for="answer" id="label"></label>
+    <textarea id="answer"></textarea>
   </div>
 
-  <div class="card">
-    <h2>Setting the frame</h2>
-    <p class="teach">Before any content, make clear the referral question and the purpose of the evaluation, the nature of the evaluation and its final product, and the paperwork, consent, cost, and timeline. Then hand the floor to the person.</p>
-    <label>How will you open and set the frame?</label>
-    <textarea data-key="Setting the frame"></textarea>
+  <div class="card hidden" id="doneCard">
+    <p class="eyebrow">Last step</p>
+    <h2>Your assembled guide</h2>
+    <p class="teach" style="min-height:0">Read it back, then copy it into your own document. That document, not this page, is your guide. Steps you left blank are marked to complete.</p>
+    <textarea id="out" readonly aria-label="Your assembled guide"></textarea>
   </div>
 
-  <div class="card">
-    <h2>The presenting problem</h2>
-    <p class="teach">Current stressors and difficulties, when they began, whether acute or chronic, any trigger, why an evaluation now, severity and how much functioning varies, the person's own explanation, whether things are improving or worsening, other stakeholders, and any prior evaluation or treatment.</p>
-    <label>How will you open it, and what will you ask?</label>
-    <textarea data-key="The presenting problem"></textarea>
-  </div>
-
-  <div class="card">
-    <h2>Diagnostic and mental status screen</h2>
-    <p class="teach">When the presenting problem points at a diagnostic category, explore its symptoms directly, and this is where a structured interview may plug in. If mental functioning seems impaired, screen orientation, memory, thought content and process, affect, appearance, attention, speech, and rapport.</p>
-    <label>How will you approach it, and what will you ask?</label>
-    <textarea data-key="Diagnostic and mental status screen"></textarea>
-  </div>
-
-  <div class="card">
-    <h2>Medical and biological context</h2>
-    <p class="teach">Recent check-up, chronic disease, hospitalizations, head injury, chronic pain, family history of illness, and current and past medications. For any head injury, get loss-of-consciousness duration, the first memory afterward, the location and cause, and the recovery.</p>
-    <label>How will you open it, and what will you ask?</label>
-    <textarea data-key="Medical and biological context"></textarea>
-  </div>
-
-  <div class="card">
-    <h2>Distal developmental context</h2>
-    <p class="teach">The family the person grew up in, how discipline and emotion were handled, attachment to parents, the move through adolescence, the history of friendships and romantic relationships, whether they felt liked, a formative event that left a mark, and any history of trauma.</p>
-    <label>How will you open it, and what will you ask?</label>
-    <textarea data-key="Distal developmental context"></textarea>
-  </div>
-
-  <div class="card">
-    <h2>Sociocultural and relational contexts</h2>
-    <p class="teach">The larger world the person lives within, gender, socioeconomic status, race, ethnicity and culture, religion, region, and identity, and the values these carry, and then how the person functions with parents, siblings, family, friends and a best friend, partners, and peers or coworkers.</p>
-    <label>How will you open it, and what will you ask?</label>
-    <textarea data-key="Sociocultural and relational contexts"></textarea>
-  </div>
-
-  <div class="card">
-    <h2>Academic and occupational functioning</h2>
-    <p class="teach">History of achievement and satisfaction with it, grades and current standing, study habits, organization and procrastination, attitude toward school or work, any disciplinary history, and long-term goals and the strength of the drive toward them.</p>
-    <label>How will you open it, and what will you ask?</label>
-    <textarea data-key="Academic and occupational functioning"></textarea>
-  </div>
-
-  <div class="card">
-    <h2>Legal and forensic history</h2>
-    <p class="teach">Arrests, charges, and convictions, any incarceration, current or past probation or parole, any current or pending litigation, and any current legal involvement. Ask matter-of-factly, since a guarded response is itself informative, and remember this domain connects to validity and secondary gain in forensic and disability contexts.</p>
-    <label>How will you open it, and what will you ask?</label>
-    <textarea data-key="Legal and forensic history"></textarea>
-  </div>
-
-  <div class="card">
-    <h2>Personality and socio-emotional functioning</h2>
-    <p class="teach">The deepest domain, worked one system at a time. Take each on its own terms rather than all at once.</p>
-
-    <div class="sys">
-      <h3>Habits and daily activities</h3>
-      <p class="teach">Sleep, eating, substance use, sexual patterns, exercise, routine, and how leisure and interests are spent.</p>
-      <label>How will you ask about this?</label>
-      <textarea data-key="Personality — habits and daily activities"></textarea>
-    </div>
-
-    <div class="sys">
-      <h3>The experiential system</h3>
-      <p class="teach">The felt experience of being. Can the person reach their feelings and express them? What is the general emotionality? Are emotions chronically active, or over-controlled? Any strong images or flashbacks?</p>
-      <label>How will you ask about this?</label>
-      <textarea data-key="Personality — the experiential system"></textarea>
-    </div>
-
-    <div class="sys">
-      <h3>The relational system</h3>
-      <p class="teach">The internal models the person navigates others by. Their sense of relational value, felt respected and loved versus rejected, security and trust, whether they lean agentic or communal, and how they handle conflict.</p>
-      <label>How will you ask about this?</label>
-      <textarea data-key="Personality — the relational system"></textarea>
-    </div>
-
-    <div class="sys">
-      <h3>The defensive system</h3>
-      <p class="teach">How the person filters and copes. Are they guarded or open? What happens at certain topics? Do they rationalize, suppress, or avoid, and how much genuine insight do they show?</p>
-      <label>How will you ask about this?</label>
-      <textarea data-key="Personality — the defensive system"></textarea>
-    </div>
-
-    <div class="sys">
-      <h3>The justification system</h3>
-      <p class="teach">The language-based beliefs and values through which the person makes meaning. Verbal ability, self-reflection and ego development, self-regulation and conscientiousness, self-criticism and core beliefs, self-efficacy, driving purpose, and overall life satisfaction.</p>
-      <label>How will you ask about this?</label>
-      <textarea data-key="Personality — the justification system"></textarea>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Observing while you interview (AMSIT)</h2>
-    <p class="teach">Appearance, behavior, and speech, which you observe. Mood, which you ask about and record in the person's own words, and affect, which you observe. Sensorium, meaning alertness, orientation, attention, and memory. Intellectual function, which you estimate. Thought, meaning process, content, perception, insight, and judgment.</p>
-    <label>Your observation reminders, in your own words</label>
-    <textarea data-key="Observing while you interview (AMSIT)"></textarea>
-  </div>
-
-  <div class="card">
-    <h2>Assemble your guide</h2>
-    <p class="teach">Put it together, read it back, then copy it into your own document. That document, not this page, is your guide.</p>
-    <button id="assembleBtn" type="button">Assemble my guide</button>
-    <div id="assembled" class="hidden">
-      <div class="warn" style="margin-top:14px;"><strong>Copy this into your own document now.</strong> Nothing on this page is saved. When you close or refresh it, this is gone.</div>
-      <textarea id="output" readonly></textarea>
-      <div class="row">
-        <button id="copyBtn" class="secondary" type="button">Copy my guide</button>
-        <span id="copied" class="copied hidden">Copied. Now paste it into your document.</span>
-      </div>
-    </div>
+  <div class="nav">
+    <button class="secondary" id="back" type="button">Back</button>
+    <button class="primary" id="next" type="button">Next</button>
+    <button class="primary hidden" id="copyBtn" type="button">Copy my guide</button>
+    <span class="status" id="status"></span>
   </div>
 </div>
-
 <script>
-  function assemble(){
-    var out = "MY UNSTRUCTURED CLINICAL INTERVIEW GUIDE\n\n";
-    var cards = document.querySelectorAll('.card');
-    var areas = document.querySelectorAll('textarea[data-key]');
-    // Build in document order, grouping the personality subsystems under one heading.
-    var persDone = false;
-    areas.forEach(function(a){
-      var key = a.getAttribute('data-key');
-      var val = (a.value || '').trim();
-      if(key.indexOf('Personality — ') === 0){
-        if(!persDone){ out += "PERSONALITY AND SOCIO-EMOTIONAL FUNCTIONING\n"; persDone = true; }
-        var sys = key.replace('Personality — ','');
-        out += "  " + sys.charAt(0).toUpperCase() + sys.slice(1) + ":\n";
-        out += "  " + (val ? val.replace(/\n/g,'\n  ') : "[to complete]") + "\n\n";
-      } else {
-        out += key.toUpperCase() + "\n";
-        out += (val ? val : "[to complete]") + "\n\n";
-      }
-    });
-    document.getElementById('output').value = out.trim();
-    document.getElementById('assembled').classList.remove('hidden');
-    document.getElementById('copied').classList.add('hidden');
-    document.getElementById('assembled').scrollIntoView({behavior:'smooth'});
-  }
-  function copyGuide(){
-    var ta = document.getElementById('output');
-    var done = function(){ document.getElementById('copied').classList.remove('hidden'); };
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(ta.value).then(done, function(){ ta.select(); document.execCommand('copy'); done(); });
+var STEPS = [{"group": "", "title": "Setting the frame", "teach": "Before any content, make clear the referral question and the purpose of the evaluation, the nature of the evaluation and its final product, and the paperwork, consent, cost, and timeline. Then hand the floor to the person.", "label": "How will you open and set the frame?"}, {"group": "", "title": "The presenting problem", "teach": "Current stressors and difficulties, when they began, whether acute or chronic, any trigger, why an evaluation now, severity and how much functioning varies, the person's own explanation, whether things are improving or worsening, other stakeholders, and any prior evaluation or treatment.", "label": "How will you open it, and what will you ask?"}, {"group": "", "title": "Diagnostic and mental status screen", "teach": "When the presenting problem points at a diagnostic category, explore its symptoms directly, and this is where a structured interview may plug in. If mental functioning seems impaired, screen orientation, memory, thought content and process, affect, appearance, attention, speech, and rapport.", "label": "How will you approach it, and what will you ask?"}, {"group": "", "title": "Medical and biological context", "teach": "Recent check-up, chronic disease, hospitalizations, head injury, chronic pain, family history of illness, and current and past medications. For any head injury, get loss-of-consciousness duration, the first memory afterward, the location and cause, and the recovery.", "label": "How will you open it, and what will you ask?"}, {"group": "", "title": "Distal developmental context", "teach": "The family the person grew up in, how discipline and emotion were handled, attachment to parents, the move through adolescence, the history of friendships and romantic relationships, whether they felt liked, a formative event that left a mark, and any history of trauma.", "label": "How will you open it, and what will you ask?"}, {"group": "", "title": "Sociocultural and relational contexts", "teach": "The larger world the person lives within, gender, socioeconomic status, race, ethnicity and culture, religion, region, and identity, and the values these carry, and then how the person functions with parents, siblings, family, friends and a best friend, partners, and peers or coworkers.", "label": "How will you open it, and what will you ask?"}, {"group": "", "title": "Academic and occupational functioning", "teach": "History of achievement and satisfaction with it, grades and current standing, study habits, organization and procrastination, attitude toward school or work, any disciplinary history, and long-term goals and the strength of the drive toward them.", "label": "How will you open it, and what will you ask?"}, {"group": "", "title": "Legal and forensic history", "teach": "Arrests, charges, and convictions, any incarceration, current or past probation or parole, any current or pending litigation, and any current legal involvement. Ask matter-of-factly, since a guarded response is itself informative, and remember this domain connects to validity and secondary gain in forensic and disability contexts.", "label": "How will you open it, and what will you ask?"}, {"group": "Personality and socio-emotional functioning", "title": "Habits and daily activities", "teach": "Sleep, eating, substance use, sexual patterns, exercise, routine, and how leisure and interests are spent.", "label": "How will you ask about this?"}, {"group": "Personality and socio-emotional functioning", "title": "The experiential system", "teach": "The felt experience of being. Can the person reach their feelings and express them? What is the general emotionality? Are emotions chronically active, or over-controlled? Any strong images or flashbacks?", "label": "How will you ask about this?"}, {"group": "Personality and socio-emotional functioning", "title": "The relational system", "teach": "The internal models the person navigates others by. Their sense of relational value, felt respected and loved versus rejected, security and trust, whether they lean agentic or communal, and how they handle conflict.", "label": "How will you ask about this?"}, {"group": "Personality and socio-emotional functioning", "title": "The defensive system", "teach": "How the person filters and copes. Are they guarded or open? What happens at certain topics? Do they rationalize, suppress, or avoid, and how much genuine insight do they show?", "label": "How will you ask about this?"}, {"group": "Personality and socio-emotional functioning", "title": "The justification system", "teach": "The language-based beliefs and values through which the person makes meaning. Verbal ability, self-reflection and ego development, self-regulation and conscientiousness, self-criticism and core beliefs, self-efficacy, driving purpose, and overall life satisfaction.", "label": "How will you ask about this?"}, {"group": "", "title": "Observing while you interview (AMSIT)", "teach": "Appearance, behavior, and speech, which you observe. Mood, which you ask about and record in the person's own words, and affect, which you observe. Sensorium, meaning alertness, orientation, attention, and memory. Intellectual function, which you estimate. Thought, meaning process, content, perception, insight, and judgment.", "label": "Your observation reminders, in your own words"}];
+var N = STEPS.length, i = 0, vals = STEPS.map(function(){return "";});
+var el = function(id){return document.getElementById(id);};
+var jump = el('jump');
+STEPS.forEach(function(s,k){ var o=document.createElement('option'); o.value=k; o.textContent=(k+1)+'. '+s.title; jump.appendChild(o); });
+var o=document.createElement('option'); o.value=N; o.textContent=(N+1)+'. Your assembled guide'; jump.appendChild(o);
+
+function assemble(){
+  var out="MY UNSTRUCTURED CLINICAL INTERVIEW GUIDE\n\n", groupDone={};
+  STEPS.forEach(function(s,k){
+    var v=(vals[k]||"").trim();
+    if(s.group){
+      if(!groupDone[s.group]){ out+=s.group.toUpperCase()+"\n"; groupDone[s.group]=true; }
+      out+="  "+s.title+":\n  "+(v? v.replace(/\n/g,"\n  ") : "[to complete]")+"\n\n";
     } else {
-      ta.select(); document.execCommand('copy'); done();
+      out+=s.title.toUpperCase()+"\n"+(v||"[to complete]")+"\n\n";
     }
-  }
-  // Warn before leaving if anything has been typed, since nothing is saved.
-  window.addEventListener('beforeunload', function(e){
-    var typed = Array.prototype.some.call(document.querySelectorAll('textarea[data-key]'), function(a){ return (a.value||'').trim().length>0; });
-    if(typed){ e.preventDefault(); e.returnValue = ''; }
   });
-  document.getElementById('assembleBtn').addEventListener('click', assemble);
-  document.getElementById('copyBtn').addEventListener('click', copyGuide);
+  return out.trim();
+}
+function show(k){
+  if(i<N) vals[i]=el('answer').value;
+  i=Math.max(0,Math.min(N,k));
+  var done=(i===N);
+  el('stepCard').classList.toggle('hidden',done);
+  el('doneCard').classList.toggle('hidden',!done);
+  el('copyBtn').classList.toggle('hidden',!done);
+  el('next').classList.toggle('hidden',done);
+  el('status').textContent='';
+  if(!done){
+    var s=STEPS[i];
+    el('eyebrow').textContent=s.group||'';
+    el('title').textContent=s.title;
+    el('teach').textContent=s.teach;
+    el('label').textContent=s.label;
+    el('answer').value=vals[i];
+    el('next').textContent=(i===N-1)?'Assemble my guide':'Next';
+  } else {
+    el('out').value=assemble();
+  }
+  el('back').disabled=(i===0);
+  jump.value=i;
+  el('count').textContent='Step '+(i+1)+' of '+(N+1);
+  el('prog').style.width=((i)/(N))*100+'%';
+  report();
+}
+el('next').addEventListener('click',function(){ show(i+1); });
+el('back').addEventListener('click',function(){ show(i-1); });
+jump.addEventListener('change',function(){ show(parseInt(jump.value,10)); });
+el('answer').addEventListener('input',function(){ vals[i]=el('answer').value; });
+el('copyBtn').addEventListener('click',function(){
+  var t=el('out').value, done=function(){ el('status').textContent='Copied. Now paste it into your own document.'; };
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(done,function(){ fallback(t,done); }); } else { fallback(t,done); }
+});
+function fallback(t,done){ var ta=el('out'); ta.focus(); ta.select(); try{ document.execCommand('copy'); done(); }catch(e){ el('status').textContent='Select the text above and copy it.'; } }
+window.addEventListener('beforeunload',function(e){ if(i<N) vals[i]=el('answer').value; if(vals.some(function(v){return v.trim();})){ e.preventDefault(); e.returnValue=''; } });
+// Tell Canvas the page height, so a frame can fit it exactly where Canvas supports this.
+function report(){ try{ var h=document.documentElement.scrollHeight; parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:h}),'*'); }catch(e){} }
+window.addEventListener('load',report); window.addEventListener('resize',report);
+show(0);
 </script>
 </body>
 </html>

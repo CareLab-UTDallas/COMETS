@@ -3,71 +3,64 @@
 <head>
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Practice Behavioral Observations with AMSIT</title>
 <style>
-  :root{
-    --bg:#f4f7f5; --card:#ffffff; --ink:#17251d; --muted:#41544a;
-    --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b;
-    box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
-  }
+  :root{--bg:#ffffff; --card:#f7faf8; --ink:#17251d; --muted:#41544a; --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b;}
   *{box-sizing:border-box;}
-  html{scroll-padding-top:env(safe-area-inset-top,0px);}
-  body{margin:0; background:var(--bg); color:var(--ink);
-    font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:17px; line-height:1.6;}
-  .wrap{max-width:820px; margin:0 auto; padding:26px 18px 60px;}
-  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:27px; margin:0 0 6px;}
-  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:20px; margin:0 0 6px;}
-  p{margin:0 0 12px;}
-  .lede{color:var(--muted);}
-  .warn{background:#fff3e6; border:1px solid #e6c199; border-left:5px solid var(--accent); border-radius:8px; padding:12px 16px; margin:0 0 20px; color:#7a3d00; font-size:15px;}
-  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:18px 20px; margin:0 0 16px;}
-  .chars{display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 0;}
-  .chars button{font:inherit; font-size:15px; cursor:pointer; border:1px solid #cfe0d7; border-radius:20px; background:#eef4f1; color:var(--green); padding:7px 14px;}
-  .chars button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
-  .setup{font-size:15px; color:var(--teach); background:#f7faf8; border-left:3px solid var(--green); padding:10px 12px; border-radius:6px; margin:10px 0 0;}
-  .field{margin:0 0 14px;}
-  label{display:block; font-weight:600; color:var(--green); font-size:15px; margin:0 0 2px;}
-  .hint{font-size:13px; color:var(--muted); margin:0 0 4px;}
-  textarea{width:100%; min-height:70px; resize:vertical; font:inherit; font-size:15px; color:var(--ink); background:#fbfdfc; border:1px solid var(--line); border-radius:7px; padding:9px 11px;}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.55;}
+  .wrap{max-width:820px; margin:0 auto; padding:14px 14px 16px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:22px; margin:0 0 4px;}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
+  .warn{font-size:13px; color:#7a3d00; background:#fff3e6; border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px; margin:0 0 10px;}
+  .chips{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 6px;}
+  .chips button{font:inherit; font-size:14px; cursor:pointer; border:1px solid #cfe0d7; border-radius:20px; background:#eef4f1; color:var(--green); padding:5px 12px;}
+  .chips button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .setup{font-size:13px; color:var(--teach); background:#f7faf8; border-left:3px solid var(--green); border-radius:6px; padding:6px 10px; margin:0 0 10px; min-height:62px;}
+  .tabs{display:flex; flex-wrap:wrap; gap:4px; margin:0 0 8px;}
+  .tabs button{font:inherit; font-size:14px; cursor:pointer; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--green); padding:5px 10px;}
+  .tabs button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .tabs button.filled:not(.on){border-color:#9cc3ae; background:#eef4f1;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:18px; margin:0 0 2px;}
+  .hint{font-size:13px; color:var(--muted); margin:0 0 6px; min-height:40px;}
+  textarea{display:block; width:100%; height:150px; resize:none; font:inherit; font-size:15px; color:var(--ink); background:#fff; border:1px solid var(--line); border-radius:7px; padding:8px 10px;}
   textarea:focus{outline:2px solid #bcd6c8; border-color:#bcd6c8;}
-  .expert{display:none; margin:6px 0 0; padding:10px 12px; background:#fff7ef; border:1px solid #f0d9c2; border-left:4px solid var(--accent); border-radius:6px; font-size:15px; color:var(--teach);}
+  .expert{margin:8px 0 0; height:190px; overflow-y:auto; padding:8px 10px; background:#fff7ef; border:1px solid #f0d9c2; border-left:4px solid var(--accent); border-radius:6px; font-size:14px; color:var(--teach);}
+  .expert.locked{background:#f5f7f8; border-color:var(--line); border-left-color:#b8ccc2; color:var(--muted); display:flex; align-items:center; justify-content:center; text-align:center;}
   .expert strong{color:#8a4600;}
-  .show .expert{display:block;}
-  button.main{font:inherit; font-size:16px; cursor:pointer; border:none; border-radius:8px; background:var(--green); color:#eef4f1; padding:12px 20px; margin:6px 8px 6px 0;}
-  button.sec{font:inherit; font-size:16px; cursor:pointer; border-radius:8px; background:#eef4f1; color:var(--green); border:1px solid #cfe0d7; padding:12px 20px; margin:6px 8px 6px 0;}
-  .status{font-size:14px; color:var(--muted);}
-  a.link{color:var(--accent); font-size:14px; cursor:pointer; text-decoration:underline; background:none; border:none; padding:0; font-family:inherit;}
+  .nav{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0 0;}
+  button.b{font:inherit; font-size:15px; cursor:pointer; border-radius:8px; padding:9px 16px;}
+  .primary{background:var(--green); color:#eef4f1; border:1px solid var(--green);}
+  .secondary{background:#eef4f1; color:var(--green); border:1px solid #cfe0d7;}
+  button.b:disabled{opacity:.45; cursor:default;}
+  .status{font-size:13px; color:var(--muted);}
+  .linkbtn{font:inherit; font-size:13px; color:var(--accent); background:none; border:none; padding:0; text-decoration:underline; cursor:pointer;}
+  .hidden{display:none !important;}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Practice behavioral observations with AMSIT</h1>
-  <p class="lede">Watch a character, pause often, and write what you observe under each AMSIT area. Then turn those notes into the Behavioral Observations section of a report, the same section that closes the background in the sample for Nate. Only then compare with the expert notes. Describe what you see and hear. Do not diagnose. Observation practice is about noticing and describing accurately, and a fictional character is a safe, endlessly replayable place to build that skill. Any film works, and the fifth option below is for a character of your own choosing.</p>
-
-  <div class="warn"><strong>This page does not save anything.</strong> Finish in one sitting and use the copy button to keep your notes. You can come back and practice as often as you like.</div>
-
+  <p class="lede">Watch a character, pause often, and write what you observe under each AMSIT area. Then write the Behavioral Observations section of a report. Describe what you see and hear, and do not diagnose. Only then compare with the expert.</p>
+  <div class="warn"><strong>Nothing here is saved.</strong> Use the copy button to keep your notes. Practice as often as you like.</div>
+  <div class="chips" id="chips"></div>
+  <div class="setup" id="setup"></div>
+  <div class="tabs" id="tabs"></div>
   <div class="card">
-    <h2>Choose a character</h2>
-    <div class="chars" id="chars"></div>
-    <div class="setup" id="setup"></div>
+    <h2 id="fTitle"></h2>
+    <p class="hint" id="fHint"></p>
+    <textarea id="fText" aria-labelledby="fTitle"></textarea>
+    <div class="expert locked" id="fExpert"></div>
   </div>
-
-  <div class="card" id="work">
-    <div class="field" data-f="A"><label>A. Appearance, behavior, and speech</label><p class="hint">Apparent age, grooming, dress, manner of relating to others, psychomotor activity, eye contact, and speech.</p><textarea></textarea><div class="expert"></div></div>
-    <div class="field" data-f="M"><label>M. Mood and affect</label><p class="hint">Mood as the character would describe it, and the affect you observe, its quality, range, stability, and congruence.</p><textarea></textarea><div class="expert"></div></div>
-    <div class="field" data-f="S"><label>S. Sensorium</label><p class="hint">Alertness, orientation, attention, and memory, as shown in what you watch.</p><textarea></textarea><div class="expert"></div></div>
-    <div class="field" data-f="I"><label>I. Intellectual function</label><p class="hint">An estimate, from vocabulary, knowledge, education, and reasoning.</p><textarea></textarea><div class="expert"></div></div>
-    <div class="field" data-f="T"><label>T. Thought, perception, insight, and judgment</label><p class="hint">Thought process and content, any perceptual disturbance, insight, and judgment.</p><textarea></textarea><div class="expert"></div></div>
-    <div class="field" data-f="P"><label>Now write the Behavioral Observations section</label><p class="hint">This is the section as it would appear in a report. Write one continuous paragraph, in past tense, describing how the character presented during the scenes you watched. Follow the order AMSIT gives you, without the letters as headings. Describe only what you observed or heard said, and close with a sentence on what your observations were based on.</p><textarea style="min-height:130px"></textarea><div class="expert"></div></div>
-
-    <button class="main" id="compare">Compare with the expert</button>
-    <button class="sec" id="copy">Copy my notes</button>
+  <div class="nav">
+    <button class="b secondary" id="back" type="button">Back</button>
+    <button class="b secondary" id="next" type="button">Next</button>
+    <button class="b primary" id="compare" type="button">Compare with the expert</button>
+    <button class="b secondary" id="copy" type="button">Copy my notes</button>
     <span class="status" id="status"></span>
-    <p class="status" id="gate" style="display:none; margin:8px 0 0;">Write something under every area first, since committing to your own observations is the point. <button class="link" id="anyway">Show the expert notes anyway</button></p>
   </div>
 </div>
-
 <script>
 var CH = {
   scrooge: {
@@ -116,45 +109,66 @@ var CH = {
     none: true
   }
 };
-var order=["scrooge","holmes","eeyore","hamlet","own"], cur=null;
-var chars=document.getElementById('chars');
-order.forEach(function(k){
-  var b=document.createElement('button'); b.textContent=CH[k].name; b.onclick=function(){pick(k);}; b.id='b-'+k; chars.appendChild(b);
-});
-function fields(){ return Array.prototype.slice.call(document.querySelectorAll('.field')); }
+var FIELDS=[
+ {k:"A",tab:"A",title:"A. Appearance, behavior, and speech",hint:"Apparent age, grooming, dress, manner of relating to others, psychomotor activity, eye contact, and speech."},
+ {k:"M",tab:"M",title:"M. Mood and affect",hint:"Mood as the character would describe it, and the affect you observe, its quality, range, stability, and congruence."},
+ {k:"S",tab:"S",title:"S. Sensorium",hint:"Alertness, orientation, attention, and memory, as shown in what you watch."},
+ {k:"I",tab:"I",title:"I. Intellectual function",hint:"An estimate, from vocabulary, knowledge, education, and reasoning."},
+ {k:"T",tab:"T",title:"T. Thought, perception, insight, and judgment",hint:"Thought process and content, any perceptual disturbance, insight, and judgment."},
+ {k:"P",tab:"Observations section",title:"The Behavioral Observations section",hint:"Write the section as it would appear in a report, one continuous past-tense paragraph in AMSIT order, without the letters as headings, closing with what your observations were based on."}
+];
+var order=["scrooge","holmes","eeyore","hamlet","own"], cur=null, f=0, vals={}, revealed=false;
+var el=function(id){return document.getElementById(id);};
+order.forEach(function(k){ var b=document.createElement('button'); b.type='button'; b.id='b-'+k; b.textContent=CH[k].name; b.addEventListener('click',function(){pick(k);}); el('chips').appendChild(b); });
+FIELDS.forEach(function(F,n){ var b=document.createElement('button'); b.type='button'; b.textContent=F.tab; b.addEventListener('click',function(){go(n);}); el('tabs').appendChild(b); });
+function save(){ if(cur) vals[FIELDS[f].k]=el('fText').value; }
+function any(){ return FIELDS.some(function(F){ return (vals[F.k]||"").trim(); }); }
 function pick(k){
-  if(cur && fields().some(function(f){return f.querySelector('textarea').value.trim();})){
-    if(!confirm('Switching characters clears your notes. Copy them first if you want to keep them. Switch anyway?')) return;
-  }
-  cur=k;
-  order.forEach(function(x){document.getElementById('b-'+x).classList.toggle('on',x===k);});
-  document.getElementById('setup').textContent=CH[k].setup;
-  fields().forEach(function(f){
-    f.classList.remove('show'); f.querySelector('textarea').value='';
-    var key=f.getAttribute('data-f'), e=f.querySelector('.expert');
-    e.innerHTML = CH[k].none ? '' : (key==='P' ? '<strong>Expert Behavioral Observations section.</strong> ' : '<strong>Expert notes.</strong> ')+CH[k][key];
-  });
-  document.getElementById('compare').style.display = CH[k].none ? 'none' : '';
-  document.getElementById('gate').style.display='none';
-  document.getElementById('status').textContent='';
+  save();
+  if(cur && any() && !confirm('Switching characters clears your notes. Copy them first if you want to keep them. Switch anyway?')) return;
+  cur=k; vals={}; revealed=false;
+  order.forEach(function(x){ el('b-'+x).classList.toggle('on',x===k); });
+  el('setup').textContent=CH[k].setup;
+  el('compare').classList.toggle('hidden',!!CH[k].none);
+  go(0,true);
 }
-function reveal(){ fields().forEach(function(f){ if(!CH[cur].none) f.classList.add('show'); }); document.getElementById('gate').style.display='none'; }
-document.getElementById('compare').onclick=function(){
-  if(!cur) return;
-  var allDone=fields().every(function(f){return f.querySelector('textarea').value.trim().length>=10;});
-  if(allDone) reveal(); else document.getElementById('gate').style.display='block';
-};
-document.getElementById('anyway').onclick=reveal;
-document.getElementById('copy').onclick=function(){
-  if(!cur) return;
-  var labels={A:'A. Appearance, behavior, and speech',M:'M. Mood and affect',S:'S. Sensorium',I:'I. Intellectual function',T:'T. Thought, perception, insight, and judgment',P:'Behavioral Observations section'};
+function go(n,skipSave){
+  if(!skipSave) save();
+  f=Math.max(0,Math.min(FIELDS.length-1,n));
+  var F=FIELDS[f];
+  el('fTitle').textContent=F.title; el('fHint').textContent=F.hint; el('fText').value=vals[F.k]||"";
+  var ex=el('fExpert');
+  if(CH[cur].none){ ex.className='expert locked'; ex.textContent='No expert notes for a character of your own. Compare your notes with the AMSIT reveals on the module page.'; }
+  else if(revealed){ ex.className='expert'; ex.innerHTML='<strong>'+(F.k==='P'?'Expert Behavioral Observations section.':'Expert notes.')+'</strong> '+CH[cur][F.k]; ex.scrollTop=0; }
+  else { ex.className='expert locked'; ex.textContent='The expert notes open after you have written something in all six tabs and clicked Compare with the expert.'; }
+  Array.prototype.forEach.call(el('tabs').children,function(b,j){ b.classList.toggle('on',j===f); b.classList.toggle('filled',!!(vals[FIELDS[j].k]||"").trim()); });
+  el('back').disabled=(f===0); el('next').disabled=(f===FIELDS.length-1);
+  el('status').textContent='';
+  report();
+}
+el('fText').addEventListener('input',function(){ vals[FIELDS[f].k]=el('fText').value; el('tabs').children[f].classList.toggle('filled',!!el('fText').value.trim()); });
+el('back').addEventListener('click',function(){ go(f-1); });
+el('next').addEventListener('click',function(){ go(f+1); });
+el('compare').addEventListener('click',function(){
+  save();
+  var missing=FIELDS.filter(function(F){ return (vals[F.k]||"").trim().length<10; });
+  if(!missing.length){ revealed=true; go(f,true); return; }
+  el('status').innerHTML='';
+  el('status').appendChild(document.createTextNode('Write something in every tab first. Still empty: '+missing.map(function(F){return F.tab;}).join(', ')+'. '));
+  var a=document.createElement('button'); a.type='button'; a.className='linkbtn'; a.textContent='Show the expert notes anyway';
+  a.addEventListener('click',function(){ revealed=true; go(f,true); }); el('status').appendChild(a);
+});
+el('copy').addEventListener('click',function(){
+  save();
   var out='AMSIT PRACTICE: '+CH[cur].name.toUpperCase()+'\n\n';
-  fields().forEach(function(f){ var k=f.getAttribute('data-f'); out+=labels[k]+'\n'+(f.querySelector('textarea').value.trim()||'[not completed]')+'\n\n'; });
-  var done=function(){document.getElementById('status').textContent='Copied. Paste it into your own document.';};
-  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(out.trim()).then(done,function(){fallback(out,done);});}else{fallback(out,done);}
-};
-function fallback(t,done){var a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();try{document.execCommand('copy');done();}catch(e){document.getElementById('status').textContent='Copy failed. Select your text manually.';}document.body.removeChild(a);}
-window.addEventListener('beforeunload',function(e){ if(fields().some(function(f){return f.querySelector('textarea').value.trim();})){e.preventDefault();e.returnValue='';} });
+  FIELDS.forEach(function(F){ out+=(F.k==='P'?'Behavioral Observations section':F.title)+'\n'+((vals[F.k]||'').trim()||'[not completed]')+'\n\n'; });
+  out=out.trim(); var done=function(){ el('status').textContent='Copied. Paste it into your own document.'; };
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(out).then(done,function(){ fallback(out,done); }); } else { fallback(out,done); }
+});
+function fallback(t,done){ var a=document.createElement('textarea'); a.value=t; a.style.position='fixed'; a.style.opacity='0'; document.body.appendChild(a); a.select(); try{ document.execCommand('copy'); done(); }catch(e){ el('status').textContent='Copy failed. Select your text manually.'; } document.body.removeChild(a); }
+window.addEventListener('beforeunload',function(e){ save(); if(any()){ e.preventDefault(); e.returnValue=''; } });
+function report(){ try{ parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:document.documentElement.scrollHeight}),'*'); }catch(e){} }
+window.addEventListener('load',report); window.addEventListener('resize',report);
 pick('scrooge');
 </script>
 </body>
