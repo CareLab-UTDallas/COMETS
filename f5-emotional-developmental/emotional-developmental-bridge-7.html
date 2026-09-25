@@ -94,6 +94,21 @@
 </style>
 </head>
 <body>
+<!-- COMETS instructions panel -->
+<div style="max-width:900px; margin:16px auto 12px auto; padding:0 12px; box-sizing:border-box;"><details open style="background:#eef4f1; border:1px solid #cfe0d7; border-left:5px solid #b35900; border-radius:8px; padding:12px 16px; font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:15px; line-height:1.55; color:#17251d; text-align:left;"><summary style="cursor:pointer; font-weight:700; color:#1e4d3a; font-size:15px;">Instructions for this activity</summary><div style="margin-top:10px;"><p style="margin:0 0 8px 0; font-size:18px; font-weight:700; color:#1e4d3a; font-family:Georgia,serif;">The Present and the Story That Made It</p>
+
+<p style="margin:0 0 8px 0;">About 13 minutes</p>
+
+<p style="margin:0 0 8px 0;">Two questions circle each other in every real case, and this module holds both at once. The emotional question is what a person does with their feelings, moment to moment. The developmental question is how they came to handle feelings that way. This activity puts the two together. For each case you'll name two things: the present-moment regulation strategy the person is using, and the developmental origin, usually an attachment pattern, that shaped it. The developmental layer opens after you've named the present one, and once you've named both, the activity reveals a plan that works at both levels and shows how the therapy relationship itself does part of the work.</p>
+
+<p style="margin:0 0 8px 0;">Watch for the pattern as you go. A strategy that looks puzzling in the present often makes complete sense as a childhood adaptation that was intelligent when it formed and has simply outlived the situation it was built for, so the clinical move is to name it as an outdated adaptation rather than a flaw. Notice, too, that not every case traces to insecure attachment; one of these is a person with a secure history whose current struggle follows a real recent loss, and reading that correctly changes the plan. Above all, watch what the relationship does. For someone whose regulation was never reliably modeled, being met consistently is not a backdrop to treatment. It is a corrective relational experience that lets an old working model start to update, which is the Foundations 1 alliance doing developmental work. Where two developmental reads both fit, either counts, and the explanation says why.</p>
+
+<p style="margin:0 0 8px 0;">This activity runs entirely on your own screen. The cases score only the options you pick, and nothing is saved, sent, or made visible to anyone else. There's nothing to submit.</p>
+
+
+
+<p style="margin:0 0 8px 0;"><em>Check yourself. For one case, can you state both what the person is doing with their feelings now and how they learned to do it?</em></p><p style="margin:8px 0 0 0; padding-top:8px; border-top:1px solid #cfe0d7;"><strong>What it adds to your clinical thinking.</strong> A person&rsquo;s present way of handling feelings and the story that produced it, the link an interview draws out.</p></div></details></div>
+
 <div class="wrap">
   <div class="masthead">
     <h1>The Present and the Story That Made It</h1>
@@ -306,7 +321,7 @@ function render(){
   var ready = a.emo!==null && a.dev!==null;
   var last = idx===CASES.length-1;
   var nb=el("button","btn"); nb.disabled=!ready;
-  nb.innerHTML = last ? "See the through-line" : "Next case \u2192";
+  nb.innerHTML = last ? "See the summary" : "Next case \u2192";
   nb.addEventListener("click", function(){ if(last){ finish(); } else { idx++; render(); window.scrollTo({top:0,behavior:"smooth"}); } });
   foot.appendChild(nb);
   panel.appendChild(foot);
@@ -323,7 +338,7 @@ function finish(){
     if(a.dev===c.dev.answer || (c.dev.also && a.dev===c.dev.also)) dev++;
   });
   var rp=document.getElementById("resultsPanel"); rp.classList.remove("hidden"); rp.innerHTML="";
-  rp.appendChild(el("h2",null,"The through-line"));
+  rp.appendChild(el("h2",null,"The pattern across cases"));
   rp.appendChild(el("p","score","You named the present strategy in <b>"+emo+" of "+CASES.length+"</b> cases and the developmental origin in <b>"+dev+" of "+CASES.length+"</b>."));
   rp.appendChild(el("p",null,"Two questions carried each case: what is this person doing with their feelings now, and how did they come to do it this way. The emotional lens answered the first, the developmental lens answered the second, and together they pointed at a plan built around the person rather than a label. Notice how often the childhood strategy was intelligent when it formed and simply outlived the situation it was built for."));
   rp.appendChild(el("p",null,"Notice too what the relationship did. For a person whose regulation was never reliably modeled, the alliance is not a backdrop to the real work. Being met consistently is itself part of the treatment, the corrective relational experience that lets an old working model start to update. That is the same alliance you studied in Foundations 1, now doing developmental work."));
