@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Score the RAVLT</title>
+<style>
+  :root{--bg:#ffffff; --card:#f7faf8; --ink:#17251d; --muted:#41544a; --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b; --ok:#2f6b4f; --okbg:#e8f3ec; --no:#9a3412; --nobg:#fbeee6;}
+  *{box-sizing:border-box;}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.55;}
+  .wrap{max-width:820px; margin:0 auto; padding:14px 14px 16px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:22px; margin:0 0 4px;}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
+  .warn{font-size:13px; color:#7a3d00; background:#fff3e6; border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px; margin:0 0 10px;}
+  .tabs{display:flex; flex-wrap:wrap; gap:4px; margin:0 0 8px;}
+  .tabs button{font:inherit; font-size:14px; cursor:pointer; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--green); padding:5px 10px;}
+  .tabs button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .tabs button.done:not(.on){border-color:#9cc3ae; background:#eef4f1;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:0 0 10px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:18px; margin:0 0 4px;}
+  h3{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:16px; margin:12px 0 6px;}
+  .note{font-size:13px; color:var(--muted); margin:0 0 8px;}
+  .lists{display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:13px; color:var(--teach); margin:0 0 6px;}
+  @media (max-width:560px){ .lists{grid-template-columns:1fr;} }
+  .lists div{background:#fff; border:1px solid var(--line); border-radius:6px; padding:6px 8px;}
+  table{border-collapse:collapse; width:100%; font-size:14px; background:#fff;}
+  th,td{border:1px solid #cfe0d7; padding:5px 6px; text-align:left; vertical-align:top;}
+  th{background:#eef4f1; color:var(--green); font-weight:600;}
+  td.said{font-style:italic; color:var(--teach);}
+  td.num{width:74px;}
+  input[type=number]{width:62px; font:inherit; font-size:15px; padding:3px 5px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink);}
+  input[type=number]:focus{outline:2px solid #bcd6c8; border-color:#bcd6c8;}
+  input.ok{border-color:var(--ok); background:var(--okbg);}
+  input.no{border-color:var(--no); background:var(--nobg);}
+  .key{display:block; font-size:12px; color:var(--no); margin-top:2px;}
+  .rec{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:4px; margin:0 0 8px;}
+  @media (max-width:560px){ .rec{grid-template-columns:repeat(3,minmax(0,1fr));} }
+  .rec span{font-size:13px; text-align:center; border:1px solid var(--line); border-radius:14px; padding:3px 4px; background:#fff; color:var(--muted);}
+  .rec span.yes{border:2px solid var(--green); color:var(--green); font-weight:600;}
+  .sumgrid{display:grid; grid-template-columns:minmax(0,1fr) 90px; gap:4px 10px; align-items:center; font-size:14px;}
+  .sumgrid label{color:var(--teach);}
+  .sumgrid small{color:var(--muted);}
+  .fb{margin:10px 0 0; border-radius:8px; border:1px solid var(--line); background:#fff; padding:10px 12px; font-size:14px; color:var(--teach);}
+  .fb h3{margin:0 0 6px;}
+  .fb p{margin:0 0 6px;}
+  .fb ul{margin:0 0 6px; padding-left:20px;}
+  .tag{display:inline-block; font-size:12px; font-weight:600; border-radius:99px; padding:1px 8px; margin-right:6px;}
+  .tag.ok{background:var(--okbg); color:var(--ok);}
+  .tag.no{background:var(--nobg); color:var(--no);}
+  .nav{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0 0;}
+  button.b{font:inherit; font-size:15px; cursor:pointer; border-radius:8px; padding:9px 16px;}
+  .primary{background:var(--green); color:#eef4f1; border:1px solid var(--green);}
+  .secondary{background:#eef4f1; color:var(--green); border:1px solid #cfe0d7;}
+  button.b:focus-visible,.tabs button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .status{font-size:13px; color:var(--muted);}
+  .source{font-size:12px; color:var(--muted); margin:12px 0 0; border-top:1px solid var(--line); padding-top:8px;}
+  .source p{margin:0 0 4px;}
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Score the RAVLT</h1>
+  <p class="lede">Each examinee below is invented, and so is the word list, which was written for this practice and is not the RAVLT list. Read what the examinee said on each trial, count the correct words, repetitions, and intrusions, then compute the summary scores and check your work. Keep the scoring rules from the Canvas page open beside you.</p>
+  <div class="warn"><strong>Nothing here is saved.</strong> These are practice responses, not patient records. The tool scores raw values only and gives no norms.</div>
+  <div class="tabs" id="tabs"></div>
+
+  <div class="card">
+    <h2 id="title"></h2>
+    <p class="note" id="context"></p>
+    <div class="lists">
+      <div><strong>List A</strong><br><span id="la"></span></div>
+      <div><strong>List B</strong><br><span id="lb"></span></div>
+    </div>
+    <h3>1. Score each recall trial</h3>
+    <p class="note">A repetition is a correct word said again in the same trial. An intrusion is any word not on the list being recalled, including a word from the other list.</p>
+    <table>
+      <thead><tr><th>Trial</th><th>What the examinee said, in order</th><th>Correct</th><th>Repetitions</th><th>Intrusions</th></tr></thead>
+      <tbody id="trials"></tbody>
+    </table>
+    <h3>2. Delay and recognition</h3>
+    <p class="note" id="times"></p>
+    <div class="sumgrid" style="margin:0 0 10px;"><label for="delay">Delay length in minutes</label><span><input type="number" id="delay" inputmode="numeric"><span class="key" id="k-delay"></span></span></div>
+    <p class="note">Words the examinee accepted on recognition are circled. Count the List A words accepted (hits) and the new words accepted (false positives).</p>
+    <div class="rec" id="rec"></div>
+    <div class="sumgrid">
+      <label for="hits">Recognition hits</label><span><input type="number" id="hits" inputmode="numeric"><span class="key" id="k-hits"></span></span>
+      <label for="fp">Recognition false positives</label><span><input type="number" id="fp" inputmode="numeric"><span class="key" id="k-fp"></span></span>
+    </div>
+    <h3>3. Summary scores</h3>
+    <p class="note">Give percentages to one decimal place and memory efficiency to two. A negative interference value means fewer words on the later trial.</p>
+    <div class="sumgrid" id="sums"></div>
+    <div class="fb hidden" id="fb"></div>
+  </div>
+
+  <div class="nav">
+    <button class="b primary" id="check" type="button">Check my scoring</button>
+    <button class="b secondary" id="show" type="button">Show the key</button>
+    <button class="b secondary" id="clear" type="button">Clear this examinee</button>
+    <span class="status" id="status"></span>
+  </div>
+
+  <div class="source">
+    <p><strong>Sources.</strong> Trial procedure and recording follow the NACC Uniform Data Set v4.0 C2 worksheets (National Alzheimer's Coordinating Center, 2025). Trials 1&ndash;5 total, sum of trials, percentage retention, recognition percentage correct, memory efficiency, and total intrusions follow Stricker et al. (2021). Learning slope (Trial 5 minus Trial 1) and forgetting follow Moradi et al. (2017). Learning over trials follows Alviarez-Schulze et al. (2022), and recognition discrimination (hits minus false positives) follows Loring et al. (2023). The interference comparisons follow Ebert and Anderson (2009) and are written here as differences.</p>
+    <p>No normative values are included. Mayo Normative Studies T scores require the published lookup table and formulas in Stricker et al. (2021), which are taught on the Canvas page, not reproduced here.</p>
+    <p>Stricker, N. H., et al. (2021). Mayo Normative Studies: Regression-based normative data for the Auditory Verbal Learning Test for ages 30&ndash;91 years and the importance of adjusting for sex. <em>Journal of the International Neuropsychological Society, 27</em>(3), 211&ndash;226. https://doi.org/10.1017/S1355617720000752</p>
+  </div>
+</div>
+<script>
+var LA=["lantern","pepper","canyon","button","market","tiger","blanket","orchard","whistle","saddle","candle","harbor","picnic","violin","sponge"];
+var LB=["parrot","chimney","glove","wagon","meadow","kettle","anchor","pillow","trumpet","carrot","ladder","island","mirror","pocket","biscuit"];
+var REC=["salt","lantern","valley","pepper","zipper","canyon","button","store","market","lion","tiger","quilt","blanket","vineyard","orchard","flute","whistle","bridle","saddle","match","candle","port","harbor","soap","picnic","cello","violin","basket","sponge","parrot"];
+var TRIALS=[["t1","Trial 1","A"],["t2","Trial 2","A"],["t3","Trial 3","A"],["t4","Trial 4","A"],["t5","Trial 5","A"],["b","List B","B"],["t6","Trial 6","A"],["d","Delayed recall","A"]];
+var CASES=[
+ {title:"Examinee 1", context:"A 68-year-old woman with 14 years of education. She worked steadily and asked no questions.",
+  start:"2:41 p.m.", end:"3:06 p.m.",
+  said:{t1:["lantern","pepper","candle","sponge","violin","harbor"],
+   t2:["lantern","pepper","canyon","candle","sponge","violin","harbor","button"],
+   t3:["lantern","pepper","canyon","button","candle","harbor","sponge","violin","tiger","pepper","orchard"],
+   t4:["lantern","pepper","canyon","button","market","tiger","candle","harbor","picnic","violin","sponge","orchard"],
+   t5:["lantern","pepper","canyon","button","market","tiger","blanket","orchard","candle","harbor","picnic","violin","sponge"],
+   b:["parrot","chimney","glove","mirror","biscuit","candle"],
+   t6:["lantern","pepper","canyon","button","tiger","orchard","candle","harbor","violin","sponge","picnic","kettle"],
+   d:["lantern","pepper","canyon","button","tiger","candle","harbor","violin","sponge","picnic"]},
+  yes:["lantern","pepper","canyon","button","market","tiger","blanket","orchard","saddle","candle","harbor","picnic","violin","sponge","parrot"]},
+ {title:"Examinee 2", context:"A 79-year-old man with 12 years of education. He said \"lamp\" on most trials and did not notice his repeats.",
+  start:"10:12 a.m.", end:"10:40 a.m.",
+  said:{t1:["lantern","pepper","sponge","lamp","sponge"],
+   t2:["lantern","pepper","candle","sponge","violin","lamp","pepper"],
+   t3:["lantern","pepper","candle","sponge","violin","harbor","lamp","bucket","candle"],
+   t4:["lantern","pepper","candle","sponge","violin","harbor","market","lamp","lantern"],
+   t5:["lantern","pepper","candle","sponge","violin","harbor","market","tiger","lamp","pepper"],
+   b:["parrot","glove","lantern","candle"],
+   t6:["lantern","pepper","candle","sponge","parrot","glove","lamp"],
+   d:["lantern","candle","lamp","parrot"]},
+  yes:["lantern","pepper","canyon","market","tiger","candle","harbor","violin","sponge","match","flute","basket","soap","parrot"]},
+ {title:"Examinee 3", context:"A 74-year-old woman with 16 years of education. She recalled slowly and said she was \"sure there were more.\"",
+  start:"1:15 p.m.", end:"1:37 p.m.",
+  said:{t1:["picnic","violin","sponge","lantern"],
+   t2:["picnic","violin","sponge","lantern","pepper"],
+   t3:["picnic","violin","sponge","lantern","pepper","tiger"],
+   t4:["picnic","violin","sponge","lantern","pepper","tiger","harbor"],
+   t5:["picnic","violin","sponge","lantern","pepper","tiger","harbor","violin","candle"],
+   b:["meadow","anchor","pillow","carrot","ladder"],
+   t6:["picnic","sponge","lantern","tiger","harbor"],
+   d:["picnic","lantern","tiger"]},
+  yes:["lantern","pepper","canyon","button","market","tiger","blanket","orchard","candle","harbor","picnic","violin","sponge"]}
+];
+var CLOCK={};
+function mins(a,b){ function m(s){ var p=s.split(/[: ]/); var h=+p[0]%12; if(p[2].charAt(0)==='p')h+=12; return h*60+(+p[1]); } return m(b)-m(a); }
+function scoreTrial(words,list){ var seen={}, c=0, r=0, x=0, reps=[], intr=[];
+  words.forEach(function(w){ if(list.indexOf(w)>=0){ if(seen[w]){r++; reps.push(w);} else {seen[w]=1;c++;} } else {x++; intr.push(w);} });
+  return {c:c,r:r,x:x,reps:reps,intr:intr}; }
+function r1(v){return Math.round(v*10)/10;} function r2(v){return Math.round(v*100)/100;}
+function keyFor(k){ var cs=CASES[k], t={};
+  TRIALS.forEach(function(tr){ t[tr[0]]=scoreTrial(cs.said[tr[0]], tr[2]==="A"?LA:LB); });
+  var hits=cs.yes.filter(function(w){return LA.indexOf(w)>=0;}).length, fp=cs.yes.length-hits;
+  var tot=t.t1.c+t.t2.c+t.t3.c+t.t4.c+t.t5.c, T5=t.t5.c, ti=0; TRIALS.forEach(function(tr){ti+=t[tr[0]].x;});
+  var s={tot:tot, slope:T5-t.t1.c, lot:tot-5*t.t1.c, lb:t.b.c, pi:t.b.c-t.t1.c, ri:t.t6.c-T5,
+    str:r1(100*t.t6.c/T5), dr:t.d.c, ltr:r1(100*t.d.c/T5), forg:T5-t.d.c, sot:tot+t.t6.c+t.d.c,
+    disc:hits-fp, rpc:r1((hits+(15-fp))/30*100), me:r2((t.d.c/15)/(tot/75)+(hits/15-fp/15)), ti:ti};
+  return {t:t, hits:hits, fp:fp, delay:mins(cs.start,cs.end), s:s}; }
+var SUMS=[["tot","Trials 1&ndash;5 total","sum of Trials 1 to 5",0],["slope","Learning slope","Trial 5 &minus; Trial 1",0],["lot","Learning over trials","total &minus; (5 &times; Trial 1)",0],
+ ["lb","List B","",0],["pi","Proactive interference","List B &minus; Trial 1",0],["ri","Retroactive interference","Trial 6 &minus; Trial 5",0],
+ ["str","Short-term % retention","100 &times; (Trial 6 / Trial 5)",0.1],["dr","Delayed recall","",0],["ltr","Long-term % retention","100 &times; (delayed / Trial 5)",0.1],
+ ["forg","Forgetting","Trial 5 &minus; delayed",0],["sot","Sum of trials","total + Trial 6 + delayed",0],["disc","Recognition discrimination","hits &minus; false positives",0],
+ ["rpc","Recognition % correct","([hits + (15 &minus; FP)] / 30) &times; 100",0.1],["me","Memory efficiency","[(delayed/15)/(total/75)] + [(hits/15) &minus; (FP/15)]",0.01],["ti","Total intrusions","all eight recall trials",0]];
+var cur=0, st=CASES.map(function(){return {v:{}, checked:false};});
+function el(id){return document.getElementById(id);}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+function build(){
+  el('la').textContent=LA.join(", "); el('lb').textContent=LB.join(", ");
+  var h=""; TRIALS.forEach(function(tr){ h+='<tr><td>'+tr[1]+'</td><td class="said" id="said-'+tr[0]+'"></td>'+
+    ['c','r','x'].map(function(f){return '<td class="num"><input type="number" inputmode="numeric" id="in-'+tr[0]+'-'+f+'" aria-label="'+tr[1]+' '+({c:'correct',r:'repetitions',x:'intrusions'})[f]+'"><span class="key" id="k-'+tr[0]+'-'+f+'"></span></td>';}).join('')+'</tr>'; });
+  el('trials').innerHTML=h;
+  var g=""; SUMS.forEach(function(s){ g+='<label for="in-s-'+s[0]+'">'+s[1]+(s[2]?' <small>('+s[2]+')</small>':'')+'</label><span><input type="number" step="any" id="in-s-'+s[0]+'"><span class="key" id="k-s-'+s[0]+'"></span></span>'; });
+  el('sums').innerHTML=g;
+  CASES.forEach(function(c,k){ var b=document.createElement('button'); b.type='button'; b.textContent=c.title; b.addEventListener('click',function(){save(); go(k);}); el('tabs').appendChild(b); });
+  allInputs().forEach(function(i){ i.addEventListener('input',function(){ st[cur].checked=false; i.classList.remove('ok','no'); }); });
+}
+function allInputs(){ return Array.prototype.slice.call(document.querySelectorAll('input[type=number]')); }
+function save(){ allInputs().forEach(function(i){ st[cur].v[i.id]=i.value; }); }
+function go(k){
+  cur=k; var cs=CASES[k];
+  el('title').textContent=cs.title; el('context').textContent=cs.context;
+  TRIALS.forEach(function(tr){ el('said-'+tr[0]).textContent='"'+cs.said[tr[0]].join(", ")+'."'; });
+  el('times').textContent='Time written when Trial 6 ended: '+cs.start+' Time written when delayed recall began: '+cs.end+(/\.$/.test(cs.end)?'':'.');
+  el('rec').innerHTML=REC.map(function(w){return '<span class="'+(cs.yes.indexOf(w)>=0?'yes':'')+'">'+w+'</span>';}).join('');
+  allInputs().forEach(function(i){ i.value=st[k].v[i.id]||''; i.classList.remove('ok','no'); });
+  document.querySelectorAll('.key').forEach(function(s){s.textContent='';});
+  el('fb').classList.add('hidden'); el('status').textContent='';
+  Array.prototype.forEach.call(el('tabs').children,function(b,j){ b.classList.toggle('on',j===k); b.classList.toggle('done',st[j].checked); });
+  if(st[k].checked) check(false);
+  report();
+}
+function pairs(K){ var out=[]; TRIALS.forEach(function(tr){ out.push(['in-'+tr[0]+'-c',K.t[tr[0]].c,0],['in-'+tr[0]+'-r',K.t[tr[0]].r,0],['in-'+tr[0]+'-x',K.t[tr[0]].x,0]); });
+  out.push(['delay',K.delay,0],['hits',K.hits,0],['fp',K.fp,0]); SUMS.forEach(function(s){ out.push(['in-s-'+s[0],K.s[s[0]],s[3]]); }); return out; }
+function check(showAll){
+  var K=keyFor(cur), right=0, n=0, blank=0;
+  pairs(K).forEach(function(p){ var i=el(p[0]), kid=p[0].replace(/^in-/,'k-'); var ks=el(kid)||el('k-'+p[0]);
+    n++; i.classList.remove('ok','no'); if(ks) ks.textContent='';
+    if(i.value===''){ blank++; if(showAll&&ks) ks.textContent='key '+p[1]; return; }
+    var ok=Math.abs(parseFloat(i.value)-p[1])<=p[2]+1e-9; i.classList.add(ok?'ok':'no'); if(ok) right++; else if(ks) ks.textContent='key '+p[1]; });
+  st[cur].checked=true;
+  var cs=CASES[cur], notes=[];
+  TRIALS.forEach(function(tr){ var t=K.t[tr[0]], bits=[];
+    if(t.reps.length) bits.push('repeated '+t.reps.map(esc).join(', '));
+    if(t.intr.length) bits.push('intrusion'+(t.intr.length>1?'s':'')+' '+t.intr.map(function(w){ var src=(tr[2]==="A"&&LB.indexOf(w)>=0)?' (a List B word)':(tr[2]==="B"&&LA.indexOf(w)>=0)?' (a List A word)':''; return esc(w)+src; }).join(', '));
+    if(bits.length) notes.push('<li>'+tr[1]+'. '+t.c+' correct, '+bits.join(', ')+'.</li>'); });
+  var h='<h3>'+(blank?'Checked the numbers you entered':'Checked')+'</h3><p><span class="tag '+(right===n?'ok':'no')+'">'+right+' of '+n+'</span>'+(blank?blank+' left blank. ':'')+'Green matches the key. Any orange box shows the key beside it.</p>';
+  if(notes.length) h+='<p>Where the trials hold repetitions or intrusions:</p><ul>'+notes.join('')+'</ul>';
+  h+='<p>Recognition. '+K.hits+' hits and '+K.fp+' false positive'+(K.fp===1?'':'s')+(cs.yes.indexOf('parrot')>=0?', including parrot, a List B word':'')+'. Delay '+K.delay+' minutes'+(K.delay>=20&&K.delay<=30?', inside the NACC window of 20 to 30 minutes':', outside the NACC window of 20 to 30 minutes')+'.</p>';
+  el('fb').innerHTML=h; el('fb').classList.remove('hidden');
+  el('status').textContent=''; Array.prototype.forEach.call(el('tabs').children,function(b,j){ b.classList.toggle('done',st[j].checked); });
+  report();
+}
+el('check').addEventListener('click',function(){ save(); check(false); });
+el('show').addEventListener('click',function(){ save(); check(true); el('status').textContent='The key is shown beside every box. Clear the examinee to try again from blank.'; report(); });
+el('clear').addEventListener('click',function(){ st[cur]={v:{},checked:false}; go(cur); el('status').textContent='Cleared.'; report(); });
+function report(){ try{ parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:document.documentElement.scrollHeight}),'*'); }catch(e){} }
+window.addEventListener('load',report); window.addEventListener('resize',report);
+build(); go(0);
+</script>
+</body>
+</html>

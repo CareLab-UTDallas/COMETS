@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Score Converter</title>
+<style>
+  :root{--bg:#ffffff; --card:#f7faf8; --ink:#17251d; --muted:#41544a; --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b; --warn:#7a3d00; --warn-bg:#fff3e6; --accent-bg:#fff7ef;
+    --b1:#8c2f1d; --b2:#c7662c; --b3:#e3b25c; --b4:#6f9c86; --b5:#4f8a72; --b6:#2f6b54; --b7:#1e4d3a;}
+  *{box-sizing:border-box;}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.55;}
+  [hidden]{display:none!important}
+  .wrap{max-width:820px; margin:0 auto; padding:14px 14px 16px; display:grid; gap:12px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:22px; margin:0 0 4px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:18px; margin:0;}
+  p{margin:0;}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
+  .eyebrow{display:none}
+  .warnbox{font-size:13px; color:var(--warn); background:var(--warn-bg); border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px;}
+  .panel{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; display:grid; gap:10px;}
+  .seg{display:flex; flex-wrap:wrap; gap:6px;}
+  .seg label{display:flex; align-items:center; gap:6px; border:1px solid #cfe0d7; border-radius:20px; padding:5px 12px; cursor:pointer; background:#eef4f1; color:var(--green); font-size:14px;}
+  .seg input{accent-color:var(--green);}
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px;}
+  .field{display:grid; gap:4px;}
+  .field label{font-size:14px; color:var(--green); font-weight:600;}
+  input[type=number],select{font:inherit; font-size:15px; color:var(--ink); background:#fff; border:1px solid var(--line); border-radius:7px; padding:7px 9px; width:100%; font-variant-numeric:tabular-nums;}
+  input:focus-visible,select:focus-visible,button:focus-visible,.seg label:focus-within{outline:2px solid #bcd6c8; outline-offset:1px;}
+  .check{display:flex; gap:8px; align-items:flex-start; font-size:14px; color:var(--teach);}
+  .check input{margin-top:5px; accent-color:var(--green);}
+  .btnrow{display:flex; flex-wrap:wrap; gap:8px;}
+  button{font:inherit; font-size:14px; cursor:pointer; border-radius:8px; padding:7px 14px; background:#eef4f1; color:var(--green); border:1px solid #cfe0d7;}
+  .err{background:var(--warn-bg); color:var(--warn); border-left:4px solid var(--accent); padding:8px 10px; border-radius:6px; font-size:14px;}
+  .label-out{display:flex; flex-wrap:wrap; align-items:baseline; gap:10px;}
+  .label-out .lab{font-family:Georgia,'Playfair Display',serif; font-size:21px; color:var(--green);}
+  .label-out .pill{font-size:12px; border:1px solid var(--line); border-radius:99px; padding:1px 9px; color:var(--muted); background:#fff;}
+  .tbl{overflow-x:auto;}
+  table{border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; background:#fff; font-size:14px;}
+  th,td{text-align:left; padding:6px 8px; border:1px solid #cfe0d7;}
+  th{background:#eef4f1; color:var(--green); font-weight:600;}
+  td.num{font-weight:700;}
+  .ruler{display:grid; gap:4px;}
+  .bands{display:flex; height:30px; border-radius:4px; overflow:hidden; position:relative;}
+  .bands div{display:flex; align-items:center; justify-content:center; font-size:11px; color:#fff; text-align:center; line-height:1.1; padding:0 2px;}
+  .marker{position:absolute; top:-5px; bottom:-5px; width:3px; background:var(--ink); border-radius:2px; transform:translateX(-1px);}
+  .ticks{display:flex; justify-content:space-between; font-size:11.5px; color:var(--muted); font-variant-numeric:tabular-nums;}
+  .note{background:#fff; border:1px solid var(--line); border-left:4px solid var(--green); padding:7px 10px; border-radius:6px; font-size:14px; color:var(--teach);}
+  .note.accent{background:var(--accent-bg); border-left-color:var(--accent);}
+  .small{font-size:13px; color:var(--muted);}
+  footer{font-size:12.5px; color:var(--muted); display:grid; gap:4px;}
+  @media (max-width:480px){ .bands div{font-size:0;} }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header style="display:grid;gap:8px">
+    <h1>Score converter</h1>
+    <p class="lede">Place a raw or derived score on the normal curve, read it in every common metric, and apply the AACN label that belongs to its distribution. The example loaded below is the Trails B case from the Scores, Norms, and Reporting page.</p>
+    <div class="warnbox"><strong>Nothing here is saved or sent.</strong> Use it with a norm table open beside you.</div>
+  </header>
+
+  <section class="panel" aria-labelledby="h-dist">
+    <h2 id="h-dist">1. How is this test distributed in its norm sample?</h2>
+    <div class="seg" role="radiogroup" aria-label="Distribution">
+      <label><input type="radio" name="dist" id="dist-normal" value="normal" checked> Approximately normal</label>
+      <label><input type="radio" name="dist" id="dist-skew" value="skew"> Highly skewed (for example BNT-15, clock, figure copy, Bells, orientation)</label>
+    </div>
+    <p class="small" id="dist-help">Normally distributed tests are reported as T scores with AACN standard-score labels.</p>
+  </section>
+
+  <section class="panel" id="normal-input" aria-labelledby="h-in">
+    <h2 id="h-in">2. Enter the score</h2>
+    <div class="seg" role="radiogroup" aria-label="Input type">
+      <label><input type="radio" name="mode" id="mode-raw" value="raw" checked> Raw score with norm mean and SD</label>
+      <label><input type="radio" name="mode" id="mode-der" value="der"> A score already converted</label>
+    </div>
+
+    <div id="raw-fields" class="grid">
+      <div class="field"><label for="raw">Raw score</label><input type="number" id="raw" step="any" value="130"></div>
+      <div class="field"><label for="mean">Norm-group mean</label><input type="number" id="mean" step="any" value="86.27"></div>
+      <div class="field"><label for="sd">Norm-group SD</label><input type="number" id="sd" step="any" value="24.07"></div>
+    </div>
+    <div id="raw-dir" class="check">
+      <input type="checkbox" id="lower" checked>
+      <label for="lower">Lower raw scores are better (completion time, errors). The sign of z is reversed so that negative always means worse than the norm group.</label>
+    </div>
+
+    <div id="der-fields" class="grid" hidden>
+      <div class="field"><label for="dtype">Metric</label>
+        <select id="dtype">
+          <option value="z">z score (mean 0, SD 1)</option>
+          <option value="ss">Standard score (mean 100, SD 15)</option>
+          <option value="sc" selected>Scaled score (mean 10, SD 3)</option>
+          <option value="t">T score (mean 50, SD 10)</option>
+          <option value="pct">Percentile (normal curve)</option>
+        </select></div>
+      <div class="field"><label for="dval">Value</label><input type="number" id="dval" step="any" value="7"></div>
+    </div>
+
+    <div class="btnrow">
+      <button type="button" id="ex-trails">Load Trails B example</button>
+      <button type="button" id="ex-scaled">Load scaled score 7</button>
+      <button type="button" id="ex-t36">Load T 36</button>
+    </div>
+  </section>
+
+  <section class="panel" id="skew-input" hidden aria-labelledby="h-sk">
+    <h2 id="h-sk">2. Enter the percentile from the norm table</h2>
+    <p>For a skewed test, read the percentile from the published percentile table for the examinee's age, education, or other stratification cell. Converting a raw score with a mean and SD would assume a normal curve the data do not follow.</p>
+    <div class="grid">
+      <div class="field"><label for="skpct">Percentile from the table</label><input type="number" id="skpct" step="any" value="40"></div>
+    </div>
+  </section>
+
+  <section class="panel" aria-live="polite" aria-labelledby="h-out">
+    <h2 id="h-out">3. Result</h2>
+    <div id="error" class="err" hidden></div>
+    <div id="result" style="display:grid;gap:16px">
+      <div class="label-out"><span class="lab" id="lab">Below average score</span><span class="pill" id="basis">AACN standard-score label</span></div>
+      <div id="normal-out" style="display:grid;gap:16px">
+        <div class="tbl"><table>
+          <thead><tr><th scope="col">Metric</th><th scope="col">Value</th><th scope="col">Formula</th></tr></thead>
+          <tbody>
+            <tr><td>z score</td><td class="num" id="o-z">-1.82</td><td class="small">(raw &minus; mean) / SD</td></tr>
+            <tr><td>T score (the common metric taught in this track)</td><td class="num" id="o-t">32</td><td class="small">50 + 10z</td></tr>
+            <tr><td>Standard score</td><td class="num" id="o-ss">73</td><td class="small">100 + 15z</td></tr>
+            <tr><td>Scaled score</td><td class="num" id="o-sc">5</td><td class="small">10 + 3z, bounded 1 to 19</td></tr>
+            <tr><td>Percentile</td><td class="num" id="o-p">3</td><td class="small">Normal cumulative distribution of z</td></tr>
+          </tbody>
+        </table></div>
+        <div class="ruler" aria-hidden="true">
+          <div class="bands" id="bands">
+            <div style="flex:15;background:var(--b1)">Exceptionally low</div>
+            <div style="flex:10;background:var(--b2)">Below avg</div>
+            <div style="flex:10;background:var(--b3);color:#3a2600">Low avg</div>
+            <div style="flex:20;background:var(--b4)">Average</div>
+            <div style="flex:10;background:var(--b5)">High avg</div>
+            <div style="flex:10;background:var(--b6)">Above avg</div>
+            <div style="flex:15;background:var(--b7)">Exceptionally high</div>
+            <span class="marker" id="marker" style="left:20%"></span>
+          </div>
+          <div class="ticks"><span>SS 55</span><span>70</span><span>80</span><span>90</span><span>110</span><span>120</span><span>130</span><span>145</span></div>
+        </div>
+      </div>
+      <div id="skew-out" hidden class="tbl"><table>
+        <thead><tr><th scope="col">Percentile range</th><th scope="col">AACN label for skewed tests</th></tr></thead>
+        <tbody id="skew-rows">
+          <tr><td>Above 24</td><td>Within normal limits score</td></tr>
+          <tr><td>9 to 24</td><td>Low average score</td></tr>
+          <tr><td>2 to 8</td><td>Below average score</td></tr>
+          <tr><td>Below 2</td><td>Exceptionally low score</td></tr>
+        </tbody>
+      </table></div>
+      <div id="notes" style="display:grid;gap:10px"></div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="h-rules">
+    <h2 id="h-rules">Rules this tool applies</h2>
+    <div class="tbl"><table>
+      <thead><tr><th scope="col">Standard score</th><th scope="col">AACN label (normal distribution)</th></tr></thead>
+      <tbody>
+        <tr><td>130 and above</td><td>Exceptionally high score</td></tr>
+        <tr><td>120 to 129</td><td>Above average score</td></tr>
+        <tr><td>110 to 119</td><td>High average score</td></tr>
+        <tr><td>90 to 109</td><td>Average score</td></tr>
+        <tr><td>80 to 89</td><td>Low average score</td></tr>
+        <tr><td>70 to 79</td><td>Below average score</td></tr>
+        <tr><td>Below 70</td><td>Exceptionally low score</td></tr>
+      </tbody>
+    </table></div>
+    <p class="small">Labels for normally distributed tests are assigned from the standard score rounded to a whole number, the form in which scores are reported. T, scaled, and z scores are labeled through their standard-score equivalent. Performance validity tests are not converted here. AACN labels them valid range, indeterminate range, or invalid range scores against the test's own cutoffs.</p>
+  </section>
+
+  <footer>
+    <p>Source for all labels. Guilmette, T. J., Sweet, J. J., Hebben, N., Koltai, D., Mahone, E. M., Spiegler, B. J., Stucky, K., Westerveld, M., &amp; Conference Participants. (2020). American Academy of Clinical Neuropsychology consensus conference statement on uniform labeling of performance test scores. <em>The Clinical Neuropsychologist, 34</em>(3), 437&ndash;453. https://doi.org/10.1080/13854046.2020.1722244</p>
+    <p>Example norms. Tombaugh, T. N. (2004). Trail Making Test A and B: Normative data stratified by age and education. <em>Archives of Clinical Neuropsychology, 19</em>, 203&ndash;214. https://doi.org/10.1016/S0887-6177(03)00039-8. Ages 70 to 74, more than 12 years of education, Trails B mean 86.27 s, SD 24.07 s.</p>
+    <p>Labels describe scores, not people, and a label is never a diagnosis.</p>
+  </footer>
+</main>
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  // Complementary error function, Numerical Recipes Chebyshev fit, fractional error below 1.2e-7
+  function erfc(x){var z=Math.abs(x),t=1/(1+0.5*z);
+    var r=t*Math.exp(-z*z-1.26551223+t*(1.00002368+t*(0.37409196+t*(0.09678418+t*(-0.18628806+t*(0.27886807+t*(-1.13520398+t*(1.48851587+t*(-0.82215223+t*0.17087277)))))))));
+    return x>=0?r:2-r;}
+  function Phi(z){return 0.5*erfc(-z/Math.SQRT2);}
+  // Inverse normal CDF, Acklam's algorithm, relative error below 1.15e-9
+  function invPhi(p){
+    var a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.3577518672690,-30.66479806614716,2.506628277459239],
+        b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572],
+        c=[-0.007784894002430293,-0.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],
+        d=[0.007784695709041462,0.3224671290700398,2.445134137142996,3.754408661907416],
+        pl=0.02425,q,r;
+    if(p<pl){q=Math.sqrt(-2*Math.log(p));return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+    if(p>1-pl){q=Math.sqrt(-2*Math.log(1-p));return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+    q=p-0.5;r=q*q;return(((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);}
+  function num(id){var v=$(id).value.trim();if(v==='')return NaN;return Number(v);}
+  function fmtP(p){var pc=p*100;if(pc<1)return'<1';if(pc>99)return'>99';return String(Math.round(pc));}
+  function labelSS(ss){if(ss>=130)return'Exceptionally high score';if(ss>=120)return'Above average score';if(ss>=110)return'High average score';
+    if(ss>=90)return'Average score';if(ss>=80)return'Low average score';if(ss>=70)return'Below average score';return'Exceptionally low score';}
+  function labelSkew(p){if(p>24)return'Within normal limits score';if(p>=9)return'Low average score';if(p>=2)return'Below average score';return'Exceptionally low score';}
+  function note(text,cls){var d=document.createElement('p');d.className='note'+(cls?' '+cls:'');d.textContent=text;return d;}
+  function showError(msg){$('error').textContent=msg;$('error').hidden=false;$('result').hidden=true;}
+  function clearError(){$('error').hidden=true;$('result').hidden=false;}
+  function dist(){return $('dist-skew').checked?'skew':'normal';}
+  function mode(){return $('mode-der').checked?'der':'raw';}
+
+  function update(){
+    var skew=dist()==='skew';
+    $('normal-input').hidden=skew;$('skew-input').hidden=!skew;
+    $('normal-out').hidden=skew;$('skew-out').hidden=!skew;
+    $('dist-help').textContent=skew?'Skewed tests are reported as percentiles from the norm table, with the AACN percentile labels for skewed distributions.':'Normally distributed tests are reported as T scores with AACN standard-score labels.';
+    var raw=mode()==='raw';
+    $('raw-fields').hidden=!raw;$('raw-dir').hidden=!raw;$('der-fields').hidden=raw;
+    var notes=$('notes');notes.innerHTML='';
+
+    if(skew){
+      var p=num('skpct');
+      if(!isFinite(p)){showError('Enter the percentile printed in the norm table.');return;}
+      if(p<0||p>100){showError('A percentile must fall between 0 and 100. Check that the value was read from the percentile column.');return;}
+      clearError();
+      $('lab').textContent=labelSkew(p);$('basis').textContent='AACN percentile label for skewed tests';
+      var rows=$('skew-rows').children,idx=p>24?0:p>=9?1:p>=2?2:3;
+      for(var i=0;i<rows.length;i++){rows[i].style.fontWeight=i===idx?'700':'400';rows[i].style.background=i===idx?'var(--accent-bg)':'';}
+      if(p>24)notes.appendChild(note('AACN advises against high average or above average labels at the upper end of a skewed test, because the ceiling compresses the distribution. Any score above the 24th percentile is a within normal limits score.'));
+      notes.appendChild(note('Report the percentile, the label, and the norm source with its stratification cell. Do not convert this score to T.','accent'));
+      return;
+    }
+
+    var z,src;
+    if(raw){
+      var x=num('raw'),m=num('mean'),s=num('sd');
+      if(!isFinite(x)||!isFinite(m)||!isFinite(s)){showError('Enter a raw score, the norm-group mean, and the norm-group SD.');return;}
+      if(s<=0){showError('The SD must be greater than 0. Check that the SD and the mean were not entered in each other\'s fields.');return;}
+      z=(x-m)/s;if($('lower').checked)z=-z;src='raw';
+    }else{
+      var t=$('dtype').value,v=num('dval');
+      if(!isFinite(v)){showError('Enter a value for the selected metric.');return;}
+      if(t==='pct'){if(v<=0||v>=100){showError('A percentile for conversion must be greater than 0 and less than 100.');return;}z=invPhi(v/100);}
+      else if(t==='z')z=v;else if(t==='ss')z=(v-100)/15;else if(t==='sc'){if(v<1||v>19){showError('Wechsler scaled scores run from 1 to 19.');return;}z=(v-10)/3;}
+      else z=(v-50)/10;
+      src=t;
+    }
+    if(Math.abs(z)>5){showError('This score is more than 5 SD from the mean (z = '+z.toFixed(2)+'). Check the mean, the SD, the direction box, and the metric before interpreting it.');return;}
+    clearError();
+    var ss=Math.round(100+15*z),T=Math.round(50+10*z),scr=Math.round(10+3*z),sc=Math.min(19,Math.max(1,scr)),p=Phi(z);
+    $('o-z').textContent=(z<0?'−':'')+Math.abs(z).toFixed(2);
+    $('o-t').textContent=T;$('o-ss').textContent=ss;
+    $('o-sc').textContent=sc+(sc!==scr?' (bounded)':'');
+    $('o-p').textContent=fmtP(p);
+    $('lab').textContent=labelSS(ss);$('basis').textContent='AACN standard-score label';
+    var pos=(Math.min(145,Math.max(55,100+15*z))-55)/90*100;$('marker').style.left=pos+'%';
+    var bounds=[70,80,90,110,120,130],near=bounds.some(function(b){return ss>=b-2&&ss<=b+1;});
+    if(near)notes.appendChild(note('This score is within 2 points of a label boundary. AACN asks clinicians to consider the confidence interval near cut points. Report the interval and avoid treating adjacent scores as categorically different.','accent'));
+    if(raw&&$('lower').checked)notes.appendChild(note('The direction box is checked, so a raw score above the mean produced a negative z. Uncheck it for tests where higher raw scores are better.'));
+    if(src==='sc')notes.appendChild(note('Each scaled-score point equals 5 standard-score points, so scaled 7 and standard score 85 describe the same position.'));
+    if(raw&&$('mean').value==='86.27'&&$('sd').value==='24.07')notes.appendChild(note('Tombaugh (2004) reports a skewness of .97 for this cell and publishes percentile tables. This example isolates the effect of the reference group. On the Trail Making page the percentile comes from his table.'));
+    notes.appendChild(note('The percentile shown is the normal-curve value for z. Where the norm source prints its own percentile table, report the table value.'));
+  }
+
+  function setRadio(id){$(id).checked=true;}
+  $('ex-trails').addEventListener('click',function(){setRadio('dist-normal');setRadio('mode-raw');$('raw').value='130';$('mean').value='86.27';$('sd').value='24.07';$('lower').checked=true;update();});
+  $('ex-scaled').addEventListener('click',function(){setRadio('dist-normal');setRadio('mode-der');$('dtype').value='sc';$('dval').value='7';update();});
+  $('ex-t36').addEventListener('click',function(){setRadio('dist-normal');setRadio('mode-der');$('dtype').value='t';$('dval').value='36';update();});
+  document.querySelectorAll('input,select').forEach(function(el){el.addEventListener('input',update);el.addEventListener('change',update);});
+  update();
+  function report(){ try{ parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:document.documentElement.scrollHeight}),'*'); }catch(e){} }
+  window.addEventListener('load',report); window.addEventListener('resize',report);
+  document.querySelectorAll('input,select,button').forEach(function(el){el.addEventListener('input',report);el.addEventListener('change',report);el.addEventListener('click',report);});
+})();
+</script>
+</body>
+</html>
