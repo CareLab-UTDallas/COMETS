@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medical Mimics</title>
+<style>
+  :root{
+    --bg:#faf9f7; --ink:#1f1e1c; --muted:#6b6862; --line:#e7e4de;
+    --panel:#ffffff; --panel-shadow:0 1px 2px rgba(28,27,25,.04),0 6px 20px rgba(28,27,25,.05);
+    --accent:#8a5a25; --accent-ink:#6f4a20;
+    --correct-bg:#eef5ee; --correct-line:#bcd6bd; --correct-ink:#3c6b3e;
+    --wrong-bg:#fbecec; --wrong-line:#e3b9b9; --wrong-ink:#a23b34;
+    --amber-bg:#fffbef; --amber-line:#e7c98a; --amber-ink:#8a6d2f;
+    --focus:#2f6f4f; --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);
+    font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.55;overflow-wrap:break-word;}
+  .wrap{max-width:820px;margin:0 auto;padding:24px 20px 60px;}
+
+  .masthead{padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--line);}
+  .masthead h1{margin:0;font-size:23px;font-weight:700;letter-spacing:-.01em;}
+  .masthead .sub{margin:6px 0 0;color:var(--ink);font-size:14.5px;max-width:74ch;}
+
+  .legend{background:var(--amber-bg);border:1px solid var(--amber-line);color:var(--amber-ink);
+    border-radius:12px;padding:12px 15px;margin:14px 0 8px;font-size:13px;line-height:1.55;}
+  .legend b{font-weight:700;}
+
+  .progress{display:flex;align-items:center;gap:10px;margin:14px 0 18px;flex-wrap:wrap;}
+  .pbar{flex:1 1 160px;height:6px;border-radius:3px;background:var(--line);overflow:hidden;}
+  .pbar span{display:block;height:100%;background:var(--accent);width:0;transition:width .25s;}
+  .pcount{font-size:12.5px;color:var(--muted);flex:0 0 auto;}
+  .acc{font-size:12.5px;color:var(--accent-ink);font-weight:600;flex:0 0 auto;}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--panel-shadow);padding:22px 24px;}
+  @media(max-width:560px){ .card{padding:18px 16px;} .wrap{padding:18px 14px 50px;} }
+  .qtop{font-size:13px;color:var(--muted);margin-bottom:6px;}
+  .client{font-size:18px;font-weight:700;margin:0 0 10px;}
+  .steps{list-style:none;margin:0 0 6px;padding:0;display:flex;flex-direction:column;gap:10px;}
+  .step{padding:12px 14px;background:#f5f3ef;border-radius:12px;border-left:3px solid var(--accent);font-size:14.5px;}
+  .step .lab{display:block;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);font-weight:700;margin-bottom:3px;}
+  .step.lab-finding{border-left-color:var(--focus);background:#eef4f1;}
+  .step.lab-finding .lab{color:var(--focus);}
+  .do{font-size:15px;font-weight:600;margin:16px 0 12px;}
+  .do:focus{outline:none;}
+
+  .options{display:flex;flex-direction:column;gap:10px;}
+  .opt{display:flex;gap:11px;align-items:flex-start;width:100%;text-align:left;background:#fff;
+    border:1px solid var(--line);border-radius:12px;padding:12px 14px;font:inherit;font-size:14.5px;
+    line-height:1.5;cursor:pointer;color:var(--ink);transition:border-color .12s,background .12s;}
+  .opt:hover:not(:disabled){border-color:#cfc9bf;}
+  .opt:focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+  .opt .k{flex:0 0 auto;font-weight:700;color:var(--muted);min-width:15px;}
+  .opt .txt{flex:1 1 auto;min-width:0;}
+  .opt .mark{flex:0 0 auto;width:20px;height:20px;display:grid;place-items:center;margin-left:auto;}
+  .opt:disabled{cursor:default;}
+  .opt.correct{background:var(--correct-bg);border-color:var(--correct-line);}
+  .opt.correct .k{color:var(--correct-ink);}
+  .opt.wrong{background:var(--wrong-bg);border-color:var(--wrong-line);}
+  .opt.wrong .k{color:var(--wrong-ink);}
+  .opt.dim{opacity:.55;}
+
+  .fb:focus{outline:none;}
+  .verdict{margin:16px 0 0;font-size:14.5px;font-weight:600;}
+  .verdict.ok{color:var(--correct-ink);}
+  .verdict.no{color:var(--wrong-ink);}
+  .explain{margin:8px 0 0;font-size:14px;color:#413d36;line-height:1.6;}
+  .explain .also{margin-top:8px;}
+  .refer{margin-top:10px;background:var(--correct-bg);border:1px solid var(--correct-line);color:var(--correct-ink);
+    border-radius:10px;padding:9px 12px;font-size:13.5px;}
+  .src{color:var(--muted);font-size:12.5px;margin-top:8px;}
+
+  .foot{display:flex;justify-content:flex-end;align-items:center;margin-top:18px;gap:12px;}
+  .btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border:none;border-radius:10px;
+    padding:11px 19px;font-size:14.5px;font-weight:600;cursor:pointer;font-family:inherit;}
+  .btn:hover{filter:brightness(1.05);}
+  .btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+  .btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line);font-weight:500;}
+
+  .results h2{margin:0 0 4px;font-size:20px;}
+  .results h2:focus{outline:none;}
+  .results .score{font-size:16px;margin:0;}
+  .results .score b{color:var(--accent-ink);}
+  .results .list{margin:16px 0 0;border-top:1px solid var(--line);padding-top:12px;}
+  .results .r{display:flex;gap:10px;align-items:flex-start;font-size:14px;padding:8px 0;border-bottom:1px solid #f0eee9;}
+  .results .r:last-child{border-bottom:none;}
+  .results .r .ri{flex:0 0 auto;margin-top:1px;}
+  .actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+  .selfnote{font-size:12.5px;color:var(--muted);margin-top:14px;line-height:1.55;}
+  .hidden{display:none !important;}
+  @media (prefers-reduced-motion:reduce){ *{transition:none !important;} }
+</style>
+</head>
+<body>
+<!-- COMETS instructions panel -->
+<div style="max-width:900px; margin:16px auto 12px auto; padding:0 12px; box-sizing:border-box;"><details open style="background:#eef4f1; border:1px solid #cfe0d7; border-left:5px solid #b35900; border-radius:8px; padding:12px 16px; font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:15px; line-height:1.55; color:#17251d; text-align:left;"><summary style="cursor:pointer; font-weight:700; color:#1e4d3a; font-size:15px;">Instructions for this activity</summary><div style="margin-top:10px;"><p style="margin:0 0 8px 0; font-size:18px; font-weight:700; color:#1e4d3a; font-family:Georgia,serif;">Medical Mimics</p>
+<p style="margin:0 0 8px 0;">About 15 minutes</p>
+<p style="margin:0 0 8px 0;">Five invented clients come to you with what sounds like anxiety, panic, or depression. Each case unfolds one step at a time, from the presenting complaint to the history, a telling detail, and finally an exam or lab finding reported by a physician. At each step you choose what to ask or do next, or which explanations are still on the table. You get immediate feedback with the reason after every choice. The cases appear in a new order each time.</p>
+<p style="margin:0 0 8px 0;">Best done <strong>after</strong> reading "When the Body Imitates the Mind: Medical Mimics" in the Foundations 4 reading. Your job in every case is the interviewer's job. You ask the questions that make a medical explanation visible, and you refer to a physician. You never diagnose the medical condition yourself.</p>
+<p style="margin:0 0 8px 0;">The activity tracks how many choices you get right on the first try during this session. Nothing is saved or sent, and there is nothing to submit.</p>
+<p style="margin:8px 0 0 0; padding-top:8px; border-top:1px solid #cfe0d7;"><strong>What it adds to your clinical thinking.</strong> Asking the medical questions that keep a thyroid problem, low blood sugar, or overbreathing from being mistaken for a purely psychological one, and knowing when to refer.</p></div></details></div>
+
+<div class="wrap">
+  <div class="masthead">
+    <h1>Medical Mimics</h1>
+    <p class="sub">Some medical conditions look, sound, and feel like anxiety or depression. Work through each case one step at a time. At every step, decide what to ask, what to do, or what is still possible. The medical question always goes to a physician.</p>
+  </div>
+
+  <div class="legend"><b>Your role.</b> Ask about medical history, medications, substances, and how the symptoms feel in the body. Notice what does not fit. Refer to a physician and document it. Keep assessing the psychological picture, because a medical cause and a psychological problem can occur together.</div>
+
+  <div class="progress">
+    <div class="pbar" aria-hidden="true"><span id="pbarfill"></span></div>
+    <div class="pcount" id="pcount"></div>
+    <div class="acc" id="acc"></div>
+  </div>
+
+  <section class="card" id="cardPanel"></section>
+  <section class="card results hidden" id="resultsPanel"></section>
+  <div id="live" class="hidden" aria-live="polite"></div>
+</div>
+
+<script>
+// ===========================================================================
+// Medical Mimics (Foundations 4). Stepwise case reveal. Every medical fact is
+// drawn from sources verified for the F4 reading addition "When the Body
+// Imitates the Mind" (see drafts/f4-verification.md):
+//   DSM-5 (APA, 2013) pp. 146, 161, 181, 209, 214, 217, 231
+//   StatPearls: Hyperthyroidism (Mathew, Kaur, & Rawla, 2023), Thyrotoxicosis
+//   (Blick, Nguyen, & Jialal, 2025), Hypothyroidism (Patil et al., 2024),
+//   Hypoglycemia (Mathew & Thoppil, 2022)
+//   MSD Manual Professional, Hyperventilation Syndrome (Dezube, 2026)
+// Clients are invented. Names do not overlap with the reading's Devon, Priya,
+// and Marcus.
+// ===========================================================================
+
+var REFER = "The medical question belongs to a physician. Your part is to ask, notice, refer, and document.";
+
+var CASES = [
+{
+  id:"nadia", client:"Nadia, 34", title:"Panic, or an overactive thyroid?",
+  steps:[
+    { stage:"Presenting complaint",
+      text:"Nadia, a graduate student, asks for help with anxiety. For three months her heart has raced, her hands shake, she sleeps badly, and she feels keyed up most of the day. She wonders whether these are panic attacks.",
+      q:"What do you ask about next?",
+      opts:[
+        { t:"Her physical health. Any weight change, how she tolerates heat, when she last saw a physician, and everything she takes, including caffeine.", ok:true,
+          fb:"These questions open the medical and biological domain. Palpitations, tremor, and anxiety all appear in hyperthyroidism, alongside heat intolerance and unintentional weight loss, and caffeine and other stimulants can precipitate panic attacks." },
+        { t:"Her core beliefs about danger, so you can start a cognitive formulation.",
+          fb:"Her beliefs will matter, but a formulation built before you know what is producing the sensations can rest on the wrong foundation. The body comes first here." },
+        { t:"Whether anyone in her family has had panic disorder.",
+          fb:"Family history belongs in the interview, but it cannot tell you whether something in her body is producing these symptoms now." },
+        { t:"Reassure her that panic is uncomfortable but not dangerous.",
+          fb:"The reading ties that reassurance to a clinician having assessed the symptoms as panic. Nobody has done that yet, and unexplained physical symptoms warrant medical evaluation first." }
+      ],
+      src:"Mathew et al. (2023), StatPearls: Hyperthyroidism. DSM-5, p. 217." },
+    { stage:"History",
+      text:"Nadia has lost weight over the same three months without trying. She feels hot in rooms where other people are comfortable. She has never had problems with anxiety before this year, and she drinks one coffee a day.",
+      q:"Which explanation remains possible at this point?",
+      opts:[
+        { t:"An anxiety disorder, a medical cause such as an overactive thyroid, or both. The interview alone cannot tell them apart.", ok:true,
+          fb:"Unintentional weight loss and heat intolerance alongside palpitations, tremor, and anxiety fit hyperthyroidism, and DSM-5 names hyperthyroidism among the conditions that can cause or be misdiagnosed as panic attacks. None of this rules out an anxiety disorder. Only a medical evaluation can sort it out." },
+        { t:"Panic disorder only, since stress can explain the weight loss.",
+          fb:"That is a guess about the cause of the weight loss. Panic disorder requires that the attacks not be attributable to another medical condition, and nobody has checked yet." },
+        { t:"Hyperthyroidism only, so psychological work would be pointless.",
+          fb:"You are not in a position to diagnose hyperthyroidism, and a medical cause would not make her distress less real. Her fear of the episodes may still need attention." },
+        { t:"Caffeine alone explains it, so cutting back is all she needs.",
+          fb:"Asking about caffeine was right, but caffeine does not account for the weight loss or the heat intolerance. Stopping here would leave the most important question unasked." }
+      ],
+      src:"Mathew et al. (2023). DSM-5, pp. 209 and 217." },
+    { stage:"A detail",
+      text:"During the session you notice a fine tremor in her hands while they rest in her lap. She mentions that her heart feels fast even when she is sitting still and calm.",
+      q:"What do you do now?",
+      opts:[
+        { t:"Explain that some of her symptoms can come from medical conditions, recommend a prompt visit to her physician, document the referral, and continue the interview.", ok:true,
+          fb:"This is the referral the reading describes. You describe what you noticed and why a physician should look, without naming a diagnosis. Continuing the interview keeps the psychological picture in view while the medical question is answered." },
+        { t:"Tell her she probably has a thyroid problem.",
+          fb:"That is a diagnosis you are not trained or equipped to make. Describe what you observed and why it matters, and let the physician name the condition." },
+        { t:"Begin exposure to a racing heart so she learns to tolerate it.",
+          fb:"Exposure to feared sensations comes after a clinician has assessed the symptoms as panic. Her fast heart rate at rest has not been explained yet." },
+        { t:"Wait a few weeks to see whether therapy settles the symptoms.",
+          fb:"Waiting delays the evaluation that could explain everything. Referral and therapy can proceed side by side." }
+      ],
+      src:"F4 reading, A Second Illustration (Priya). Mathew et al. (2023)." },
+    { stage:"Exam or lab finding", lab:true,
+      text:"With Nadia's consent, her physician calls. Her TSH is suppressed and her free T4 is elevated. The physician is starting treatment for hyperthyroidism.",
+      q:"What does this finding mean for your work with Nadia?",
+      opts:[
+        { t:"Her thyroid is a likely driver of the symptoms. Coordinate with the physician, and keep reassessing her anxiety as treatment proceeds, since an anxiety disorder can still be present.", ok:true,
+          fb:"A suppressed TSH with elevated free T4 is the typical pattern of overt hyperthyroidism. DSM-5 asks whether the anxiety is better explained by the medical condition, and DSM-5 also notes that panic disorder is comorbid with hyperthyroidism, so keep watching rather than closing the question." },
+        { t:"Close the case, because her anxiety was never real.",
+          fb:"Her distress was real. Its source appears to be at least partly medical. A medical cause changes the plan, not the experience." },
+        { t:"Set the result aside, since therapists do not interpret blood tests.",
+          fb:"You do not interpret the test, but you do use the physician's conclusion. It changes your formulation and your plan." },
+        { t:"Diagnose panic disorder anyway, since she had repeated attacks.",
+          fb:"Panic disorder requires that the attacks not be attributable to another medical condition, and DSM-5 gives hyperthyroidism as its example." }
+      ],
+      src:"Mathew et al. (2023). DSM-5, pp. 209, 214, and 231." }
+  ]
+},
+{
+  id:"gerald", client:"Gerald, 58", title:"Depression, or an underactive thyroid?",
+  steps:[
+    { stage:"Presenting complaint",
+      text:"Gerald's daughter urged him to come in for depression. For about a year he has felt flat and tired, sleeps more but wakes unrefreshed, and has lost interest in his woodworking. He says his thinking feels slow and he forgets things.",
+      q:"What do you ask about next?",
+      opts:[
+        { t:"Physical changes and medical care. His weight, how he tolerates cold, bowel habits, skin and hair, his last checkup and blood work, and his medications.", ok:true,
+          fb:"Fatigue, weight gain, cold intolerance, constipation, dry skin, hair loss, and sleep disturbance are typical of hypothyroidism, which can also bring depression and memory problems. These questions make that possibility visible." },
+        { t:"His childhood experiences of loss.",
+          fb:"Developmental history has its place, but it cannot show whether a medical condition is producing these symptoms now." },
+        { t:"Ask him to rate his mood every day for two weeks before deciding anything.",
+          fb:"Mood tracking can be useful, but it delays the questions that might reveal a medical cause." },
+        { t:"Screen for suicidal thoughts, then start behavioral activation right away.",
+          fb:"Asking about suicide belongs in every depression assessment. Starting treatment before you know whether a medical condition is driving the picture skips a step." }
+      ],
+      src:"Patil et al. (2024), StatPearls: Hypothyroidism." },
+    { stage:"History",
+      text:"Gerald has gained weight over the year without eating more. He wears a sweater when everyone else is comfortable, has been constipated, and his skin is dry. He has not had blood work in three years and has never been depressed before.",
+      q:"Which explanation remains possible at this point?",
+      opts:[
+        { t:"A depressive disorder, a medical condition such as an underactive thyroid, or both. Only a medical evaluation can sort this out.", ok:true,
+          fb:"This cluster fits hypothyroidism, which DSM-5 names among the neuroendocrine conditions most closely associated with depression. None of it rules out a depressive disorder." },
+        { t:"Major depression only, since weight gain and oversleeping are common in depression.",
+          fb:"That reasoning stops a step early. Cold intolerance, constipation, and dry skin are not part of the criteria for a depressive episode, and a major depressive episode also requires that it not be attributable to another medical condition." },
+        { t:"Early dementia, so he needs a memory clinic instead of therapy.",
+          fb:"His memory complaints deserve attention, but jumping to one cause repeats the same error in a different direction. Hypothyroidism can bring cognitive problems, and so can depression. A physician is the right first stop." },
+        { t:"Ordinary aging, so nothing needs to be checked.",
+          fb:"Age is not an explanation. A year of fatigue, slowed thinking, and physical change deserves a medical look at any age." }
+      ],
+      src:"DSM-5, pp. 161 and 181. Patil et al. (2024)." },
+    { stage:"A detail",
+      text:"His daughter mentions that his voice has grown hoarse. Gerald adds that his hair seems thinner than it used to be.",
+      q:"What do you do now?",
+      opts:[
+        { t:"Recommend a medical evaluation with blood work, explain why in plain words, document the referral, and keep assessing his mood and safety.", ok:true,
+          fb:"Voice changes and hair loss join the list of symptoms a physician would want to know about in a possible thyroid problem. Your referral gets the question to the right person, and your ongoing assessment keeps the depression in view." },
+        { t:"Tell him his thyroid is underactive.",
+          fb:"That is a medical diagnosis. Describe what you noticed and why it matters, and let the physician decide." },
+        { t:"Suggest an over-the-counter supplement for energy.",
+          fb:"Recommending supplements falls outside your role, and it could delay the evaluation he needs." },
+        { t:"Start behavioral activation, and raise medical questions only if he does not improve.",
+          fb:"Activation may still help, but making a medical evaluation conditional on therapy failing reverses the order. Refer now." }
+      ],
+      src:"Patil et al. (2024)." },
+    { stage:"Exam or lab finding", lab:true,
+      text:"His physician reports an elevated TSH and a low free T4 and starts thyroid hormone replacement.",
+      q:"What does this finding mean for your work with Gerald?",
+      opts:[
+        { t:"The thyroid finding may account for much of the picture. Coordinate with the physician, keep monitoring mood and safety, and reassess whether a depressive disorder remains as treatment proceeds.", ok:true,
+          fb:"An elevated TSH with low free T4 is the characteristic pattern of hypothyroidism. DSM-5 uses hypothyroidism as its example of a depressive disorder due to another medical condition. Whether depression persists after treatment is a question for ongoing assessment." },
+        { t:"His depression was imaginary, so therapy can end.",
+          fb:"His low mood was real. Its source looks at least partly medical, which changes the plan, not the experience." },
+        { t:"Diagnose major depressive disorder anyway, since he meets the symptom count.",
+          fb:"Counting symptoms is not enough. A major depressive episode requires that it not be attributable to the physiological effects of another medical condition." },
+        { t:"Stop asking about mood until his thyroid levels are normal.",
+          fb:"Mood and safety still need monitoring while medical treatment proceeds." }
+      ],
+      src:"Patil et al. (2024). DSM-5, pp. 161 and 181." }
+  ]
+},
+{
+  id:"tomas", client:"Tomás, 27", title:"Panic attacks, or low blood sugar?",
+  steps:[
+    { stage:"Presenting complaint",
+      text:"Tomás describes what he calls panic attacks at work. Several times a month, usually late in the morning, he suddenly feels shaky and sweaty, his heart pounds, and a wave of dread comes over him. Once a coworker said he seemed confused.",
+      q:"What do you ask about next?",
+      opts:[
+        { t:"His medical conditions and medications, and when the episodes happen relative to meals, exercise, and alcohol.", ok:true,
+          fb:"Tremor, palpitations, anxiety, sweating, and hunger are early symptoms of hypoglycemia, and confusion can follow as glucose keeps falling. Timing questions show whether the episodes track his eating." },
+        { t:"What thoughts go through his mind during the attacks.",
+          fb:"That question matters for panic, but it passes over the confusion. Confusion is not among the panic attack symptoms DSM-5 lists, so it needs explaining before anything else." },
+        { t:"How stressful his job has been lately.",
+          fb:"Stress can come up later. It cannot tell you whether something medical is happening during the episodes." },
+        { t:"Teach him paced breathing to use at the next attack.",
+          fb:"Breathing skills can help with panic, but if the episodes come from low blood sugar, the answer is medical, and a breathing exercise would not address it." }
+      ],
+      src:"Mathew & Thoppil (2022), StatPearls: Hypoglycemia. DSM-5, p. 214." },
+    { stage:"History",
+      text:"Tomás has diabetes and takes insulin. The episodes happen mostly on days he skips breakfast, and they ease within minutes after he eats. He has not told his doctor, because he assumed it was stress.",
+      q:"Which explanation remains possible at this point?",
+      opts:[
+        { t:"Hypoglycemia is a strong possibility, and some anxiety about the episodes may also be present. His physician needs to evaluate this.", ok:true,
+          fb:"Insulin is one of the main causes of hypoglycemia, and the link to skipped meals and relief after eating fits the pattern physicians check. DSM-5 lists hypoglycemia among the endocrine conditions known to produce anxiety." },
+        { t:"Panic disorder, because the attacks keep coming back.",
+          fb:"Recurrence is only part of the picture. Panic disorder also requires that the attacks not be attributable to another medical condition." },
+        { t:"Work stress, because that is what he believes.",
+          fb:"Record his own theory, but it is not evidence about what his blood sugar is doing." },
+        { t:"Hypoglycemia is unlikely because he is young.",
+          fb:"Age does not rule it out. His insulin use and the timing of the episodes are what matter." }
+      ],
+      src:"Mathew & Thoppil (2022). DSM-5, pp. 209 and 231." },
+    { stage:"A detail",
+      text:"He adds that on weekends he sometimes drinks without eating much, and one of the worst episodes came the morning after.",
+      q:"What do you do now?",
+      opts:[
+        { t:"Urge him to contact his physician or diabetes care team soon, tell them about the confusion and the drinking, and document the referral.", ok:true,
+          fb:"Alcohol is another recognized cause of hypoglycemia. Because confusion, seizures, and coma can follow when glucose keeps falling, this referral should not wait." },
+        { t:"Advise him to lower his insulin dose on the days he skips breakfast.",
+          fb:"Medication changes belong to his prescriber. Advice on insulin dosing is outside your role." },
+        { t:"Start exposure to the bodily sensations of the attacks.",
+          fb:"Exposure to feared sensations comes after a clinician has assessed the episodes as panic. These episodes may be medical." },
+        { t:"Make a note and raise it again next session.",
+          fb:"Waiting a week is too long when the episodes include confusion. Refer now." }
+      ],
+      src:"Mathew & Thoppil (2022)." },
+    { stage:"Exam or lab finding", lab:true,
+      text:"His physician confirms that his glucose was low during an episode and that his symptoms resolved once it was corrected. The physician adjusts his diabetes treatment.",
+      q:"What does this finding mean for your work with Tomás?",
+      opts:[
+        { t:"The episodes fit hypoglycemia. Coordinate with the physician, and explore any fear of the episodes that lingers, since that may still deserve attention.", ok:true,
+          fb:"Symptoms, a measured low glucose, and relief once glucose is corrected make up Whipple's triad, the pattern physicians use to confirm hypoglycemia. Any fear of the sensations that remains is yours to assess." },
+        { t:"His panic disorder is now confirmed.",
+          fb:"The finding points the other way. The episodes are attributable to a medical condition." },
+        { t:"He no longer needs to discuss the episodes with anyone.",
+          fb:"He needs ongoing medical care, and any fear or avoidance that remains is a fair topic for therapy." },
+        { t:"Teach him to manage his glucose yourself.",
+          fb:"Diabetes management belongs to his medical team. Your role is coordination and the psychological side." }
+      ],
+      src:"Mathew & Thoppil (2022)." }
+  ]
+},
+{
+  id:"aisha", client:"Aisha, 22", title:"Hyperventilation, panic, or both?",
+  steps:[
+    { stage:"Presenting complaint",
+      text:"Aisha describes sudden episodes of breathlessness, a tight chest, tingling around her mouth and in her fingers, stiff hands, and dizziness. She is sure she cannot get enough air.",
+      q:"What do you ask about next?",
+      opts:[
+        { t:"Whether these episodes have been medically evaluated, her lung and heart history, her medications, and when the episodes happen.", ok:true,
+          fb:"These symptoms appear in hyperventilation syndrome, but pulmonary embolism, cardiac ischemia, and metabolic acidosis can look the same, so a physician has to exclude them. They also overlap with panic attacks." },
+        { t:"Coach her to slow her breathing right away and leave the medical questions for later.",
+          fb:"Breathing skills may come later. Breathlessness and chest tightness that nobody has evaluated come first, and a description alone cannot rule out a serious cause." },
+        { t:"Tell her this is panic disorder.",
+          fb:"That is a diagnosis made too early. Several medical conditions produce the same symptoms." },
+        { t:"Ask only about her fear of suffocating.",
+          fb:"Her fear matters, but asking only about it skips whether anyone has checked her heart and lungs." }
+      ],
+      src:"Dezube (2026), MSD Manual: Hyperventilation Syndrome. DSM-5, p. 214." },
+    { stage:"History",
+      text:"After her first episode Aisha went to urgent care. The physician checked her oxygen level, ran an ECG and a chest radiograph, found nothing serious, and told her she was hyperventilating. She has had more episodes since and now avoids crowded buses.",
+      q:"Which explanation remains possible at this point?",
+      opts:[
+        { t:"Hyperventilation syndrome, panic disorder, or both, since the two overlap heavily.", ok:true,
+          fb:"The MSD Manual treats hyperventilation syndrome as separate from panic disorder but notes that about half of patients with either one show evidence of the other. Her new avoidance also deserves assessment." },
+        { t:"Hyperventilation only, so anxiety is beside the point.",
+          fb:"Hyperventilation syndrome is often associated with anxiety, and her avoidance of buses points to fear that needs assessing." },
+        { t:"Nothing is wrong, because the tests were normal.",
+          fb:"Normal tests ruled out some serious causes. They did not make her episodes or her avoidance go away." },
+        { t:"A serious lung condition the physician must have missed.",
+          fb:"Second-guessing a completed evaluation is not your role. What you can do is send any new or different symptoms back to the physician." }
+      ],
+      src:"Dezube (2026)." },
+    { stage:"A detail",
+      text:"A few weeks into your work together, Aisha mentions that last week's episode came with chest pain that felt different from her usual episodes and did not ease the way they do.",
+      q:"What do you do now?",
+      opts:[
+        { t:"Treat it as new medical information. Encourage her to seek medical evaluation promptly, and document it.", ok:true,
+          fb:"Hyperventilation syndrome is a diagnosis of exclusion, and conditions such as pulmonary embolism and cardiac ischemia can look the same. A change in the pattern sends the question back to a physician rather than being filed under the familiar explanation." },
+        { t:"Reassure her that it is her usual hyperventilation.",
+          fb:"You cannot know that from a description, and this episode was different. Reassurance here could delay care she needs." },
+        { t:"Use the episode as material for exposure practice.",
+          fb:"New and different physical symptoms need medical evaluation before they become therapy material." },
+        { t:"Wait to see whether it happens again.",
+          fb:"Waiting is not the safe choice when chest pain has changed character. Refer now." }
+      ],
+      src:"Dezube (2026). F4 reading, A Second Illustration (Priya)." },
+    { stage:"Exam or lab finding", lab:true,
+      text:"Her physician evaluates the new episode, again finds no medical emergency, and agrees that anxiety and overbreathing are driving the episodes. The physician supports her working on them in therapy.",
+      q:"What does this mean for your work with Aisha?",
+      opts:[
+        { t:"Assess her for panic disorder and the avoidance of buses, keep coordinating with the physician, and keep a standing agreement that new or different symptoms go back to the physician.", ok:true,
+          fb:"With serious causes excluded and the physician on board, the psychological work can go ahead. The standing agreement keeps the medical door open, which matters because the two problems overlap." },
+        { t:"Tell her the episodes are all in her head.",
+          fb:"Overbreathing produces real physical sensations. Dismissing them would undermine her trust and misstate what is happening." },
+        { t:"Stop asking about physical symptoms from now on.",
+          fb:"New or different symptoms still need medical attention. Keep asking." },
+        { t:"Refer her to a pulmonologist yourself.",
+          fb:"Specialist referrals are the physician's call. Your part is coordination with her physician." }
+      ],
+      src:"Dezube (2026). DSM-5, p. 209." }
+  ]
+},
+{
+  id:"ruth", client:"Ruth, 74", title:"Late-life depression, or an overactive thyroid?",
+  steps:[
+    { stage:"Presenting complaint",
+      text:"Ruth's son brings her in because she has seemed depressed since the winter. She is tired, has little interest in anything, and has lost weight. She says she simply feels old and worn out.",
+      q:"What do you ask about next?",
+      opts:[
+        { t:"Her physical health, recent medical visits, any heart symptoms, weight change, and every medication she takes.", ok:true,
+          fb:"Fatigue and weight loss are not specific to depression, and in older adults some medical conditions show up mainly as low mood and low energy. These questions bring that possibility into view." },
+        { t:"Recent losses, since late-life depression usually follows grief.",
+          fb:"Ask about loss, but assuming a cause before asking about her health can hide a medical one." },
+        { t:"Her opinion of her son's concern.",
+          fb:"Her view matters, but it will not reveal a medical explanation." },
+        { t:"Whether she would consider antidepressant medication.",
+          fb:"That is a prescriber's conversation, and it is premature before her health has been reviewed." }
+      ],
+      src:"Blick et al. (2025), StatPearls: Thyrotoxicosis." },
+    { stage:"History",
+      text:"Ruth has lost weight without trying. Her son says her doctor recently mentioned an irregular heartbeat. She is not jittery or anxious, only flat.",
+      q:"Which explanation remains possible at this point?",
+      opts:[
+        { t:"A depressive disorder, a medical condition such as an overactive thyroid that can look like depression in older adults, or both.", ok:true,
+          fb:"Older adults with an overactive thyroid often show fewer typical signs and may instead present with heart rhythm problems, depression, fatigue, and weight loss, a picture called apathetic hyperthyroidism." },
+        { t:"An overactive thyroid is ruled out because she is not anxious or jittery.",
+          fb:"That is the trap. In older adults hyperthyroidism can present as apathy and low mood rather than agitation." },
+        { t:"Depression only, because she says she feels worn out.",
+          fb:"Her words describe how she feels, not what is causing it. The weight loss and the heart rhythm finding still need a medical explanation." },
+        { t:"Normal aging, so nothing needs to change.",
+          fb:"Unintended weight loss and a new heart rhythm finding are not explained by age alone." }
+      ],
+      src:"Blick et al. (2025)." },
+    { stage:"A detail",
+      text:"Ruth has never been depressed before. This is her first episode, beginning in her seventies.",
+      q:"What do you do now?",
+      opts:[
+        { t:"Ask Ruth for consent to contact her physician, share your observations, recommend evaluation including thyroid tests, document the referral, and keep assessing mood and safety.", ok:true,
+          fb:"DSM-5 lists features atypical of a primary mood disorder, such as an atypical age at onset, as one clue that a medical condition may be involved. Coordinating with her physician gets the clue to someone who can act on it." },
+        { t:"Tell her son that her thyroid is probably overactive.",
+          fb:"That is a diagnosis you cannot make, and sharing it with her son without her consent raises a confidentiality problem as well." },
+        { t:"Start a course of therapy and revisit her health in three months.",
+          fb:"Therapy may help, but delaying the medical question for months leaves a possible cause untreated." },
+        { t:"Decide that a first episode this late must be dementia.",
+          fb:"That swaps one assumption for another. A physician should evaluate the medical possibilities." }
+      ],
+      src:"DSM-5, p. 181." },
+    { stage:"Exam or lab finding", lab:true,
+      text:"Her physician finds a suppressed TSH with elevated thyroid hormone and begins treatment for hyperthyroidism.",
+      q:"What does this finding mean for your work with Ruth?",
+      opts:[
+        { t:"Her thyroid may explain much of the low mood. Coordinate with the physician, keep monitoring mood and safety, and reassess as treatment proceeds.", ok:true,
+          fb:"A suppressed TSH with elevated thyroid hormone is the typical pattern of overt hyperthyroidism. Older adults can present with depression rather than anxiety. Whether low mood persists after treatment is a question for ongoing assessment." },
+        { t:"Because she was not anxious, the result must be wrong.",
+          fb:"Interpreting the result is the physician's job, and in older adults an overactive thyroid can look like depression." },
+        { t:"Close the case, since the problem was only medical.",
+          fb:"Her mood and safety still need monitoring while treatment proceeds, and she may need support adjusting." },
+        { t:"Diagnose major depressive disorder, since she has the symptoms.",
+          fb:"A major depressive episode requires that it not be attributable to the physiological effects of another medical condition." }
+      ],
+      src:"Mathew et al. (2023). Blick et al. (2025). DSM-5, p. 161." }
+  ]
+}
+];
+
+// ---------------------------------------------------------------- state
+var order=[], ci=0, si=0, picks={}, optOrder={};
+var session={ first:0, total:0, rounds:0 };
+var round={ first:0, total:0, perCase:{} };
+
+function shuffle(a){ for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+function el(t,c,h){var e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e;}
+function esc(s){return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function key(){ return order[ci]+":"+si; }
+function cur(){ return CASES.filter(function(c){return c.id===order[ci];})[0]; }
+
+var CHECK='<svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8.2" stroke="#3c6b3e" stroke-width="1.4"/><path d="M6.4 10.2l2.3 2.3 4.7-4.9" stroke="#3c6b3e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+var CROSS='<svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8.2" stroke="#a23b34" stroke-width="1.4"/><path d="M7.2 7.2l5.6 5.6M12.8 7.2l-5.6 5.6" stroke="#a23b34" stroke-width="1.6" stroke-linecap="round"/></svg>';
+
+function totalSteps(){ return CASES.reduce(function(n,c){return n+c.steps.length;},0); }
+function doneSteps(){ var n=0; for(var i=0;i<ci;i++){ n+=CASES.filter(function(c){return c.id===order[i];})[0].steps.length; } return n+si; }
+
+function start(){
+  order=shuffle(CASES.map(function(c){return c.id;}));
+  ci=0; si=0; picks={}; optOrder={};
+  round={ first:0, total:0, perCase:{} };
+  order.forEach(function(id){ round.perCase[id]={first:0,total:0}; });
+  document.getElementById("cardPanel").classList.remove("hidden");
+  document.getElementById("resultsPanel").classList.add("hidden");
+  render(false);
+}
+
+function renderProgress(){
+  document.getElementById("pbarfill").style.width=(doneSteps()/totalSteps()*100)+"%";
+  document.getElementById("pcount").textContent="Case "+(ci+1)+" of "+order.length+", step "+(si+1)+" of "+cur().steps.length;
+  var acc=document.getElementById("acc");
+  acc.textContent = session.total ? ("First-try accuracy this session: "+session.first+" of "+session.total+" ("+Math.round(100*session.first/session.total)+"%)") : "First-try accuracy this session: none yet";
+}
+
+function render(focusQ){
+  renderProgress();
+  var c=cur(), st=c.steps[si], k=key();
+  if(!optOrder[k]) optOrder[k]=shuffle(st.opts.map(function(_,i){return i;}));
+  var pick=picks[k], answered=pick!=null;
+  var panel=document.getElementById("cardPanel"); panel.innerHTML="";
+  panel.appendChild(el("div","qtop","Case "+(ci+1)+" of "+order.length+". "+esc(c.title)));
+  panel.appendChild(el("p","client",esc(c.client)));
+  var ul=el("ol","steps");
+  for(var i=0;i<=si;i++){
+    var s=c.steps[i], li=el("li","step"+(s.lab?" lab-finding":""));
+    li.innerHTML='<span class="lab">'+esc(s.stage)+'</span>'+esc(s.text);
+    ul.appendChild(li);
+  }
+  panel.appendChild(ul);
+  var q=el("p","do",esc(st.q)); q.id="qprompt"; q.tabIndex=-1; panel.appendChild(q);
+
+  var opts=el("div","options"); opts.setAttribute("role","group"); opts.setAttribute("aria-labelledby","qprompt");
+  optOrder[k].forEach(function(oi,pos){
+    var o=st.opts[oi], cls="opt";
+    if(answered){ if(o.ok) cls+=" correct"; else if(oi===pick) cls+=" wrong"; else cls+=" dim"; }
+    var b=el("button",cls); b.type="button"; b.setAttribute("data-oi",oi);
+    if(answered) b.disabled=true;
+    var mark = answered ? (o.ok?CHECK:(oi===pick?CROSS:"")) : "";
+    b.innerHTML='<span class="k">'+String.fromCharCode(65+pos)+'.</span><span class="txt">'+esc(o.t)+'</span><span class="mark">'+mark+'</span>';
+    if(!answered) b.addEventListener("click",function(){ choose(oi); });
+    opts.appendChild(b);
+  });
+  panel.appendChild(opts);
+
+  if(answered){
+    var o=st.opts[pick], right=!!o.ok;
+    var fb=el("div","fb"); fb.id="fb"; fb.tabIndex=-1;
+    fb.appendChild(el("p","verdict "+(right?"ok":"no"), right?"Good choice.":"Not the best next step."));
+    var ex=el("div","explain");
+    ex.appendChild(el("p",null,esc(o.fb)));
+    if(!right){
+      var best=st.opts.filter(function(x){return x.ok;})[0];
+      ex.appendChild(el("p","also","<b>The better choice:</b> "+esc(best.t)+" "+esc(best.fb)));
+    }
+    ex.appendChild(el("div","refer",esc(REFER)));
+    ex.appendChild(el("div","src","Source: "+esc(st.src)));
+    fb.appendChild(ex);
+    panel.appendChild(fb);
+    var foot=el("div","foot");
+    var lastStep=si===c.steps.length-1, lastCase=ci===order.length-1;
+    var nb=el("button","btn"); nb.type="button"; nb.id="nextBtn";
+    nb.textContent = lastStep ? (lastCase ? "See your results" : "Next case") : "Reveal the next step";
+    nb.addEventListener("click",next);
+    foot.appendChild(nb); panel.appendChild(foot);
+  }
+  if(focusQ){ q.focus(); }
+}
+
+function choose(oi){
+  var k=key(); if(picks[k]!=null) return;
+  picks[k]=oi;
+  var ok=!!cur().steps[si].opts[oi].ok;
+  session.total++; round.total++; round.perCase[order[ci]].total++;
+  if(ok){ session.first++; round.first++; round.perCase[order[ci]].first++; }
+  render(false);
+  var live=document.getElementById("live");
+  live.textContent=(ok?"Good choice. ":"Not the best next step. ")+cur().steps[si].opts[oi].fb;
+  var f=document.getElementById("fb"); if(f) f.focus();
+}
+
+function next(){
+  var c=cur();
+  if(si<c.steps.length-1){ si++; render(true); return; }
+  if(ci<order.length-1){ ci++; si=0; render(true); window.scrollTo({top:0,behavior:"smooth"}); return; }
+  finish();
+}
+
+function finish(){
+  session.rounds++;
+  document.getElementById("pbarfill").style.width="100%";
+  document.getElementById("pcount").textContent="Complete";
+  renderProgress(); document.getElementById("pcount").textContent="Complete";
+  document.getElementById("cardPanel").classList.add("hidden");
+  var rp=document.getElementById("resultsPanel"); rp.classList.remove("hidden"); rp.innerHTML="";
+  var h=el("h2",null,"Your results"); h.tabIndex=-1; rp.appendChild(h);
+  rp.appendChild(el("p","score","This round you made <b>"+round.first+" of "+round.total+"</b> choices correctly on the first try. Across the session: <b>"+session.first+" of "+session.total+"</b>."));
+  var list=el("div","list");
+  order.forEach(function(id){
+    var c=CASES.filter(function(x){return x.id===id;})[0], pc=round.perCase[id];
+    var r=el("div","r");
+    r.innerHTML='<span class="ri">'+(pc.first===pc.total?CHECK:CROSS)+'</span><span><b>'+esc(c.client)+'.</b> '+esc(c.title)+' '+pc.first+' of '+pc.total+' on the first try.</span>';
+    list.appendChild(r);
+  });
+  rp.appendChild(list);
+  var act=el("div","actions");
+  var again=el("button","btn secondary","Run the cases again in a new order"); again.type="button";
+  again.addEventListener("click",function(){ start(); window.scrollTo({top:0,behavior:"smooth"}); var q=document.getElementById("qprompt"); if(q) q.focus(); });
+  act.appendChild(again); rp.appendChild(act);
+  rp.appendChild(el("p","selfnote","Every case ended the same way. You asked, noticed what did not fit, and referred, and a physician answered the medical question. A medical cause does not make distress imaginary, and a psychological problem can remain after the medical one is treated, so assessment continues. Nothing is saved or sent."));
+  h.focus();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+window.__tool={
+  cases:CASES,
+  state:function(){ return {order:order.slice(), ci:ci, si:si, session:JSON.parse(JSON.stringify(session)), round:JSON.parse(JSON.stringify(round))}; },
+  correctIndex:function(){ var st=cur().steps[si]; for(var i=0;i<st.opts.length;i++){ if(st.opts[i].ok) return i; } return -1; },
+  choose:choose, next:next, restart:start
+};
+
+start();
+</script>
+</body>
+</html>
