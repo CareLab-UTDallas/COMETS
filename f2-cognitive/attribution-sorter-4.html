@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sort the Explanation</title>
+<style>
+  :root{
+    --bg:#faf9f7; --ink:#1f1e1c; --muted:#6b6862; --line:#e7e4de;
+    --panel:#ffffff; --panel-shadow:0 1px 2px rgba(28,27,25,.04),0 6px 20px rgba(28,27,25,.05);
+    --accent:#8a5a25; --accent-ink:#6f4a20;
+    --correct-bg:#eef5ee; --correct-line:#bcd6bd; --correct-ink:#3c6b3e;
+    --wrong-bg:#fbecec; --wrong-line:#e3b9b9; --wrong-ink:#a23b34;
+    --amber-bg:#fffbef; --amber-line:#e7c98a; --amber-ink:#8a6d2f;
+    --focus:#2f6f4f; --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);
+    font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.55;}
+  .wrap{max-width:820px;margin:0 auto;padding:24px 20px 60px;}
+
+  .masthead{padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--line);}
+  .masthead h1{margin:0;font-size:23px;font-weight:700;letter-spacing:-.01em;}
+  .masthead .sub{margin:6px 0 0;color:var(--ink);font-size:14.5px;max-width:74ch;}
+
+  .legend{background:var(--amber-bg);border:1px solid var(--amber-line);color:var(--amber-ink);
+    border-radius:12px;padding:12px 15px;margin:14px 0 8px;font-size:13px;line-height:1.55;}
+  .legend b{font-weight:700;}
+  .legend .row{margin-top:6px;}
+
+  .progress{display:flex;align-items:center;gap:10px;margin:14px 0 18px;flex-wrap:wrap;}
+  .pbar{flex:1 1 160px;height:6px;border-radius:3px;background:var(--line);overflow:hidden;}
+  .pbar span{display:block;height:100%;background:var(--accent);width:0;transition:width .25s;}
+  .pcount{font-size:12.5px;color:var(--muted);flex:0 0 auto;}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--panel-shadow);padding:22px 24px;}
+  @media(max-width:560px){ .card{padding:18px 16px;} .wrap{padding:18px 14px 50px;} }
+  .qtop{font-size:13px;color:var(--muted);margin-bottom:10px;}
+  .scenario{font-size:13.5px;color:var(--ink);margin:0 0 6px;}
+  .thought{font-size:18px;font-weight:600;line-height:1.45;margin:0 0 4px;padding:14px 16px;
+    background:#f5f3ef;border-radius:12px;border-left:3px solid var(--accent);}
+  .do{font-size:13px;color:var(--muted);margin:12px 0 14px;}
+
+  .dim{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 10px;}
+  .dim legend{padding:0 4px;font-size:13.5px;font-weight:700;}
+  .dim .q{font-size:12.5px;color:var(--muted);margin:0 0 8px;}
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .opt{text-align:left;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;
+    font-size:14.5px;font-weight:600;cursor:pointer;color:var(--ink);transition:border-color .12s,background .12s;}
+  .opt:hover:not(:disabled){border-color:#cfc9bf;}
+  .opt:focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+  .opt[aria-pressed="true"]{border-color:var(--accent);background:#f7efe5;color:var(--accent-ink);}
+  .opt:disabled{cursor:default;}
+  .opt.correct{background:var(--correct-bg);border-color:var(--correct-line);color:var(--correct-ink);}
+  .opt.wrong{background:var(--wrong-bg);border-color:var(--wrong-line);color:var(--wrong-ink);}
+  .opt.dimmed{opacity:.5;}
+  .fb{margin:10px 0 0;font-size:13.5px;line-height:1.55;color:#413d36;}
+  .fb b.ok{color:var(--correct-ink);}
+  .fb b.no{color:var(--wrong-ink);}
+
+  .verdict{margin:16px 0 0;font-size:14.5px;font-weight:600;}
+  .verdict.ok{color:var(--correct-ink);}
+  .verdict.no{color:var(--wrong-ink);}
+  .explain{margin:8px 0 0;font-size:14px;color:#413d36;line-height:1.6;}
+  .explain .src{color:var(--muted);font-size:12.5px;margin-top:6px;}
+
+  .foot{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:12px;flex-wrap:wrap;}
+  .btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border:none;border-radius:10px;
+    padding:11px 19px;font-size:14.5px;font-weight:600;cursor:pointer;}
+  .btn:hover{filter:brightness(1.05);}
+  .btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+  .btn:disabled{opacity:.5;cursor:default;filter:none;}
+  .btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line);font-weight:500;}
+  .need{font-size:12.5px;color:var(--muted);}
+
+  .results h2{margin:0 0 4px;font-size:20px;}
+  .results .score{font-size:16px;margin:0;}
+  .results .score b{color:var(--accent-ink);}
+  .results .list{margin:16px 0 0;border-top:1px solid var(--line);padding-top:12px;}
+  .results .r{display:flex;gap:10px;align-items:flex-start;font-size:14px;padding:8px 0;border-bottom:1px solid #f0eee9;}
+  .results .r:last-child{border-bottom:none;}
+  .results .r .ri{flex:0 0 auto;margin-top:1px;}
+  .actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+  .selfnote{font-size:12.5px;color:var(--muted);margin-top:14px;line-height:1.55;}
+  .hidden{display:none !important;}
+  @media (prefers-reduced-motion:reduce){ *{transition:none !important;} }
+</style>
+</head>
+<body>
+<!-- COMETS instructions panel -->
+<div style="max-width:900px; margin:16px auto 12px auto; padding:0 12px; box-sizing:border-box;"><details open style="background:#eef4f1; border:1px solid #cfe0d7; border-left:5px solid #b35900; border-radius:8px; padding:12px 16px; font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:15px; line-height:1.55; color:#17251d; text-align:left;"><summary style="cursor:pointer; font-weight:700; color:#1e4d3a; font-size:15px;">Instructions for this activity</summary><div style="margin-top:10px;"><p style="margin:0 0 8px 0; font-size:18px; font-weight:700; color:#1e4d3a; font-family:Georgia,serif;">Sort the Explanation</p>
+
+<p style="margin:0 0 8px 0;">About 10 minutes</p>
+
+<p style="margin:0 0 8px 0;">The reading describes explanatory style, the habitual way a person explains why things happen. Each round draws eight invented client statements at random. For each one, rate the client's explanation on all three dimensions, internal or external, stable or unstable, and global or specific, then check your ratings. You get feedback on each dimension with the reason, so you can see exactly which part of the explanation you read correctly.</p>
+
+<p style="margin:0 0 8px 0;">Best done <strong>after</strong> the reading's section on cognitive models of specific problems. Rate the explanation the client gives, not the one you would give and not the true cause of the event. A few statements are about good events, where the pessimistic pattern runs the other way.</p>
+
+<p style="margin:0 0 8px 0;">This activity scores only the ratings you pick, and nothing is saved or sent. There's nothing to write and nothing to submit.</p>
+
+<p style="margin:8px 0 0 0; padding-top:8px; border-top:1px solid #cfe0d7;"><strong>What it adds to your clinical thinking.</strong> Hearing explanatory style in the way a client explains a setback during the interview.</p></div></details></div>
+
+<div class="wrap">
+  <div class="masthead">
+    <h1>Sort the Explanation</h1>
+    <p class="sub">People explain the same kind of setback in very different ways, and the explanation shapes how long and how widely the setback weighs on them. Rate each client's explanation on three dimensions and see the reasoning for each.</p>
+  </div>
+
+  <div class="legend" id="legend"><b>The three dimensions.</b>
+    <div class="row"><b>Internal or external:</b> is the cause about the person, or about the situation and other people?</div>
+    <div class="row"><b>Stable or unstable:</b> will the cause last, or will it pass?</div>
+    <div class="row"><b>Global or specific:</b> does the cause reach into many areas of life, or only this one?</div>
+  </div>
+
+  <div class="progress">
+    <div class="pbar" aria-hidden="true"><span id="pbarfill"></span></div>
+    <div class="pcount" id="pcount"></div>
+    <div class="pcount" id="acc" aria-live="polite"></div>
+  </div>
+
+  <section class="card" id="cardPanel" aria-live="polite"></section>
+  <section class="card results hidden" id="resultsPanel" aria-live="polite"></section>
+</div>
+
+<script>
+// Sort the Explanation (Foundations 2). Each invented statement is rated on the
+// three attributional dimensions from Abramson, Seligman, & Teasdale (1978).
+// Explanatory style definition (bad and good events) from Kamen & Seligman (1987).
+// Client names do not reuse the reading's cases (Marcus, Sarah, Devon, Maya).
+
+var DIMS = [
+  { id:"ie", name:"Internal or external", q:"Is the cause about the person, or about the situation and other people?", a:"internal", b:"external", A:"Internal", B:"External" },
+  { id:"st", name:"Stable or unstable", q:"Will the cause last, or will it pass?", a:"stable", b:"unstable", A:"Stable", B:"Unstable" },
+  { id:"gs", name:"Global or specific", q:"Does the cause reach into many areas of life, or only this one?", a:"global", b:"specific", A:"Global", B:"Specific" }
+];
+
+var BANK = [
+  { who:"Priya, 24, a graduate student", event:"bad", situation:"She did not get a fellowship she applied for.",
+    say:"“I didn't get it because I'm not smart enough, and I never will be. It's the same with everything I try.”",
+    ie:"internal", st:"stable", gs:"global",
+    why:{ ie:"She locates the cause in herself (“I'm not smart enough”).", st:"“I never will be” makes the cause permanent.", gs:"“Everything I try” spreads one rejection across her whole life." },
+    note:"All three point the pessimistic way for a bad event, the pattern the 1978 reformulation links to chronic, broad helplessness and lowered self-esteem." },
+  { who:"Jordan, 31, an accountant", event:"bad", situation:"He arrived forty minutes late to work.",
+    say:"“There was a crash on the highway and traffic was stopped. Tomorrow should be fine.”",
+    ie:"external", st:"unstable", gs:"specific",
+    why:{ ie:"The cause is a crash on the highway, outside him.", st:"“Tomorrow should be fine” marks the cause as temporary.", gs:"He limits the explanation to this one commute." },
+    note:"This is the opposite of the pessimistic pattern. Notice that it may also simply be accurate." },
+  { who:"Luis, 45, a father of two", event:"bad", situation:"He shouted at his teenage son during an argument.",
+    say:"“I lost my temper because I've slept about three hours a night this week. It's only with him, and only lately.”",
+    ie:"internal", st:"unstable", gs:"specific",
+    why:{ ie:"The cause is his own state, his exhaustion, so it is about him.", st:"Lack of sleep “this week” and “only lately” can pass.", gs:"“It's only with him” confines it to one relationship." },
+    note:"Internal does not have to mean pessimistic. Owning a temporary, specific cause leaves room to change it." },
+  { who:"Hannah, 19, a first-year student", event:"bad", situation:"She received a low grade on a chemistry exam.",
+    say:"“That professor writes impossible exams, and he always will. My other classes are fine.”",
+    ie:"external", st:"stable", gs:"specific",
+    why:{ ie:"She places the cause in the professor's exams, not in herself.", st:"“He always will” makes the cause lasting.", gs:"“My other classes are fine” keeps it to one course." },
+    note:"A stable cause predicts the problem will recur, here confined to one course." },
+  { who:"Tomas, 52, a machinist", event:"bad", situation:"He was laid off when his plant closed.",
+    say:"“The whole industry is dying and it's never coming back. It's going to wreck my marriage, my health, all of it.”",
+    ie:"external", st:"stable", gs:"global",
+    why:{ ie:"He blames the industry, not himself.", st:"“Never coming back” makes it permanent.", gs:"He expects it to reach his marriage, his health, “all of it.”" },
+    note:"External explanations can still be stable and global. Self-esteem may hold, yet hopelessness can grow." },
+  { who:"Keisha, 28, a nurse", event:"bad", situation:"A first date felt awkward.",
+    say:"“I was nervous tonight and I rambled. Once I relax I'm usually fine, and the rest of my life is going well.”",
+    ie:"internal", st:"unstable", gs:"specific",
+    why:{ ie:"She names her own nervousness as the cause.", st:"“Tonight” and “once I relax” mark it as passing.", gs:"She keeps it to this date and notes the rest of life is going well." },
+    note:"A balanced explanation. She owns her part without turning one evening into a verdict." },
+  { who:"Ben, 36, a project manager", event:"bad", situation:"He missed a reporting deadline.",
+    say:"“I'm a disorganized person. I've always been this way, but it really only bites me at work.”",
+    ie:"internal", st:"stable", gs:"specific",
+    why:{ ie:"“I'm a disorganized person” puts the cause in him.", st:"“I've always been this way” makes it a lasting trait.", gs:"“Only bites me at work” limits its reach." },
+    note:"Two of three dimensions point the pessimistic way. The specific framing keeps the rest of his life intact." },
+  { who:"Aiko, 22, a college senior", event:"bad", situation:"A friend canceled dinner plans.",
+    say:"“People just don't want to be around me. It's been like this my whole life, in every friendship, every class, every job.”",
+    ie:"internal", st:"stable", gs:"global",
+    why:{ ie:"She reads the cancellation as caused by something about her.", st:"“My whole life” makes it permanent.", gs:"“Every friendship, every class, every job” spreads it everywhere." },
+    note:"In an interview, this is the moment to ask what she makes of the cancellation and whether other explanations fit." },
+  { who:"Rosa, 60, a retired teacher", event:"bad", situation:"Her vegetable garden was ruined.",
+    say:"“That freak hailstorm flattened everything. It was a one-time thing, and the rest of my week was lovely.”",
+    ie:"external", st:"unstable", gs:"specific",
+    why:{ ie:"The hailstorm is outside her.", st:"“A one-time thing” marks it as passing.", gs:"The rest of her week was lovely, so the cause stays in the garden." },
+    note:"External, unstable, and specific for a bad event is the least pessimistic combination." },
+  { who:"Daniel, 41, a software engineer", event:"bad", situation:"His team's product launch failed.",
+    say:"“The company was in chaos during the reorganization, and it's spilled into my sleep, my family time, everything. It should settle once the reorganization is done.”",
+    ie:"external", st:"unstable", gs:"global",
+    why:{ ie:"The cause is the company's chaos, not him.", st:"“It should settle” marks the cause as temporary.", gs:"He says it has spilled into sleep, family time, “everything.”" },
+    note:"Global effects can still come from a temporary, external cause." },
+  { who:"Imani, 33, a pharmacist", event:"bad", situation:"She lost a recreational tennis match.",
+    say:"“My backhand is weak and has been for years. That's just tennis for me, though. It doesn't touch anything else.”",
+    ie:"internal", st:"stable", gs:"specific",
+    why:{ ie:"Her own backhand is the cause.", st:"“Has been for years” makes it lasting.", gs:"“It doesn't touch anything else” keeps it to tennis." },
+    note:"A stable internal cause confined to one area rarely spreads into hopelessness." },
+  { who:"Owen, 27, a recent graduate", event:"bad", situation:"He did not get a callback after a job interview.",
+    say:"“I hadn't prepared for that one question this time, so I botched it. And it's thrown off my whole week. I've been snapping at everyone.”",
+    ie:"internal", st:"unstable", gs:"global",
+    why:{ ie:"He names his own lack of preparation.", st:"“This time” marks preparation as something that can change.", gs:"He describes it spilling into his whole week and how he treats everyone." },
+    note:"An unstable internal cause points toward something he can do differently next time." },
+  { who:"Farah, 38, a single parent", event:"bad", situation:"Her landlord raised the rent sharply.",
+    say:"“My landlord is greedy and he's never going to change. Now the money worry is leaking into my job, my kids, my sleep.”",
+    ie:"external", st:"stable", gs:"global",
+    why:{ ie:"She places the cause in the landlord.", st:"“Never going to change” makes it lasting.", gs:"The worry reaches her job, her children, and her sleep." },
+    note:"Her explanation may be partly accurate. The interview question is what she can still influence." },
+  { who:"Grace, 70, a grandmother", event:"good", situation:"Her granddaughter visited and they spent a lovely afternoon together.",
+    say:"“That was just luck. She happened to be in town this week, and it won't happen again. It was one nice afternoon.”",
+    ie:"external", st:"unstable", gs:"specific",
+    why:{ ie:"“Just luck” and “happened to be in town” put the cause outside her.", st:"“It won't happen again” makes it temporary.", gs:"“One nice afternoon” confines it." },
+    note:"For a good event, external, unstable, and specific is the pessimistic pattern. She gives herself no share in the good thing." },
+  { who:"Mateo, 20, a sophomore", event:"good", situation:"He earned an A on a history paper.",
+    say:"“I got lucky with an easy topic. It doesn't say anything about my other classes.”",
+    ie:"external", st:"unstable", gs:"specific",
+    why:{ ie:"Luck and an easy topic are outside him.", st:"Luck with a topic is a one-time circumstance.", gs:"“Doesn't say anything about my other classes” limits it." },
+    note:"Discounting success this way is the good-event side of a pessimistic style." },
+  { who:"Nadia, 47, an operations director", event:"good", situation:"She was promoted.",
+    say:"“I earned this. I've worked hard for years and I'm good at what I do, at work and at home.”",
+    ie:"internal", st:"stable", gs:"global",
+    why:{ ie:"She credits her own work and skill.", st:"“For years” and “I'm good at what I do” describe a lasting cause.", gs:"“At work and at home” extends it across areas." },
+    note:"For a good event, internal, stable, and global is the optimistic pattern." }
+];
+var DRAW = 8;
+var drawn=[], idx=0, picks=[], checked=[];
+var session = { items:0, itemsRight:0, dims:0, dimsRight:0 };
+
+function shuffle(a){ for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+function el(t,c,h){var e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e;}
+function esc(s){return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+var CHECK='<svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8.2" stroke="#3c6b3e" stroke-width="1.4"/><path d="M6.4 10.2l2.3 2.3 4.7-4.9" stroke="#3c6b3e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+var CROSS='<svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8.2" stroke="#a23b34" stroke-width="1.4"/><path d="M7.2 7.2l5.6 5.6M12.8 7.2l-5.6 5.6" stroke="#a23b34" stroke-width="1.6" stroke-linecap="round"/></svg>';
+
+function init(){
+  drawn = shuffle(BANK.slice()).slice(0, DRAW);
+  idx=0; picks=drawn.map(function(){return {};}); checked=drawn.map(function(){return false;});
+  render();
+}
+
+function renderAcc(){
+  var a=document.getElementById("acc");
+  a.textContent = session.dims ? ("First-try accuracy this session: "+session.dimsRight+" of "+session.dims+" ratings ("+Math.round(100*session.dimsRight/session.dims)+"%)") : "First-try accuracy this session: none yet";
+}
+
+function renderProgress(){
+  document.getElementById("pbarfill").style.width=(idx/drawn.length*100)+"%";
+  document.getElementById("pcount").textContent="Statement "+Math.min(idx+1,drawn.length)+" of "+drawn.length;
+  renderAcc();
+}
+
+function render(){
+  renderProgress();
+  var it=drawn[idx], p=picks[idx], done=checked[idx];
+  var panel=document.getElementById("cardPanel"); panel.innerHTML="";
+  panel.appendChild(el("div","qtop","Statement "+(idx+1)+" of "+drawn.length+" · "+(it.event==="good"?"a good event":"a bad event")));
+  panel.appendChild(el("p","scenario","<b>"+esc(it.who)+".</b> "+esc(it.situation)));
+  panel.appendChild(el("div","thought", esc(it.say)));
+  panel.appendChild(el("div","do","Rate the client's explanation on each dimension, then check your ratings."));
+
+  DIMS.forEach(function(d){
+    var fs=el("fieldset","dim"); fs.setAttribute("data-dim",d.id);
+    fs.appendChild(el("legend",null,esc(d.name)));
+    fs.appendChild(el("p","q",esc(d.q)));
+    var pair=el("div","pair");
+    [[d.a,d.A],[d.b,d.B]].forEach(function(o){
+      var b=el("button","opt",esc(o[1])); b.type="button";
+      b.setAttribute("data-val",o[0]);
+      b.setAttribute("aria-pressed", p[d.id]===o[0] ? "true":"false");
+      if(done){
+        b.disabled=true;
+        if(o[0]===it[d.id]) b.className+=" correct";
+        else if(o[0]===p[d.id]) b.className+=" wrong";
+        else b.className+=" dimmed";
+      } else {
+        b.addEventListener("click",function(){ pick(d.id,o[0]); });
+      }
+      pair.appendChild(b);
+    });
+    fs.appendChild(pair);
+    if(done){
+      var right = p[d.id]===it[d.id];
+      fs.appendChild(el("p","fb",'<b class="'+(right?"ok":"no")+'">'+(right?"Correct, ":"Incorrect. It reads as ")+esc(it[d.id])+".</b> "+esc(it.why[d.id])));
+    }
+    panel.appendChild(fs);
+  });
+
+  var foot=el("div","foot");
+  if(!done){
+    var n=DIMS.filter(function(d){return p[d.id];}).length;
+    foot.appendChild(el("span","need", n<3 ? ("Rate all three dimensions ("+n+" of 3 rated).") : "Ready to check."));
+    var cb=el("button","btn","Check my ratings"); cb.type="button"; cb.id="checkBtn";
+    if(n<3) cb.disabled=true;
+    cb.addEventListener("click",check);
+    foot.appendChild(cb);
+  } else {
+    var nRight=DIMS.filter(function(d){return p[d.id]===it[d.id];}).length;
+    var v=el("p","verdict "+(nRight===3?"ok":"no"), nRight===3 ? "All three correct." : (nRight+" of 3 correct."));
+    panel.appendChild(v);
+    var ex=el("p","explain", "<b>"+cap(it.ie)+", "+it.st+", "+it.gs+".</b> "+esc(it.note));
+    ex.innerHTML+='<div class="src">Reading: Foundations 2, Cognitive Models of Specific Problems (explanatory style)</div>';
+    panel.appendChild(ex);
+    foot.appendChild(el("span","",""));
+    var last=idx===drawn.length-1;
+    var nb=el("button","btn", last ? "See your results" : "Next statement"); nb.type="button"; nb.id="nextBtn";
+    nb.addEventListener("click",function(){ if(last){finish();} else {idx++; render(); nb.blur(); window.scrollTo({top:0,behavior:"smooth"});} });
+    foot.appendChild(nb);
+  }
+  panel.appendChild(foot);
+}
+
+function pick(dim,val){
+  if(checked[idx]) return;
+  picks[idx][dim]=val; render();
+  var btn=document.querySelector('fieldset[data-dim="'+dim+'"] button[data-val="'+val+'"]');
+  if(btn) btn.focus();
+}
+
+function check(){
+  if(checked[idx]) return;
+  var it=drawn[idx], p=picks[idx];
+  if(DIMS.some(function(d){return !p[d.id];})) return;
+  checked[idx]=true;
+  var nRight=DIMS.filter(function(d){return p[d.id]===it[d.id];}).length;
+  session.items++; session.dims+=3; session.dimsRight+=nRight; if(nRight===3) session.itemsRight++;
+  render();
+  var nb=document.getElementById("nextBtn"); if(nb) nb.focus();
+}
+
+function finish(){
+  document.getElementById("pbarfill").style.width="100%";
+  document.getElementById("pcount").textContent="Complete";
+  document.getElementById("cardPanel").classList.add("hidden");
+  var rp=document.getElementById("resultsPanel"); rp.classList.remove("hidden"); rp.innerHTML="";
+  var dimRight=0, allRight=0;
+  drawn.forEach(function(it,i){ var n=DIMS.filter(function(d){return picks[i][d.id]===it[d.id];}).length; dimRight+=n; if(n===3) allRight++; });
+  rp.appendChild(el("h2",null,"Your results"));
+  rp.appendChild(el("p","score","This round you rated <b>"+dimRight+" of "+(drawn.length*3)+"</b> dimensions correctly, with all three right on <b>"+allRight+" of "+drawn.length+"</b> statements."));
+  var per={}; DIMS.forEach(function(d){per[d.id]=0;});
+  drawn.forEach(function(it,i){ DIMS.forEach(function(d){ if(picks[i][d.id]===it[d.id]) per[d.id]++; }); });
+  rp.appendChild(el("p","explain", DIMS.map(function(d){return esc(d.name)+": "+per[d.id]+" of "+drawn.length;}).join(" · ")));
+  var list=el("div","list");
+  drawn.forEach(function(it,i){
+    var n=DIMS.filter(function(d){return picks[i][d.id]===it[d.id];}).length;
+    var r=el("div","r");
+    r.innerHTML='<span class="ri">'+(n===3?CHECK:CROSS)+'</span><span>'+esc(it.who.split(",")[0])+': '+esc(it.ie+", "+it.st+", "+it.gs)+(n===3?'':' ('+n+' of 3 on first try)')+'</span>';
+    list.appendChild(r);
+  });
+  rp.appendChild(list);
+  var act=el("div","actions");
+  var again=el("button","btn secondary","Try again with 8 new statements"); again.type="button"; again.id="againBtn";
+  again.addEventListener("click",function(){ document.getElementById("cardPanel").classList.remove("hidden"); rp.classList.add("hidden"); init(); window.scrollTo({top:0,behavior:"smooth"}); });
+  act.appendChild(again); rp.appendChild(act);
+  rp.appendChild(el("p","selfnote","Each round draws eight statements at random from a bank of sixteen. The session accuracy at the top counts every first-try rating since you opened the page. Rate the explanation the client offers, which is what you will be listening for in an interview."));
+  renderAcc();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+window.__tool = {
+  bank: BANK, dims: DIMS,
+  state: function(){ return { idx:idx, drawn:drawn, picks:picks, checked:checked, session:session }; },
+  current: function(){ return drawn[idx]; },
+  pick: pick, check: check, finish: finish, restart: init
+};
+
+init();
+</script>
+</body>
+</html>

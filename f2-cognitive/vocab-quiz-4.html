@@ -95,7 +95,7 @@
 
 <p style="margin:0 0 8px 0;">About 12 minutes</p>
 
-<p style="margin:0 0 8px 0;">This module carries an unusually precise vocabulary, and the terms are easy to recognize on the page but hard to produce from memory when you need them. This self-test targets that gap. You'll answer eleven questions covering the module's core terms, from information processing and the three layers of thought (automatic, intermediate, core) through the biased processes (attentional and interpretation bias) and the four tools (cognitive restructuring, behavioral experiments, behavioral activation, exposure). Several wrong answers are the popular misreadings the reading warns against, so pick the option that matches the clinical model rather than the self-help slogan.</p>
+<p style="margin:0 0 8px 0;">This module carries an unusually precise vocabulary, and the terms are easy to recognize on the page but hard to produce from memory when you need them. This self-test targets that gap. You'll answer fifteen questions covering the module's core terms, from information processing and the three layers of thought (automatic, intermediate, core) through the biased processes (attentional and interpretation bias) and the four tools (cognitive restructuring, behavioral experiments, behavioral activation, exposure), plus four terms from the depression models (learned helplessness, explanatory style, hopelessness theory, and the self-control model). Several wrong answers are the popular misreadings the reading warns against, so pick the option that matches the clinical model rather than the self-help slogan.</p>
 
 <p style="margin:0 0 8px 0;">Best done <strong>after</strong> the reading and before the worked example, since it checks whether the terms are solid enough to use in a real case. Each answer comes with an explanation and a pointer back to the relevant part of the reading. You can reveal a hint before answering, and you'll get a score at the end.</p>
 
@@ -108,7 +108,7 @@
 <div class="wrap">
   <div class="masthead">
     <h1>Cognitive Vocabulary Builder</h1>
-    <p class="sub">Eleven items on the core Foundations 2 terms, built to move each one from recognition to fluency. Cognitive terms are easy to recognize but hard to produce from memory, which is the gap this builder closes. Pick an answer to see whether it's right and why.</p>
+    <p class="sub">Fifteen items on the core Foundations 2 terms, built to move each one from recognition to fluency. Cognitive terms are easy to recognize but hard to produce from memory, which is the gap this builder closes. Pick an answer to see whether it's right and why.</p>
   </div>
 
   <div class="progress" aria-hidden="true">
@@ -289,6 +289,63 @@ var QUIZ = [
     explain:"Exposure is deliberately, gradually facing what is feared and staying long enough to learn something new. Current thinking emphasizes new learning that competes with the old fear rather than erasing it, so the most durable exposure maximizes surprise, drops safety crutches, and varies situations so the new learning generalizes.",
     hint:"New competing learning, not erasure or 'burning off.'",
     src:"Foundations 2, Exposure"
+  }
+  ,
+  {
+    term: "Learned helplessness",
+    prompt: "In the original learned helplessness experiments, dogs first exposed to inescapable shock later:",
+    options: [
+      { id:"a", text:"Learned to escape faster than dogs with no prior shock" },
+      { id:"b", text:"Failed to learn to escape shock in a new setting where escape was possible" },
+      { id:"c", text:"Escaped normally but showed no fear" },
+      { id:"d", text:"Refused to enter the new setting at all" }
+    ],
+    correct:"b",
+    explain:"Seligman and Maier (1967) found that prior uncontrollable shock led to later failure to escape when escape was possible. The original explanation was that the animals learned outcomes did not depend on their behavior. Later neuroscience from the same group reversed the mechanism. Passivity is the default response to prolonged uncontrollable stress, and experiences of control are what protect.",
+    hint:"Think about what happened once escape became possible.",
+    src:"Foundations 2, Cognitive Models of Specific Problems (depression)"
+  },
+  {
+    term: "Explanatory style",
+    prompt: "A client says of a failed exam, 'I'm stupid, I'll always be stupid, and it ruins everything I try.' Her explanation is:",
+    options: [
+      { id:"a", text:"External, unstable, and specific" },
+      { id:"b", text:"Internal, unstable, and global" },
+      { id:"c", text:"Internal, stable, and global" },
+      { id:"d", text:"External, stable, and specific" }
+    ],
+    correct:"c",
+    explain:"Explanatory style is the habitual way a person explains the causes of bad and good events. 'I'm stupid' is internal, 'always' is stable, and 'everything I try' is global. Abramson, Seligman, and Teasdale (1978) proposed that this combination makes expected helplessness chronic, broad, and damaging to self-esteem.",
+    hint:"Rate each phrase on its own dimension: who, how long, how far.",
+    src:"Foundations 2, Explanatory style"
+  },
+  {
+    term: "Hopelessness theory",
+    prompt: "According to the hopelessness theory (Abramson, Metalsky, & Alloy, 1989), which combination is proposed to produce hopelessness?",
+    options: [
+      { id:"a", text:"Negative inferential styles interacting with negative life events" },
+      { id:"b", text:"Negative life events alone, regardless of how they are interpreted" },
+      { id:"c", text:"Internal attributions for good events" },
+      { id:"d", text:"Low motivation that comes before any negative event" }
+    ],
+    correct:"a",
+    explain:"The theory is a diathesis-stress model. Stable and global explanations of negative events, along with negative inferences about consequences and about the self, are proposed to produce hopelessness when they meet negative life events. Hopelessness is then proposed to produce a subtype the authors called hopelessness depression.",
+    hint:"It takes both a style and an event.",
+    src:"Foundations 2, Cognitive Models of Specific Problems (depression)"
+  },
+  {
+    term: "Self-control model of depression",
+    prompt: "Rehm's (1977) self-control model describes depression as problems in which three linked processes?",
+    options: [
+      { id:"a", text:"Attention, interpretation, and memory" },
+      { id:"b", text:"Self-monitoring, self-evaluation, and self-reinforcement" },
+      { id:"c", text:"Automatic thoughts, intermediate beliefs, and core beliefs" },
+      { id:"d", text:"Remoralization, remediation, and rehabilitation" }
+    ],
+    correct:"b",
+    explain:"In Rehm's model, the depressed person attends selectively to negative events and immediate consequences (monitoring), sets stringent standards (evaluation), makes negative and inaccurate attributions of responsibility, and rewards themselves too little while punishing themselves too much (reinforcement). Each step points to a matching tool.",
+    hint:"Watch, judge, and reward or punish.",
+    src:"Foundations 2, Cognitive Models of Specific Problems (depression)"
   }
 ];
 
