@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Place the Parent</title>
+<style>
+  :root{
+    --bg:#faf9f7; --ink:#1f1e1c; --muted:#6b6862; --line:#e7e4de;
+    --panel:#ffffff; --panel-shadow:0 1px 2px rgba(28,27,25,.04),0 6px 20px rgba(28,27,25,.05);
+    --accent:#8a5a25; --accent-ink:#6f4a20;
+    --correct-bg:#eef5ee; --correct-line:#bcd6bd; --correct-ink:#3c6b3e;
+    --wrong-bg:#fbecec; --wrong-line:#e3b9b9; --wrong-ink:#a23b34;
+    --amber-bg:#fffbef; --amber-line:#e7c98a; --amber-ink:#8a6d2f;
+    --focus:#2f6f4f; --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);
+    font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.55;}
+  .wrap{max-width:820px;margin:0 auto;padding:24px 20px 60px;}
+
+  .masthead{padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--line);}
+  .masthead h1{margin:0;font-size:23px;font-weight:700;letter-spacing:-.01em;}
+  .masthead .sub{margin:6px 0 0;color:var(--ink);font-size:14.5px;max-width:74ch;}
+
+  .legend{background:var(--amber-bg);border:1px solid var(--amber-line);color:var(--amber-ink);
+    border-radius:12px;padding:12px 15px;margin:14px 0 8px;font-size:13px;line-height:1.55;}
+  .legend b{font-weight:700;}
+  .legend .row{margin-top:6px;}
+
+  .progress{display:flex;align-items:center;gap:10px;margin:14px 0 18px;}
+  .pbar{flex:1 1 auto;height:6px;border-radius:3px;background:var(--line);overflow:hidden;}
+  .pbar span{display:block;height:100%;background:var(--accent);width:0;transition:width .25s;}
+  .pcount{font-size:12.5px;color:var(--muted);flex:0 0 auto;}
+  .acc{font-size:12.5px;color:var(--muted);margin:-8px 0 14px;}
+  .acc b{color:var(--accent-ink);}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--panel-shadow);padding:22px 24px;}
+  @media(max-width:560px){ .wrap{padding:18px 12px 48px;} .card{padding:18px 14px;} }
+  .qtop{font-size:13px;color:var(--muted);margin-bottom:10px;}
+  .who{font-size:13.5px;color:var(--ink);margin:0 0 6px;font-weight:600;}
+  .thought{font-size:15.5px;font-weight:500;line-height:1.55;margin:0 0 4px;padding:14px 16px;
+    background:#f5f3ef;border-radius:12px;border-left:3px solid var(--accent);}
+  .do{font-size:13px;color:var(--muted);margin:12px 0 10px;}
+
+  .plane{display:grid;grid-template-columns:22px 1fr;grid-template-rows:auto auto;gap:6px;}
+  .yaxis{grid-row:1;grid-column:1;writing-mode:vertical-rl;transform:rotate(180deg);text-align:center;
+    font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+  .xaxis{grid-row:2;grid-column:2;text-align:center;font-size:11.5px;font-weight:700;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--muted);}
+  .grid{grid-row:1;grid-column:2;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+  .opt{display:flex;flex-direction:column;gap:3px;text-align:left;background:#fff;border:1px solid var(--line);
+    border-radius:12px;padding:12px 12px;font:inherit;cursor:pointer;color:var(--ink);min-height:92px;
+    transition:border-color .12s,background .12s;}
+  .opt:hover:not(:disabled){border-color:#cfc9bf;}
+  .opt:focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+  .opt .nm{font-size:13.5px;font-weight:600;line-height:1.35;}
+  .opt .gl{font-size:12px;color:var(--muted);line-height:1.4;}
+  .opt .st{font-size:13px;font-weight:700;color:var(--accent-ink);margin-top:4px;}
+  .opt:disabled{cursor:default;}
+  .opt.correct{background:var(--correct-bg);border-color:var(--correct-line);}
+  .opt.correct .st{color:var(--correct-ink);}
+  .opt.wrong{background:var(--wrong-bg);border-color:var(--wrong-line);}
+  .opt.wrong .st{color:var(--wrong-ink);}
+  .opt.dim{opacity:.55;}
+
+  .verdict{margin:16px 0 0;font-size:14.5px;font-weight:600;}
+  .verdict.ok{color:var(--correct-ink);}
+  .verdict.no{color:var(--wrong-ink);}
+  .dims{margin:6px 0 0;font-size:13.5px;color:#413d36;}
+  .dims span{display:inline-block;margin-right:12px;}
+  .explain{margin:8px 0 0;font-size:14px;color:#413d36;line-height:1.6;}
+  .explain .src{color:var(--muted);font-size:12.5px;margin-top:6px;}
+  .caution{margin-top:12px;background:var(--amber-bg);border:1px solid var(--amber-line);color:var(--amber-ink);border-radius:10px;padding:10px 13px;font-size:13.5px;}
+
+  .foot{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:12px;flex-wrap:wrap;}
+  .hintbtn{background:none;border:none;color:var(--accent-ink);font:inherit;font-size:13.5px;cursor:pointer;text-decoration:underline;padding:0;}
+  .hintbtn:focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+  .hintbox{margin-top:12px;background:var(--amber-bg);border:1px solid var(--amber-line);color:var(--amber-ink);border-radius:10px;padding:10px 13px;font-size:13.5px;}
+  .btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border:none;border-radius:10px;
+    padding:11px 19px;font-size:14.5px;font-weight:600;cursor:pointer;}
+  .btn:hover{filter:brightness(1.05);}
+  .btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+  .btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line);font-weight:500;}
+
+  .results h2{margin:0 0 4px;font-size:20px;}
+  .results .score{font-size:16px;margin:0;}
+  .results .score b{color:var(--accent-ink);}
+  .results .list{margin:16px 0 0;border-top:1px solid var(--line);padding-top:12px;}
+  .results .r{display:flex;gap:10px;align-items:flex-start;font-size:14px;padding:8px 0;border-bottom:1px solid #f0eee9;}
+  .results .r:last-child{border-bottom:none;}
+  .results .r .ri{flex:0 0 auto;margin-top:1px;}
+  .actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+  .selfnote{font-size:12.5px;color:var(--muted);margin-top:14px;line-height:1.55;}
+  .hidden{display:none !important;}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+  @media (prefers-reduced-motion:reduce){ *{transition:none !important;} }
+</style>
+</head>
+<body>
+<!-- COMETS instructions panel -->
+<div style="max-width:900px; margin:16px auto 12px auto; padding:0 12px; box-sizing:border-box;"><details open style="background:#eef4f1; border:1px solid #cfe0d7; border-left:5px solid #b35900; border-radius:8px; padding:12px 16px; font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:15px; line-height:1.55; color:#17251d; text-align:left;"><summary style="cursor:pointer; font-weight:700; color:#1e4d3a; font-size:15px;">Instructions for this activity</summary><div style="margin-top:10px;"><p style="margin:0 0 8px 0; font-size:18px; font-weight:700; color:#1e4d3a; font-family:Georgia,serif;">Place the Parent</p>
+
+<p style="margin:0 0 8px 0;">About 10 minutes</p>
+
+<p style="margin:0 0 8px 0;">Each round draws eight short portraits of invented parents from a larger bank. For each one, place the parent on the two dimensions from the reading. Responsiveness is the warmth side, how attuned and supportive the parent is to the child's needs and feelings. Demandingness is the structure side, the expectations, supervision, and follow-through on discipline. Pick the square of the grid that fits the pattern you see. The feedback then names the parenting style and explains which details in the portrait point to it.</p>
+
+<p style="margin:0 0 8px 0;">Best done <strong>after</strong> the reading section on parenting styles. Read for the pattern across many days, not the single most vivid moment. A few portraits include one bad evening or a strict rule on purpose, to test that habit. You'll get a score at the end, and a &ldquo;Try again&rdquo; button draws a fresh set. Your first-try accuracy for the session stays on screen until you close the page.</p>
+
+<p style="margin:0 0 8px 0;">This activity scores only the squares you pick, and nothing is saved or sent. There's nothing to write and nothing to submit.</p>
+
+<p style="margin:8px 0 0 0; padding-top:8px; border-top:1px solid #cfe0d7;"><strong>What it adds to your clinical thinking.</strong> Hearing warmth and structure as two separate questions when a person describes how discipline and emotion were handled at home.</p></div></details></div>
+
+<div class="wrap">
+  <div class="masthead">
+    <h1>Place the Parent</h1>
+    <p class="sub">Two questions describe a home's everyday climate. How warm and attuned was the parent? How much did the parent expect, supervise, and follow through? Place each invented parent on both, then see which style the pattern matches and why.</p>
+  </div>
+
+  <div class="legend" id="legend"></div>
+
+  <div class="progress" aria-hidden="true">
+    <div class="pbar"><span id="pbarfill"></span></div>
+    <div class="pcount" id="pcount"></div>
+  </div>
+  <p class="acc" id="acc" aria-live="polite"></p>
+
+  <section class="card" id="cardPanel" aria-live="polite"></section>
+  <section class="card results hidden" id="resultsPanel" aria-live="polite"></section>
+</div>
+
+<script>
+// ===========================================================================
+// Place the Parent (Foundations 5). Two-dimension placement on a 2x2 grid.
+// Dimensions and styles follow the Foundations 5 reading section
+// "Warmth and Structure: How Discipline and Emotion Were Handled", which rests on
+// Baumrind (1966, 1991), Maccoby & Martin (1983), Lamborn et al. (1991), and
+// Darling (1999). All parents and children below are invented.
+// Each attempt draws DRAW items at random from BANK. Only the first pick on each
+// item is scored, and first-try accuracy accumulates across rounds in the session.
+// ===========================================================================
+
+var STYLES = {
+  authoritative: { name:"Authoritative", r:"high", d:"high",
+    gloss:"High responsiveness, high demandingness. Clear standards held with warmth and reasons." },
+  authoritarian: { name:"Authoritarian", r:"low", d:"high",
+    gloss:"Low responsiveness, high demandingness. Obedience expected without explanation." },
+  permissive:    { name:"Permissive (indulgent)", r:"high", d:"low",
+    gloss:"High responsiveness, low demandingness. Warm and lenient, few demands, avoids confrontation." },
+  uninvolved:    { name:"Uninvolved (neglectful)", r:"low", d:"low",
+    gloss:"Low responsiveness, low demandingness. Little warmth and little structure." }
+};
+
+// Grid cells, top row = high demandingness, left column = low responsiveness.
+var CELLS = [
+  { r:"low",  d:"high", label:"Responsiveness low", sub:"Demandingness high" },
+  { r:"high", d:"high", label:"Responsiveness high", sub:"Demandingness high" },
+  { r:"low",  d:"low",  label:"Responsiveness low", sub:"Demandingness low" },
+  { r:"high", d:"low",  label:"Responsiveness high", sub:"Demandingness low" }
+];
+
+var BANK = [
+  { who:"Rosa, 41, mother of Nico, 9",
+    text:"Homework comes before screens in Rosa's house, and Nico knows it. When he melts down over a hard worksheet, Rosa pulls up a chair beside him, says he sounds frustrated, and helps him break the page into small steps. The screen rule still holds that night, and when he protests she explains why it matters to her.",
+    style:"authoritative",
+    explain:"Rosa names Nico's feeling and helps him settle, which is responsiveness. She also keeps the rule and gives a reason for it, which is demandingness held in a supportive rather than punitive way. Warmth plus follow-through with explanation is the authoritative pattern.",
+    hint:"Two things happen in one evening. Notice both the comfort and whether the rule bends." },
+  { who:"Kwame, 47, father of Ama, 15",
+    text:"Kwame and Ama worked out a weekend curfew together. One Saturday she comes home an hour late without texting. Kwame tells her he was scared, listens to her account, and they agree she loses the car for a week. Later that night he knocks on her door to ask how the party went.",
+    style:"authoritative",
+    explain:"The curfew is real and the consequence follows, so demandingness is high. Kwame also listens, shares his own feeling, and reconnects afterward, so responsiveness is high. Standards that are explained, negotiated, and enforced with warmth mark the authoritative style.",
+    hint:"Was there a consequence? Was there also listening and reconnection?" },
+  { who:"Mei, 36, mother of Lily, 4",
+    text:"Lily cries most nights at bedtime. Mei holds her, sings the same two songs, and tells her she knows bedtime feels hard. Then she says goodnight and leaves at the time they agreed on, even when Lily asks for one more song. She checks on her once, ten minutes later.",
+    style:"authoritative",
+    explain:"Mei comforts the distress, which is the everyday co-regulation the reading describes, and she keeps the routine. High responsiveness and high demandingness together are authoritative. Holding a limit is not the same as being cold.",
+    hint:"Comfort and a firm routine can happen in the same five minutes." },
+  { who:"Daniel, 39, father of twins, 7",
+    text:"Most evenings Daniel plays with the twins, enforces their chores with clear reasons, and listens when they complain. Last Tuesday, after a terrible day at work, he yelled at both of them and sent them to their rooms without explanation. The next morning he apologized and talked with them about what happened.",
+    style:"authoritative",
+    explain:"One harsh evening does not define a style. Across most days Daniel is warm and holds clear, explained expectations, so the pattern is authoritative. His apology the next morning is itself responsive. Parenting style describes tendencies across many interactions, not the most vivid scene.",
+    hint:"Weigh 'most evenings' against 'last Tuesday.'" },
+  { who:"Hye-jin, 43, mother of Min-jun, 12",
+    text:"Hye-jin expects Min-jun to study two hours every school night and to attend family events without argument. She explains her reasons in terms of the family and his future. After exams she cooks his favorite meal, and when he seems quiet she notices and asks what is wrong.",
+    style:"authoritative",
+    explain:"Strict is not the same as authoritarian. The expectations are high, and they come with reasons, attention to Min-jun's mood, and visible affection. That is high responsiveness and high demandingness. The reading's culture note applies here, because the meaning of strict rules can differ across families and cultures.",
+    hint:"High expectations are only half the picture. What does she do when he seems quiet?" },
+  { who:"Gloria, 52, mother of Marco, 13",
+    text:"The house rules are posted on the refrigerator. When Marco asks why a rule exists, Gloria answers, “Because I said so.” When he cries after a bad grade, she tells him crying won't fix anything and doubles his study time. Feelings rarely come up at home.",
+    style:"authoritarian",
+    explain:"Rules are firm and enforced, so demandingness is high. Questions are shut down and distress is dismissed, so responsiveness is low. Obedience expected without explanation is the authoritarian pattern.",
+    hint:"Look at what happens to his question and to his tears." },
+  { who:"Frank, 58, father of Jess, 16",
+    text:"Frank checks Jess's phone every night and sets an early curfew. When she comes in twenty minutes late and starts to explain that her ride broke down, he cuts her off and grounds her for a month. He rarely asks about her friends or how she is doing.",
+    style:"authoritarian",
+    explain:"Supervision and punishment are heavy, which is high demandingness. He does not listen to her account or show interest in her inner life, which is low responsiveness. High control without warmth or explanation is authoritarian.",
+    hint:"There is plenty of control here. Is there any attunement?" },
+  { who:"Irina, 44, mother of Sasha, 8",
+    text:"Irina expects quiet at dinner, corrects Sasha's posture, and takes away privileges for small mistakes. When Sasha scrapes her knee and cries, Irina says, “You're fine, stop that,” and goes back to the dishes. Hugs are rare.",
+    style:"authoritarian",
+    explain:"Many rules, quick consequences, and close monitoring signal high demandingness. Comfort is brushed off and affection is scarce, so responsiveness is low. That combination is authoritarian.",
+    hint:"How is distress met in this house?" },
+  { who:"Ray, 35, father of Tyler, 6",
+    text:"Ray demands that Tyler obey the first time he is told. Talking back gets a swat. Ray rarely praises Tyler, saying kids should not be rewarded for doing what they are supposed to do.",
+    style:"authoritarian",
+    explain:"Immediate obedience and physical punishment reflect high demandingness. Little praise or warmth reflects low responsiveness. This is authoritarian. DSM-5 lists harsh discipline among family-level risk factors for conduct disorder, which the reading discusses in the Moffitt section.",
+    hint:"Is there any warmth to balance the control?" },
+  { who:"Dana, 33, mother of Ava, 10",
+    text:"Dana and Ava cuddle, talk about feelings, and laugh a lot. There is no set bedtime, and Ava decides when to do homework. When Ava hits her younger brother, Dana says she is just having big feelings and lets it go.",
+    style:"permissive",
+    explain:"Dana is attuned and affectionate, so responsiveness is high. She makes few demands and avoids confronting even aggression, so demandingness is low. Warm and lenient with few demands is the permissive, or indulgent, style.",
+    hint:"Plenty of warmth. What happens when a limit is needed?" },
+  { who:"Luis, 45, father of Mateo, 14",
+    text:"Luis calls himself Mateo's best friend. He comes to every game and buys most things Mateo asks for. When Mateo says he is too tired for school, Luis lets him stay home. Luis avoids arguments because he hates seeing Mateo upset.",
+    style:"permissive",
+    explain:"The relationship is warm and involved, which is high responsiveness. Rules bend whenever Mateo resists, and conflict is avoided, which is low demandingness. That is permissive.",
+    hint:"Does any expectation survive Mateo's resistance?" },
+  { who:"Hannah, 29, mother of Zoe, 3",
+    text:"Hannah plays with Zoe for hours and notices every shift in her mood. Zoe refuses to brush her teeth most nights, and Hannah lets it go to avoid a meltdown. Mealtimes happen whenever Zoe is hungry, wherever she wants to eat.",
+    style:"permissive",
+    explain:"Hannah is highly attuned, so responsiveness is high. She avoids setting or holding routines, so demandingness is low. High warmth with little structure is permissive.",
+    hint:"Attunement is high. Is there structure?" },
+  { who:"Greg, 50, father of Chloe, 17",
+    text:"Greg tells Chloe he trusts her, so she has no curfew and he does not ask where she goes. When she seeks him out after a breakup, he listens for an hour and hugs her. He has never set a rule about the car, school, or friends.",
+    style:"permissive",
+    explain:"Greg is warm and available when Chloe comes to him, which is responsiveness. Supervision and rules are absent, which is low demandingness. Permissive parents allow considerable self-regulation and make few maturity demands.",
+    hint:"Warmth when she reaches out. What about monitoring?" },
+  { who:"Tasha, 38, mother of Jordan, 11",
+    text:"Tasha works double shifts and, when home, stays in her room on her phone. Jordan makes his own dinner, and no one checks his homework. When he was suspended, Tasha signed the form without asking what happened.",
+    style:"uninvolved",
+    explain:"Little attention to Jordan's needs means low responsiveness. No supervision or follow-through means low demandingness. The pattern is uninvolved, also called neglectful. A style describes the pattern, not the parent's character. Exhaustion and economic strain can push any parent toward disengagement, and that context belongs in the formulation.",
+    hint:"Look for both warmth and supervision. Are either present?" },
+  { who:"Mark, 46, father of Ella, 13",
+    text:"Mark lives at home but rarely speaks with Ella. He does not know her friends' names, and the house has no rules about school or bedtime. When she cries at the table, he leaves the room.",
+    style:"uninvolved",
+    explain:"Distress is met with withdrawal, so responsiveness is low. There are no expectations or monitoring, so demandingness is low. Low on both dimensions is the uninvolved style that Maccoby and Martin (1983) added to complete the grid.",
+    hint:"Physically present is not the same as involved." },
+  { who:"Pam, 31, mother of Kai, 5",
+    text:"Kai spends most days in front of the television. Pam rarely answers when he tries to show her a drawing, and there is no bedtime or routine. Neighbors often see him playing outside alone in the evening.",
+    style:"uninvolved",
+    explain:"Bids for attention go unanswered, which is low responsiveness. No routine or supervision is low demandingness. This is uninvolved. At the extreme, insufficient care of this kind is the territory of the attachment disorders described in the reading, which require far more than one parent's distraction.",
+    hint:"What happens to his bids for attention?" }
+];
+var DRAW = 8;
+
+var idx=0, chosen=[], drawn=[], hintShown={};
+var session={ tried:0, correct:0, rounds:0 };
+
+function shuffle(a){ for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+function el(t,c,h){var e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e;}
+function esc(s){return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function styleFor(r,d){ for(var k in STYLES){ if(STYLES[k].r===r && STYLES[k].d===d) return k; } return null; }
+function isCorrect(it, pick){ return !!pick && styleFor(pick.r,pick.d)===it.style; }
+
+var CHECK='<svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8.2" stroke="#3c6b3e" stroke-width="1.4"/><path d="M6.4 10.2l2.3 2.3 4.7-4.9" stroke="#3c6b3e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+var CROSS='<svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8.2" stroke="#a23b34" stroke-width="1.4"/><path d="M7.2 7.2l5.6 5.6M12.8 7.2l-5.6 5.6" stroke="#a23b34" stroke-width="1.6" stroke-linecap="round"/></svg>';
+
+function renderLegend(){
+  var box=document.getElementById("legend");
+  box.innerHTML='<b>The two dimensions.</b> <div class="row"><b>Responsiveness</b> (warmth): how attuned and supportive the parent is to the child’s needs and feelings. &nbsp;&middot;&nbsp; <b>Demandingness</b> (structure): expectations for mature behavior, supervision, and follow-through on discipline.</div><div class="row">Read for the pattern across many days. A style is a tendency, not a verdict on one moment.</div>';
+}
+
+function renderAcc(){
+  var a=document.getElementById("acc");
+  if(session.tried===0){ a.textContent="First-try accuracy this session: no placements yet."; return; }
+  var pct=Math.round(session.correct/session.tried*100);
+  a.innerHTML="First-try accuracy this session: <b>"+session.correct+" of "+session.tried+"</b> ("+pct+"%)";
+}
+
+function drawItems(){
+  // Stratified draw: two from each style, then shuffled, so every round covers the grid.
+  var by={}; BANK.forEach(function(it){ (by[it.style]=by[it.style]||[]).push(it); });
+  var out=[]; Object.keys(by).forEach(function(k){ out=out.concat(shuffle(by[k].slice()).slice(0,DRAW/4)); });
+  return shuffle(out);
+}
+
+function init(){ drawn=drawItems(); chosen=drawn.map(function(){return null;}); idx=0; hintShown={}; session.rounds++; render(); renderAcc(); }
+
+function renderProgress(){
+  document.getElementById("pbarfill").style.width=(idx/drawn.length*100)+"%";
+  document.getElementById("pcount").textContent="Parent "+Math.min(idx+1,drawn.length)+" of "+drawn.length;
+}
+
+function render(){
+  renderProgress();
+  var it=drawn[idx];
+  var panel=document.getElementById("cardPanel"); panel.innerHTML="";
+  var pick=chosen[idx], answered=pick!==null;
+
+  panel.appendChild(el("div","qtop","Parent "+(idx+1)+" of "+drawn.length));
+  panel.appendChild(el("p","who", esc(it.who)));
+  panel.appendChild(el("div","thought", esc(it.text)));
+  panel.appendChild(el("div","do", answered ? "The grid now shows the style for each square." : "Where does this parent fall on both dimensions? Pick a square."));
+
+  var plane=el("div","plane");
+  plane.appendChild(el("div","yaxis","Demandingness ↑"));
+  var grid=el("div","grid"); grid.setAttribute("role","group"); grid.setAttribute("aria-label","Placement grid. Top row high demandingness, bottom row low. Left column low responsiveness, right column high.");
+  var ansStyle=STYLES[it.style];
+  CELLS.forEach(function(c){
+    var cls="opt", sk=styleFor(c.r,c.d);
+    if(answered){
+      if(c.r===ansStyle.r && c.d===ansStyle.d) cls+=" correct";
+      else if(c.r===pick.r && c.d===pick.d) cls+=" wrong";
+      else cls+=" dim";
+    }
+    var b=el("button",cls); b.type="button";
+    b.setAttribute("data-r",c.r); b.setAttribute("data-d",c.d);
+    if(answered) b.disabled=true;
+    var inner='<span class="nm">'+esc(c.label)+'</span><span class="gl">'+esc(c.sub)+'</span>';
+    if(answered) inner+='<span class="st">'+esc(STYLES[sk].name)+'</span>';
+    b.innerHTML=inner;
+    b.setAttribute("aria-label", c.label+", "+c.sub+(answered?", "+STYLES[sk].name:""));
+    if(!answered) b.addEventListener("click",function(){ choose(c.r,c.d); });
+    grid.appendChild(b);
+  });
+  plane.appendChild(grid);
+  plane.appendChild(el("div","xaxis","Responsiveness →"));
+  panel.appendChild(plane);
+
+  if(!answered){
+    var foot=el("div","foot");
+    var hb=el("button","hintbtn", hintShown[idx]?"Hide hint":"Show a hint"); hb.type="button";
+    hb.addEventListener("click",function(){ hintShown[idx]=!hintShown[idx]; render(); });
+    foot.appendChild(hb); panel.appendChild(foot);
+    if(hintShown[idx]) panel.appendChild(el("div","hintbox", esc(it.hint)));
+  } else {
+    var right=isCorrect(it,pick);
+    var v=el("p","verdict "+(right?"ok":"no"), right ? "Correct. "+esc(ansStyle.name)+"." : "Not this time. This parent is "+esc(ansStyle.name)+".");
+    v.id="verdict"; panel.appendChild(v);
+    var rOk=pick.r===ansStyle.r, dOk=pick.d===ansStyle.d;
+    var dims=el("p","dims",
+      '<span>'+(rOk?CHECK:CROSS)+' Responsiveness: you said '+pick.r+', the pattern is '+ansStyle.r+'</span>'+
+      '<span>'+(dOk?CHECK:CROSS)+' Demandingness: you said '+pick.d+', the pattern is '+ansStyle.d+'</span>');
+    panel.appendChild(dims);
+    var ex=el("p","explain", "<b>"+esc(ansStyle.name)+".</b> "+esc(it.explain));
+    ex.innerHTML+='<div class="src">Reading: Foundations 5, Warmth and Structure. Styles from Baumrind (1966, 1991) and Maccoby &amp; Martin (1983), as summarized by Darling (1999).</div>';
+    panel.appendChild(ex);
+    var foot2=el("div","foot"); foot2.appendChild(el("span","",""));
+    var last=idx===drawn.length-1;
+    var nb=el("button","btn"); nb.type="button"; nb.id="nextBtn";
+    nb.innerHTML=last?"See your results":'Next parent <svg width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    nb.addEventListener("click",next);
+    foot2.appendChild(nb); panel.appendChild(foot2);
+  }
+}
+
+function choose(r,d){
+  if(chosen[idx]!==null) return;
+  chosen[idx]={r:r,d:d};
+  session.tried++; if(isCorrect(drawn[idx],chosen[idx])) session.correct++;
+  render(); renderAcc();
+  var nb=document.getElementById("nextBtn"); if(nb) nb.focus();
+}
+
+function next(){
+  if(chosen[idx]===null) return;
+  if(idx===drawn.length-1){ finish(); return; }
+  idx++; render(); window.scrollTo({top:0,behavior:"smooth"});
+  var first=document.querySelector("#cardPanel .opt"); if(first) first.focus({preventScroll:true});
+}
+
+function finish(){
+  document.getElementById("pbarfill").style.width="100%";
+  document.getElementById("pcount").textContent="Complete";
+  document.getElementById("cardPanel").classList.add("hidden");
+  var correct=chosen.filter(function(c,i){return isCorrect(drawn[i],c);}).length;
+  var rp=document.getElementById("resultsPanel"); rp.classList.remove("hidden"); rp.innerHTML="";
+  rp.appendChild(el("h2",null,"Your results"));
+  rp.appendChild(el("p","score","You placed <b>"+correct+" of "+drawn.length+"</b> parents correctly on the first try."));
+  var list=el("div","list");
+  drawn.forEach(function(it,i){
+    var right=isCorrect(it,chosen[i]);
+    var r=el("div","r");
+    r.innerHTML='<span class="ri">'+(right?CHECK:CROSS)+'</span><span>'+esc(it.who)+': '+esc(STYLES[it.style].name)+(right?'':'. You placed this parent as '+esc(STYLES[styleFor(chosen[i].r,chosen[i].d)].name)+'.')+'</span>';
+    list.appendChild(r);
+  });
+  rp.appendChild(list);
+  rp.appendChild(el("div","caution","<b>Two cautions.</b> A parenting style is a tendency across many interactions, and the same parent can look different on a hard day, with a different child, or in a different year. The outcomes linked to each style also vary with context. In U.S. research, authoritative parenting predicted psychosocial outcomes across the ethnic groups studied, but its link to school performance held only for some groups, and the cultural meaning of strictness may differ across families (Darling, 1999)."));
+  var act=el("div","actions");
+  var again=el("button","btn secondary","Try again with a new set"); again.type="button"; again.id="againBtn";
+  again.addEventListener("click",function(){ document.getElementById("cardPanel").classList.remove("hidden"); rp.classList.add("hidden"); init(); window.scrollTo({top:0,behavior:"smooth"}); });
+  act.appendChild(again); rp.appendChild(act);
+  rp.appendChild(el("p","selfnote","Each round draws two parents for each style from a larger bank, in random order. Only your first pick on each parent is scored. Nothing is saved or sent. All parents and children here are invented."));
+  window.scrollTo({top:0,behavior:"smooth"});
+  again.focus({preventScroll:true});
+}
+
+window.__tool = {
+  bank: BANK, styles: STYLES,
+  get drawn(){ return drawn; }, get idx(){ return idx; }, get session(){ return session; },
+  answerFor: function(i){ var s=STYLES[drawn[i==null?idx:i].style]; return {r:s.r,d:s.d,style:drawn[i==null?idx:i].style}; },
+  choose: choose, next: next, restart: init
+};
+
+renderLegend();
+init();
+</script>
+</body>
+</html>
