@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spot the Interviewer's Bias</title>
+<style>
+  :root{
+    --bg:#faf9f7; --ink:#1f1e1c; --muted:#6b6862; --line:#e7e4de;
+    --panel:#ffffff; --panel-shadow:0 1px 2px rgba(28,27,25,.04),0 6px 20px rgba(28,27,25,.05);
+    --accent:#8a5a25; --accent-ink:#6f4a20;
+    --correct-bg:#eef5ee; --correct-line:#bcd6bd; --correct-ink:#3c6b3e;
+    --wrong-bg:#fbecec; --wrong-line:#e3b9b9; --wrong-ink:#a23b34;
+    --amber-bg:#fffbef; --amber-line:#e7c98a; --amber-ink:#8a6d2f;
+    --focus:#2f6f4f; --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);
+    font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.55;overflow-wrap:break-word;}
+  .wrap{max-width:820px;margin:0 auto;padding:24px 20px 60px;}
+
+  .masthead{padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--line);}
+  .masthead h1{margin:0;font-size:23px;font-weight:700;letter-spacing:-.01em;}
+  .masthead .sub{margin:6px 0 0;color:var(--ink);font-size:14.5px;max-width:74ch;}
+
+  .legend{background:var(--amber-bg);border:1px solid var(--amber-line);color:var(--amber-ink);
+    border-radius:12px;padding:12px 15px;margin:14px 0 8px;font-size:13px;line-height:1.55;}
+  .legend b{font-weight:700;}
+  .legend .row{margin-top:6px;}
+
+  .progress{display:flex;align-items:center;gap:10px;margin:14px 0 6px;}
+  .pbar{flex:1 1 auto;height:6px;border-radius:3px;background:var(--line);overflow:hidden;}
+  .pbar span{display:block;height:100%;background:var(--accent);width:0;transition:width .25s;}
+  .pcount{font-size:12.5px;color:var(--muted);flex:0 0 auto;}
+  .acc{font-size:12.5px;color:var(--muted);margin:0 0 16px;}
+  .acc b{color:var(--accent-ink);}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--panel-shadow);padding:22px 24px;}
+  @media(max-width:560px){ .card{padding:18px 16px;} .wrap{padding:18px 14px 48px;} }
+  .qtop{font-size:13px;color:var(--muted);margin-bottom:10px;}
+  .scenario{font-size:13.5px;color:var(--ink);margin:0 0 8px;}
+  .excerpt{margin:0 0 12px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;}
+  .excerpt p{margin:4px 0;font-size:14px;}
+  .excerpt .who{font-weight:600;color:var(--muted);}
+  .notelabel{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:4px 0 4px;}
+  .thought{font-size:17px;font-weight:600;line-height:1.45;margin:0 0 4px;padding:14px 16px;
+    background:#f5f3ef;border-radius:12px;border-left:3px solid var(--accent);}
+  .do{font-size:13px;color:var(--muted);margin:12px 0 14px;}
+
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+  @media(max-width:560px){ .grid{grid-template-columns:1fr;} }
+  .opt{display:flex;flex-direction:column;gap:3px;text-align:left;background:#fff;border:1px solid var(--line);
+    border-radius:12px;padding:12px 14px;font:inherit;cursor:pointer;color:var(--ink);transition:border-color .12s,background .12s;}
+  .opt:hover:not(:disabled){border-color:#cfc9bf;}
+  .opt:focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+  .opt .nm{font-size:14.5px;font-weight:600;}
+  .opt .gl{font-size:12px;color:var(--muted);line-height:1.4;}
+  .opt:disabled{cursor:default;}
+  .opt.correct{background:var(--correct-bg);border-color:var(--correct-line);}
+  .opt.correct .nm{color:var(--correct-ink);}
+  .opt.wrong{background:var(--wrong-bg);border-color:var(--wrong-line);}
+  .opt.wrong .nm{color:var(--wrong-ink);}
+  .opt.dim{opacity:.5;}
+
+  .verdict{margin:16px 0 0;font-size:14.5px;font-weight:600;}
+  .verdict.ok{color:var(--correct-ink);}
+  .verdict.no{color:var(--wrong-ink);}
+  .explain{margin:8px 0 0;font-size:14px;color:#413d36;line-height:1.6;}
+  .fix{margin:10px 0 0;padding:10px 13px;border-radius:10px;background:var(--correct-bg);border:1px solid var(--correct-line);font-size:14px;color:#2f4f31;}
+  .fix b{color:var(--correct-ink);}
+  .explain .src{color:var(--muted);font-size:12.5px;margin-top:6px;}
+
+  .foot{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:12px;flex-wrap:wrap;}
+  .hintbtn{background:none;border:none;color:var(--accent-ink);font:inherit;font-size:13.5px;cursor:pointer;text-decoration:underline;padding:0;}
+  .hintbtn:focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+  .hintbox{margin-top:12px;background:var(--amber-bg);border:1px solid var(--amber-line);color:var(--amber-ink);border-radius:10px;padding:10px 13px;font-size:13.5px;}
+  .btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border:none;border-radius:10px;
+    padding:11px 19px;font-size:14.5px;font-weight:600;cursor:pointer;}
+  .btn:hover{filter:brightness(1.05);}
+  .btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+  .btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line);font-weight:500;}
+
+  .results h2{margin:0 0 4px;font-size:20px;}
+  .results .score{font-size:16px;margin:0;}
+  .results .score b{color:var(--accent-ink);}
+  .results .list{margin:16px 0 0;border-top:1px solid var(--line);padding-top:12px;}
+  .results .r{display:flex;gap:10px;align-items:flex-start;font-size:14px;padding:8px 0;border-bottom:1px solid #f0eee9;}
+  .results .r:last-child{border-bottom:none;}
+  .results .r .ri{flex:0 0 auto;margin-top:1px;}
+  .actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+  .selfnote{font-size:12.5px;color:var(--muted);margin-top:14px;line-height:1.55;}
+  .hidden{display:none !important;}
+  @media (prefers-reduced-motion:reduce){ *{transition:none !important;} }
+</style>
+</head>
+<body>
+<!-- COMETS instructions panel -->
+<div style="max-width:900px; margin:16px auto 12px auto; padding:0 12px; box-sizing:border-box;"><details open style="background:#eef4f1; border:1px solid #cfe0d7; border-left:5px solid #b35900; border-radius:8px; padding:12px 16px; font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:15px; line-height:1.55; color:#17251d; text-align:left;"><summary style="cursor:pointer; font-weight:700; color:#1e4d3a; font-size:15px;">Instructions for this activity</summary><div style="margin-top:10px;"><p style="margin:0 0 8px 0; font-size:18px; font-weight:700; color:#1e4d3a; font-family:Georgia,serif;">Spot the Interviewer's Bias</p>
+
+<p style="margin:0 0 8px 0;">About 10 minutes</p>
+
+<p style="margin:0 0 8px 0;">The reading's section on the interviewer's mind names six ordinary biases that follow clinicians into the intake room: the fundamental attribution error, the actor-observer effect, the availability heuristic, the representativeness heuristic, just-world thinking, and the primacy effect. Each round shows you eight invented interview excerpts drawn at random from a larger bank. Each excerpt ends with a note or inference an interviewer wrote down. Your job is to name the bias the note shows. If your first pick is off, you'll see why and can try again. When you land on the right one, you'll see the reason and a corrective move the interviewer could have made.</p>
+
+<p style="margin:0 0 8px 0;">Best done <strong>after</strong> reading "The Interviewer's Mind: Biases in Clinical Judgment." The tracker counts only your first pick on each excerpt, so the number tells you what you recognize on sight. Every client and note here is invented.</p>
+
+<p style="margin:0 0 8px 0;">Nothing is saved or sent. There's nothing to write and nothing to submit.</p>
+
+<p style="margin:8px 0 0 0; padding-top:8px; border-top:1px solid #cfe0d7;"><strong>What it adds to your clinical thinking.</strong> Catching your own inferences before they harden into a formulation.</p></div></details></div>
+
+<div class="wrap">
+  <div class="masthead">
+    <h1>Spot the Interviewer's Bias</h1>
+    <p class="sub">Each excerpt ends with something an interviewer wrote or concluded. Name the bias in the note. A wrong pick tells you why it doesn't fit, and a right pick shows the corrective move.</p>
+  </div>
+
+  <div class="legend" id="legend"></div>
+
+  <div class="progress" aria-hidden="true">
+    <div class="pbar"><span id="pbarfill"></span></div>
+    <div class="pcount" id="pcount"></div>
+  </div>
+  <p class="acc" id="acc" aria-live="polite"></p>
+
+  <section class="card" id="cardPanel">
+    <div class="qtop" id="qtop"></div>
+    <p class="scenario" id="scenario"></p>
+    <div class="excerpt" id="excerpt"></div>
+    <div class="notelabel">Interviewer's note</div>
+    <div class="thought" id="note"></div>
+    <div class="do">Which bias does this note show?</div>
+    <div class="grid" id="grid" role="group" aria-label="Bias options"></div>
+    <div id="feedback" aria-live="polite"></div>
+    <div class="foot" id="foot">
+      <button type="button" class="hintbtn" id="hintbtn">Show a hint</button>
+      <button type="button" class="btn hidden" id="nextbtn">Next excerpt</button>
+    </div>
+    <div class="hintbox hidden" id="hintbox"></div>
+  </section>
+  <section class="card results hidden" id="resultsPanel" aria-live="polite"></section>
+</div>
+
+<script>
+// ===========================================================================
+// Spot the Interviewer's Bias (Foundations 3). Six clinician biases from the
+// reading's section "The Interviewer's Mind": fundamental attribution error
+// (Ross, 1977), actor-observer effect (Jones & Nisbett, 1971; Malle, 2006),
+// availability and representativeness (Tversky & Kahneman, 1974), just-world
+// thinking (Lerner & Simmons, 1966), primacy (Asch, 1946).
+// All clients and notes are invented. Retry is allowed, and only the first pick on
+// each excerpt counts toward session accuracy.
+// ===========================================================================
+
+var BIASES = [
+  { id:"fae",   name:"Fundamental attribution error", gloss:"Explaining behavior by character while underweighting the situation.",
+    tell:"The fundamental attribution error turns behavior into a trait while the situation that explains it goes unweighed." },
+  { id:"ao",    name:"Actor-observer effect", gloss:"Your own behavior gets a situational excuse, the client's gets a trait.",
+    tell:"The actor-observer effect needs a contrast, the interviewer explaining their own similar behavior by circumstances while explaining the client's by disposition." },
+  { id:"avail", name:"Availability heuristic", gloss:"Judging likelihood by how easily recent or vivid cases come to mind.",
+    tell:"Availability shows up when a recent, vivid, or memorable case makes one explanation feel more likely than it is." },
+  { id:"rep",   name:"Representativeness heuristic", gloss:"Judging by resemblance to a prototype, ignoring how common the category is.",
+    tell:"Representativeness shows up when a person resembles a textbook picture, and the resemblance alone carries the conclusion." },
+  { id:"jw",    name:"Just-world thinking", gloss:"Assuming people get what they deserve, so searching the victim for the cause.",
+    tell:"Just-world thinking shows up when something bad happened to the person and the note looks for what they did to bring it on." },
+  { id:"prim",  name:"Primacy effect", gloss:"Early information colors everything heard later.",
+    tell:"A primacy effect shows up when the first thing learned (a referral note, an opening line, the first minutes) outweighs what came later." }
+];
+
+var FIX = {
+  fae:"Ask for the sequence before settling on a trait. “Walk me through the last time, step by step.” Write down the situation you heard, not the label.",
+  ao:"Run a symmetry test. If you would explain your own version of the behavior by circumstances, ask what circumstances might explain the client's.",
+  avail:"Notice what made this explanation come to mind so easily. Name two other explanations and ask how common each is in the people you see.",
+  rep:"Ask how common the category is before trusting the resemblance. List what else would produce the same picture, and what you would need to see to tell them apart.",
+  jw:"Notice when a question starts searching the person for their share of the harm. Ask first about safety and coping, and reflect their experience before analyzing sequence.",
+  prim:"Write your first impression down on purpose, then return to it at the end and ask what you heard later that does not fit."
+};
+
+var BANK = [
+  // ---------------- fundamental attribution error
+  { answer:"fae", client:"Dana, 37", scenario:"Intake for low mood. Third session.",
+    lines:[["Dana","My manager moved the deadline up twice this month, and my mother has been in the hospital since the third. I missed the report. I just couldn't get to it."]],
+    note:"Disorganized, poor follow-through. Explore conscientiousness problems.",
+    why:"Dana named two heavy situational pressures, a moving deadline and a hospitalized parent. The note skips both and files the missed report under a trait.",
+    hint:"How much of what Dana said made it into the note?" },
+  { answer:"fae", client:"Luis, 52", scenario:"Couple intake. His wife speaks first.",
+    lines:[["Wife","He shouts at the kids every evening."],["Luis","I get home from a twelve-hour shift, nobody has eaten, the house is chaos, and I lose it."]],
+    note:"Father has an anger problem. Explosive temperament.",
+    why:"Luis described a specific evening sequence, a long shift, hungry kids, and a chaotic house. The note jumps past that loop to a fixed temperament.",
+    hint:"Is the shouting described as happening everywhere, or at one point in a sequence?" },
+  { answer:"fae", client:"Grace, 22", scenario:"Student counseling intake.",
+    lines:[["Grace","I stopped going to class after the thing with my roommate. I've been sleeping on a friend's couch across town since October. The bus takes an hour."]],
+    note:"Unmotivated student. Low drive.",
+    why:"Grace lost her housing and now faces an hour commute. The note treats the absences as a lack of drive rather than as a response to her situation.",
+    hint:"What changed in her circumstances when attendance dropped?" },
+  { answer:"fae", client:"Paula, 39", scenario:"Parent intake about her son Eli, 9.",
+    lines:[["Paula","By the third hour of screaming I give him the tablet, just so I can get dinner on the table."]],
+    note:"Permissive mother. Lacks backbone with her son.",
+    why:"Paula described a loop in which giving in ends hours of screaming. The relief trains her giving in. The note converts a reinforced move into a character flaw.",
+    hint:"What does giving him the tablet do for Paula, right then?" },
+  // ---------------- actor-observer
+  { answer:"ao", client:"Omar, 45", scenario:"Second session. Omar arrives fifteen minutes late.",
+    lines:[["Omar","Sorry, sorry. Rough morning."]],
+    note:"Late again, likely ambivalent about treatment. (I was late to supervision myself today, the shuttle broke down, nothing to read into.)",
+    why:"The interviewer explains their own lateness by the situation and Omar's by an inner disposition. That asymmetry between self and other is the actor-observer pattern.",
+    hint:"Look at the part in parentheses. How does the interviewer explain their own lateness?" },
+  { answer:"ao", client:"Mei, 30", scenario:"Mei cancels her second session by voicemail, citing a migraine.",
+    lines:[["Voicemail","Hi, it's Mei. I have a migraine and can't make it today. Can we reschedule?"]],
+    note:"Cancelled. Avoidant pattern starting. (Rescheduled my own dentist twice this month, busy season.)",
+    why:"The interviewer's own rescheduling is about a busy season, while Mei's single cancellation becomes an avoidant pattern. Same behavior, situational for self, dispositional for the client.",
+    hint:"Compare how the two cancellations are explained." },
+  { answer:"ao", client:"Victor, 58", scenario:"Victor did not complete the mood log assigned last week.",
+    lines:[["Victor","I meant to. It's been a lot this week with my brother's move."]],
+    note:"Noncompliant with homework, low commitment. (Note to self. Didn't finish my own session notes this week, caseload is too heavy.)",
+    why:"Unfinished work is a caseload problem when it is the interviewer's and a commitment problem when it is Victor's, even though Victor also named a situational reason.",
+    hint:"Two people didn't finish their paperwork. Are they explained the same way?" },
+  { answer:"ao", client:"Simone, 31", scenario:"Simone snapped at the front desk when her insurance card was declined.",
+    lines:[["Front desk","She raised her voice and said we were useless."],["Simone (in session)","I'd been on hold with the insurer all morning."]],
+    note:"Hostile with staff, consider personality pathology. (I was short with billing myself yesterday, the system had crashed all morning.)",
+    why:"The interviewer excuses their own sharpness by a crashed system and reads Simone's sharpness as pathology, despite her naming a frustrating morning of her own.",
+    hint:"The interviewer was short with someone too. What explanation did they give themselves?" },
+  // ---------------- availability
+  { answer:"avail", client:"Hana, 26", scenario:"Intake after a move across the country.",
+    lines:[["Hana","I'm not sleeping well since the move. A car backfired last week and I jumped out of my skin. I miss my family."]],
+    note:"Third PTSD case this week. Sleep problems and startle, so likely trauma. Lead with the trauma screen.",
+    why:"Three recent PTSD cases make trauma the first explanation to come to mind. Hana described a move, missing her family, and poor sleep, which have several common explanations.",
+    hint:"Why did trauma come to mind first for this interviewer?" },
+  { answer:"avail", client:"Frank, 71", scenario:"Frank's daughter reports he has been missing appointments.",
+    lines:[["Frank","Since Ruth died in August, I can't keep track of anything. The days run together."]],
+    note:"Saw an early Alzheimer's case last week that started exactly like this. Refer for dementia workup first.",
+    why:"A vivid recent case makes dementia feel likely. Frank tied the change to his wife's death two months ago, and grief, low mood, and poor sleep can all disrupt memory and routine.",
+    hint:"What recent experience is shaping the interviewer's first guess?" },
+  { answer:"avail", client:"Ravi, 33", scenario:"Intake for work stress.",
+    lines:[["Ravi","I have a couple of beers on the weekend, that's about it. Mostly I'm just wiped out from work."]],
+    note:"After what happened with my client last month, I can't miss this. Substance use disorder likely. Lead with it.",
+    why:"A painful, memorable outcome with another client makes substance problems loom large. Nothing Ravi said points there yet. Asking about use is fine, but leading with a diagnosis is the availability pull.",
+    hint:"Is the note driven by what Ravi said, or by something that happened to the interviewer?" },
+  { answer:"avail", client:"Celeste, 24", scenario:"Graduate student, intake during finals.",
+    lines:[["Celeste","I've been skipping lunch during exam week because I'm in the library all day."]],
+    note:"Read a long feature on eating disorders in grad students yesterday. Restriction means ED until proven otherwise.",
+    why:"A vivid article read yesterday makes an eating disorder the most available explanation. Celeste gave a situational reason, and one week of missed lunches is a thin basis for that conclusion.",
+    hint:"What did the interviewer read yesterday?" },
+  // ---------------- representativeness
+  { answer:"rep", client:"Ahmed, 23", scenario:"Intake for feeling stuck after graduation.",
+    lines:[["Ahmed","Parties aren't my thing. I'd prefer to see one or two friends."]],
+    note:"Classic social anxiety picture. Start the social anxiety protocol.",
+    why:"A quiet young man who skips parties resembles the textbook picture, and the resemblance carries the conclusion. Ahmed expressed a preference, not fear, and the note never asks how common each explanation is.",
+    hint:"Did Ahmed describe fear, or a preference? What made the conclusion feel certain?" },
+  { answer:"rep", client:"Pablo, 27", scenario:"Intake for panic attacks.",
+    lines:[["Pablo","I tend bar, nights mostly. The attacks hit when I'm driving home."]],
+    note:"Tattoos, motorcycle, bar job. Fits the typical substance user. Possibly drug-seeking.",
+    why:"Surface features match a stereotype of a substance user, and the match stands in for evidence. Nothing Pablo reported concerns substances, and the base rate of drug-seeking among people with panic is not considered.",
+    hint:"Which details in the note come from Pablo's report, and which from his appearance?" },
+  { answer:"rep", client:"June, 39", scenario:"Intake for burnout.",
+    lines:[["June","I color-code my files and I like my desk just so. Work has been nonstop."]],
+    note:"Textbook OCD. Classic perfectionist type.",
+    why:"Liking order resembles a familiar picture of OCD, but June described no obsessions, no compulsions, and no distress from them. Resemblance to a type is doing the diagnostic work.",
+    hint:"What would you need to hear to diagnose OCD, and did June say any of it?" },
+  { answer:"rep", client:"Ben, 34", scenario:"Intake for low mood. Ben works as a software engineer.",
+    lines:[["Ben","I don't have many friends here. I moved for the job and I haven't really tried."]],
+    note:"Engineer, flat affect, few friends, precise speech. Everything matches the autism profile.",
+    why:"Ben's job and manner resemble a stereotyped profile, and the note treats the match as proof. He described a recent move and low mood, which are common explanations for few friends and flat affect.",
+    hint:"How much of the note is about resemblance to a profile?" },
+  // ---------------- just world
+  { answer:"jw", client:"Rosa, 41", scenario:"First session. Rosa discloses violence at home.",
+    lines:[["Rosa","My husband has hit me twice this year."]],
+    note:"Ask first what she was doing right before he hit her. Need to understand her part.",
+    why:"The first move searches Rosa for the cause of the harm done to her. Lerner proposed that this protects the listener's belief that people get what they deserve.",
+    hint:"Whose behavior is the note trying to explain?" },
+  { answer:"jw", client:"Inez, 48", scenario:"Intake after a job loss.",
+    lines:[["Inez","The plant closed. Twenty years, and three hundred of us got the same letter."]],
+    note:"Probably wasn't pulling her weight. Strong performers usually get kept on.",
+    why:"Inez lost her job in a plant closure that hit everyone. The note still finds a way for her to have earned it.",
+    hint:"Did anything Inez said suggest her performance mattered here?" },
+  { answer:"jw", client:"Talia, 29", scenario:"Intake after a robbery.",
+    lines:[["Talia","Someone grabbed my bag walking home from the train. It was about eleven."]],
+    note:"Walking alone at 11 at night in that area. Explore poor judgment and risk-taking.",
+    why:"The note shifts attention from the person who robbed Talia to what she did that might have invited it.",
+    hint:"Who committed the robbery, and whose behavior does the note want to explore?" },
+  { answer:"jw", client:"Bea, 66", scenario:"Intake for distress after financial loss.",
+    lines:[["Bea","The caller said he was from my bank. He knew my account number. I lost most of my savings."]],
+    note:"People who get scammed usually ignored warning signs. Explore what she ignored.",
+    why:"A skilled fraud is reframed as something Bea brought on herself, which preserves the sense that bad outcomes are earned.",
+    hint:"Is the note curious about the scam, or about Bea's share in it?" },
+  // ---------------- primacy
+  { answer:"prim", client:"Kenji, 19", scenario:"Kenji opens with complaints. Later in the hour he talks thoughtfully about a roommate conflict and asks for help with it.",
+    lines:[["Kenji (first minute)","My last two therapists didn't get anything."],["Kenji (forty minutes in)","I think I want to figure out how to talk to my roommate without blowing up."]],
+    note:"Difficult, oppositional client. Expect resistance throughout.",
+    why:"The opening line set the impression, and the thoughtful, help-seeking material from later in the hour never made it into the note.",
+    hint:"Which part of the session does the note reflect?" },
+  { answer:"prim", client:"Glen, 67", scenario:"Glen jokes and laughs for the first ten minutes. Near the end he mentions something else.",
+    lines:[["Glen (early)","Ha, at my age you take the free coffee where you can get it."],["Glen (near the end)","I haven't left the apartment in three weeks. I gave my tools to my nephew."]],
+    note:"Upbeat, good humor. Mood appears fine. Low concern.",
+    why:"The cheerful opening shaped the impression, and later statements that call for a careful risk assessment were heard through it. Giving away possessions and withdrawing deserve direct follow-up.",
+    hint:"What did Glen say near the end, and is it in the note?" },
+  { answer:"prim", client:"Alma, 29", scenario:"The referral note reads “borderline traits, splitting staff.” In session Alma is calm and organized and describes specific panic attacks.",
+    lines:[["Alma","The attacks come out of nowhere, usually in meetings. My heart races and I think I'm dying."]],
+    note:"As the referral indicated, unstable presentation. Watch for splitting.",
+    why:"The referral note arrived first and set the frame. What Alma actually presented, calm and specific panic symptoms, was overridden by it.",
+    hint:"What did the interviewer learn before Alma said a word?" },
+  { answer:"prim", client:"Nora, 55", scenario:"Nora arrives early, well dressed and articulate. Later she mentions her drinking.",
+    lines:[["Nora (first five minutes)","I run the regional office, so scheduling is always a puzzle."],["Nora (later)","It's a bottle of wine most nights. I've fallen twice this month."]],
+    note:"High-functioning professional, put-together. Low clinical concern.",
+    why:"The polished first five minutes set the impression. Nightly drinking and two falls came later and did not change it.",
+    hint:"Which information came first, and which made it into the note?" }
+];
+var DRAW = 8;
+
+var drawn=[], idx=0, tries=[], firstPick=[], hintShown=false;
+var session = { answered:0, firstCorrect:0 };
+
+function shuffle(a){ for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+function $(id){ return document.getElementById(id); }
+function esc(s){return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function bById(id){ for(var i=0;i<BIASES.length;i++){ if(BIASES[i].id===id) return BIASES[i]; } return null; }
+
+var CHECK='<svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8.2" stroke="#3c6b3e" stroke-width="1.4"/><path d="M6.4 10.2l2.3 2.3 4.7-4.9" stroke="#3c6b3e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+var CROSS='<svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8.2" stroke="#a23b34" stroke-width="1.4"/><path d="M7.2 7.2l5.6 5.6M12.8 7.2l-5.6 5.6" stroke="#a23b34" stroke-width="1.6" stroke-linecap="round"/></svg>';
+
+function renderLegend(){
+  var rows = BIASES.map(function(d){ return '<b>'+esc(d.name)+':</b> '+esc(d.gloss); }).join(' &nbsp;&middot;&nbsp; ');
+  $("legend").innerHTML = '<b>The six biases.</b> <div class="row">'+rows+'</div>';
+}
+
+function renderAcc(){
+  var a=session.answered, c=session.firstCorrect;
+  $("acc").innerHTML = a ? 'First-try accuracy this session: <b>'+c+' of '+a+'</b> ('+Math.round(100*c/a)+'%)' : 'First-try accuracy this session: none answered yet';
+}
+
+function newRound(){
+  drawn = shuffle(BANK.slice()).slice(0, DRAW);
+  idx=0; tries=drawn.map(function(){return [];}); firstPick=drawn.map(function(){return null;});
+  $("cardPanel").classList.remove("hidden"); $("resultsPanel").classList.add("hidden");
+  renderItem();
+}
+
+function solved(i){ return tries[i].indexOf(drawn[i].answer)>=0; }
+
+function renderItem(){
+  var it=drawn[idx]; hintShown=false;
+  $("pbarfill").style.width=(idx/drawn.length*100)+"%";
+  $("pcount").textContent="Excerpt "+(idx+1)+" of "+drawn.length;
+  $("qtop").textContent="Excerpt "+(idx+1)+" of "+drawn.length+" · "+it.client;
+  $("scenario").textContent=it.scenario;
+  $("excerpt").innerHTML = it.lines.map(function(l){ return '<p><span class="who">'+esc(l[0])+':</span> “'+esc(l[1])+'”</p>'; }).join("");
+  $("note").textContent = it.note;
+  $("feedback").innerHTML=""; $("hintbox").classList.add("hidden"); $("hintbtn").textContent="Show a hint";
+  $("hintbtn").classList.remove("hidden"); $("nextbtn").classList.add("hidden");
+  var grid=$("grid"); grid.innerHTML="";
+  shuffle(BIASES.slice()).forEach(function(d){
+    var b=document.createElement("button"); b.type="button"; b.className="opt"; b.setAttribute("data-id", d.id);
+    b.innerHTML='<span class="nm">'+esc(d.name)+'</span><span class="gl">'+esc(d.gloss)+'</span>';
+    b.addEventListener("click", function(){ pick(d.id); });
+    grid.appendChild(b);
+  });
+  renderAcc();
+}
+
+function pick(id){
+  if(solved(idx) || tries[idx].indexOf(id)>=0) return;
+  var it=drawn[idx];
+  tries[idx].push(id);
+  var first = tries[idx].length===1;
+  if(first){ firstPick[idx]=id; session.answered++; if(id===it.answer) session.firstCorrect++; }
+  var btn=document.querySelector('#grid .opt[data-id="'+id+'"]');
+  var fb=$("feedback");
+  if(id===it.answer){
+    Array.prototype.forEach.call(document.querySelectorAll("#grid .opt"), function(b){
+      var bid=b.getAttribute("data-id");
+      b.disabled=true;
+      if(bid===it.answer) b.className="opt correct";
+      else if(tries[idx].indexOf(bid)>=0) b.className="opt wrong";
+      else b.className="opt dim";
+    });
+    var nm=bById(it.answer).name;
+    fb.innerHTML='<p class="verdict ok">'+(first?"Correct on the first try.":"Correct.")+'</p>'+
+      '<p class="explain"><b>'+esc(nm)+'.</b> '+esc(it.why)+'</p>'+
+      '<div class="fix"><b>Corrective move.</b> '+esc(FIX[it.answer])+'</div>';
+    $("hintbtn").classList.add("hidden"); $("hintbox").classList.add("hidden");
+    var nb=$("nextbtn"); nb.classList.remove("hidden");
+    nb.textContent = idx===drawn.length-1 ? "See your results" : "Next excerpt";
+    nb.focus();
+  } else {
+    btn.className="opt wrong"; btn.disabled=true;
+    fb.innerHTML='<p class="verdict no">Not '+esc(bById(id).name)+'.</p>'+
+      '<p class="explain">'+esc(bById(id).tell)+' '+esc(it.hint)+' Try another.</p>';
+    var next=document.querySelector("#grid .opt:not(:disabled)"); if(next) next.focus();
+  }
+  renderAcc();
+}
+
+function next(){
+  if(!solved(idx)) return;
+  if(idx===drawn.length-1){ finish(); return; }
+  idx++; renderItem();
+  var first=document.querySelector("#grid .opt"); if(first) first.focus();
+}
+
+function finish(){
+  $("pbarfill").style.width="100%"; $("pcount").textContent="Complete";
+  $("cardPanel").classList.add("hidden");
+  var rp=$("resultsPanel"); rp.classList.remove("hidden"); rp.innerHTML="";
+  var c=drawn.filter(function(it,i){ return firstPick[i]===it.answer; }).length;
+  rp.innerHTML='<h2>Your results</h2><p class="score">This round you named <b>'+c+' of '+drawn.length+'</b> on the first try.</p>';
+  var list=document.createElement("div"); list.className="list";
+  drawn.forEach(function(it,i){
+    var ok=firstPick[i]===it.answer;
+    var r=document.createElement("div"); r.className="r";
+    r.innerHTML='<span class="ri">'+(ok?CHECK:CROSS)+'</span><span><b>'+esc(it.client)+'</b>, '+esc(bById(it.answer).name)+(ok?'':' (first pick: '+esc(bById(firstPick[i]).name)+')')+'</span>';
+    list.appendChild(r);
+  });
+  rp.appendChild(list);
+  var act=document.createElement("div"); act.className="actions";
+  var again=document.createElement("button"); again.type="button"; again.className="btn secondary"; again.id="againbtn";
+  again.textContent="Try again with 8 new excerpts";
+  again.addEventListener("click", function(){ newRound(); var f=document.querySelector("#grid .opt"); if(f) f.focus(); });
+  act.appendChild(again); rp.appendChild(act);
+  var note=document.createElement("p"); note.className="selfnote";
+  note.textContent="Each round draws eight excerpts at random from a bank of twenty-four, so a retry gives you new ones. The session accuracy above keeps counting across rounds until you close the page. Nothing is saved or sent. These biases are features of ordinary judgment. Spotting one in a note is practice for catching it in your own.";
+  rp.appendChild(note);
+  again.focus();
+}
+
+$("hintbtn").addEventListener("click", function(){
+  hintShown=!hintShown;
+  $("hintbox").textContent=drawn[idx].hint;
+  $("hintbox").classList.toggle("hidden", !hintShown);
+  $("hintbtn").textContent= hintShown ? "Hide hint" : "Show a hint";
+});
+$("nextbtn").addEventListener("click", next);
+
+window.__tool = {
+  BIASES: BIASES, BANK: BANK, DRAW: DRAW,
+  current: function(){ return drawn[idx]; },
+  index: function(){ return idx; },
+  pick: pick, next: next, newRound: newRound,
+  stats: function(){ return { answered: session.answered, firstCorrect: session.firstCorrect }; }
+};
+
+renderLegend();
+newRound();
+</script>
+</body>
+</html>

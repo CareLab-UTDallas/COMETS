@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build the Chain</title>
+<style>
+  :root{
+    --bg:#faf9f7; --ink:#1f1e1c; --muted:#6b6862; --line:#e7e4de;
+    --panel:#ffffff; --panel-shadow:0 1px 2px rgba(28,27,25,.04),0 6px 20px rgba(28,27,25,.05);
+    --accent:#8a5a25; --accent-ink:#6f4a20;
+    --correct-bg:#eef5ee; --correct-line:#bcd6bd; --correct-ink:#3c6b3e;
+    --wrong-bg:#fbecec; --wrong-line:#e3b9b9; --wrong-ink:#a23b34;
+    --amber-bg:#fffbef; --amber-line:#e7c98a; --amber-ink:#8a6d2f;
+    --focus:#2f6f4f; --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);
+    font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.55;overflow-wrap:break-word;}
+  .wrap{max-width:820px;margin:0 auto;padding:24px 20px 60px;}
+  @media(max-width:560px){ .wrap{padding:18px 14px 48px;} }
+
+  .masthead{padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--line);}
+  .masthead h1{margin:0;font-size:23px;font-weight:700;letter-spacing:-.01em;}
+  .masthead .sub{margin:6px 0 0;color:var(--ink);font-size:14.5px;max-width:74ch;}
+
+  .legend{background:var(--amber-bg);border:1px solid var(--amber-line);color:var(--amber-ink);
+    border-radius:12px;padding:12px 15px;margin:14px 0 8px;font-size:13px;line-height:1.55;}
+  .legend b{font-weight:700;}
+  .legend .row{margin-top:6px;}
+
+  .progress{display:flex;align-items:center;gap:10px;margin:14px 0 6px;}
+  .pbar{flex:1 1 auto;height:6px;border-radius:3px;background:var(--line);overflow:hidden;}
+  .pbar span{display:block;height:100%;background:var(--accent);width:0;transition:width .25s;}
+  .pcount{font-size:12.5px;color:var(--muted);flex:0 0 auto;}
+  .acc{font-size:12.5px;color:var(--muted);margin:0 0 16px;}
+  .acc b{color:var(--accent-ink);}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--panel-shadow);padding:22px 24px;margin-bottom:14px;}
+  @media(max-width:560px){ .card{padding:18px 14px;} }
+  .qtop{font-size:13px;color:var(--muted);margin-bottom:8px;}
+  .steph{font-size:16px;font-weight:700;margin:0 0 6px;}
+  .vignette{font-size:14.5px;margin:0 0 4px;padding:14px 16px;background:#f5f3ef;border-radius:12px;border-left:3px solid var(--accent);}
+  .do{font-size:13px;color:var(--muted);margin:10px 0 14px;}
+
+  .el{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 10px;background:#fff;}
+  .el.ok{background:var(--correct-bg);border-color:var(--correct-line);}
+  .el.no{background:var(--wrong-bg);border-color:var(--wrong-line);}
+  .el .txt{font-size:14.5px;font-weight:600;margin:0 0 8px;}
+  .seg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+  @media(max-width:620px){ .seg{grid-template-columns:repeat(2,1fr);} }
+  .seg button{font:inherit;font-size:12.5px;line-height:1.3;padding:8px 6px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;min-width:0;}
+  .seg button:hover:not(:disabled){border-color:#cfc9bf;}
+  .seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;}
+  .seg button:focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+  .seg button:disabled{cursor:default;opacity:.75;}
+  .el .why{margin:8px 0 0;font-size:13.5px;line-height:1.5;}
+  .el.ok .why{color:#2f4f31;} .el.no .why{color:var(--wrong-ink);}
+
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+  @media(max-width:560px){ .grid{grid-template-columns:1fr;} }
+  .opt{display:flex;flex-direction:column;gap:3px;text-align:left;background:#fff;border:1px solid var(--line);
+    border-radius:12px;padding:12px 14px;font:inherit;cursor:pointer;color:var(--ink);transition:border-color .12s,background .12s;}
+  .opt:hover:not(:disabled){border-color:#cfc9bf;}
+  .opt:focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+  .opt .nm{font-size:14.5px;font-weight:600;}
+  .opt .gl{font-size:12px;color:var(--muted);line-height:1.4;}
+  .opt:disabled{cursor:default;}
+  .opt.correct{background:var(--correct-bg);border-color:var(--correct-line);}
+  .opt.correct .nm{color:var(--correct-ink);}
+  .opt.wrong{background:var(--wrong-bg);border-color:var(--wrong-line);}
+  .opt.wrong .nm{color:var(--wrong-ink);}
+  .opt.dim{opacity:.5;}
+
+  .verdict{margin:14px 0 0;font-size:14.5px;font-weight:600;}
+  .verdict.ok{color:var(--correct-ink);}
+  .verdict.no{color:var(--wrong-ink);}
+  .explain{margin:8px 0 0;font-size:14px;color:#413d36;line-height:1.6;}
+
+  .chain{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px;}
+  @media(max-width:620px){ .chain{grid-template-columns:1fr;} }
+  .link{border:1px solid var(--correct-line);background:var(--correct-bg);border-radius:10px;padding:10px 11px;font-size:13px;}
+  .link h4{margin:0 0 4px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--correct-ink);}
+  .link ul{margin:0;padding-left:16px;}
+
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+  @media(max-width:620px){ .compare{grid-template-columns:1fr;} }
+  .col{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;font-size:13.5px;}
+  .col h3{margin:0 0 8px;font-size:14.5px;}
+  .col dl{margin:0;} .col dt{font-weight:700;color:var(--accent-ink);margin-top:6px;} .col dd{margin:2px 0 0;}
+  .contrast{margin-top:12px;background:var(--amber-bg);border:1px solid var(--amber-line);color:var(--amber-ink);border-radius:10px;padding:10px 13px;font-size:13.5px;}
+
+  .foot{display:flex;justify-content:flex-end;align-items:center;margin-top:16px;gap:12px;flex-wrap:wrap;}
+  .btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border:none;border-radius:10px;
+    padding:11px 19px;font-size:14.5px;font-weight:600;cursor:pointer;}
+  .btn:hover{filter:brightness(1.05);}
+  .btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+  .btn:disabled{opacity:.5;cursor:default;filter:none;}
+  .btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line);font-weight:500;}
+  .msg{font-size:13.5px;color:var(--muted);margin:8px 0 0;}
+
+  .results h2{margin:0 0 4px;font-size:20px;}
+  .results .score{font-size:16px;margin:0 0 4px;}
+  .results .score b{color:var(--accent-ink);}
+  .actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+  .selfnote{font-size:12.5px;color:var(--muted);margin-top:14px;line-height:1.55;}
+  .hidden{display:none !important;}
+  @media (prefers-reduced-motion:reduce){ *{transition:none !important;} }
+</style>
+</head>
+<body>
+<!-- COMETS instructions panel -->
+<div style="max-width:900px; margin:16px auto 12px auto; padding:0 12px; box-sizing:border-box;"><details open style="background:#eef4f1; border:1px solid #cfe0d7; border-left:5px solid #b35900; border-radius:8px; padding:12px 16px; font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:15px; line-height:1.55; color:#17251d; text-align:left;"><summary style="cursor:pointer; font-weight:700; color:#1e4d3a; font-size:15px;">Instructions for this activity</summary><div style="margin-top:10px;"><p style="margin:0 0 8px 0; font-size:18px; font-weight:700; color:#1e4d3a; font-family:Georgia,serif;">Build the Chain</p>
+
+<p style="margin:0 0 8px 0;">About 12 minutes</p>
+
+<p style="margin:0 0 8px 0;">The reading's section "Reading the Function" introduces the antecedent-behavior-consequence (ABC) chain and the four common functions of behavior: attention, escape, tangible, and automatic. This activity walks you through four invented cases, drawn at random from six. For each case you'll do three things. First, sort the pieces of the case into antecedent, behavior, immediate consequence, and delayed consequence, then check your chain. Second, name the function the behavior serves. Third, reveal how Ellis's ABC (activating event, belief, consequence) would read the same case, so you can see why the two models share letters but not meanings.</p>
+
+<p style="margin:0 0 8px 0;">Every answer comes with a reason. If a piece goes in the wrong place, you can move it and check again. The tracker counts only your first attempt, so it tells you what you can already see without help.</p>
+
+<p style="margin:0 0 8px 0;">Nothing is saved or sent. There's nothing to write and nothing to submit.</p>
+
+<p style="margin:8px 0 0 0; padding-top:8px; border-top:1px solid #cfe0d7;"><strong>What it adds to your clinical thinking.</strong> Hearing what a behavior gets a person, or gets them out of, in an ordinary story.</p></div></details></div>
+
+<div class="wrap">
+  <div class="masthead">
+    <h1>Build the Chain</h1>
+    <p class="sub">Sort each case into an antecedent-behavior-consequence chain, name what keeps the behavior going, and then compare it with Ellis's ABC for the same moment.</p>
+  </div>
+
+  <div class="legend" id="legend"></div>
+
+  <div class="progress" aria-hidden="true">
+    <div class="pbar"><span id="pbarfill"></span></div>
+    <div class="pcount" id="pcount"></div>
+  </div>
+  <p class="acc" id="acc" aria-live="polite"></p>
+
+  <div id="work">
+    <section class="card" id="step1">
+      <div class="qtop" id="qtop"></div>
+      <h2 class="steph">Step 1. Build the chain</h2>
+      <p class="vignette" id="vignette"></p>
+      <p class="do">Assign each piece to a link in the chain. Immediate consequences happen right after the behavior. Delayed consequences build up over days or weeks.</p>
+      <div id="elements"></div>
+      <div class="foot"><button type="button" class="btn" id="checkbtn">Check my chain</button></div>
+      <div id="chainfb" aria-live="polite"></div>
+    </section>
+
+    <section class="card hidden" id="step2">
+      <h2 class="steph">Step 2. Name the function</h2>
+      <p class="do">What does the behavior reliably get this person, or get them out of?</p>
+      <div class="grid" id="fgrid" role="group" aria-label="Function options"></div>
+      <div id="ffb" aria-live="polite"></div>
+    </section>
+
+    <section class="card hidden" id="step3">
+      <h2 class="steph">Step 3. The same case, through Ellis's ABC</h2>
+      <p class="do">Both models use the letters A, B, and C. Reveal Ellis's version to see what changes.</p>
+      <div class="foot" style="justify-content:flex-start;margin-top:0"><button type="button" class="btn secondary" id="revealbtn" aria-expanded="false" aria-controls="ellis">Reveal Ellis's ABC</button></div>
+      <div id="ellis" class="hidden" aria-live="polite"></div>
+      <div class="foot"><button type="button" class="btn hidden" id="nextbtn">Next case</button></div>
+    </section>
+  </div>
+
+  <section class="card results hidden" id="resultsPanel" aria-live="polite"></section>
+</div>
+
+<script>
+// ===========================================================================
+// Build the Chain (Foundations 3). Functional analysis ABC chain with
+// immediate and delayed consequences, the four functions (attention, escape,
+// tangible, automatic; Iwata et al., 1994; Vollmer, 1994; Melanson & Fahmie,
+// 2023), and a contrast with Ellis's ABC (Ellis, 1991). All cases invented.
+// Marcus, 12, is the school-refusal case from the reading.
+// ===========================================================================
+
+var SLOTS = [
+  { id:"A",  name:"Antecedent",               short:"Antecedent" },
+  { id:"B",  name:"Behavior",                 short:"Behavior" },
+  { id:"CI", name:"Consequence (immediate)",  short:"Immediate C" },
+  { id:"CD", name:"Consequence (delayed)",    short:"Delayed C" }
+];
+var FUNCS = [
+  { id:"attention", name:"Attention", gloss:"The behavior brings other people's attention." },
+  { id:"escape",    name:"Escape",    gloss:"The behavior ends or postpones something unpleasant." },
+  { id:"tangible",  name:"Tangible",  gloss:"The behavior gets an item or activity." },
+  { id:"automatic", name:"Automatic", gloss:"The behavior is maintained by its own effects, independent of others." }
+];
+var SLOTWHY = {
+  A:"An antecedent comes just before the behavior and sets the occasion for it.",
+  B:"The behavior is what the person does, observable and specific.",
+  CI:"An immediate consequence follows the behavior right away. This is where the payoff that maintains it usually lives.",
+  CD:"A delayed consequence builds up over days or weeks. It is often where the cost shows up."
+};
+
+var CASES = [
+  { id:"marcus", who:"Marcus, 12",
+    vignette:"On school mornings, Marcus's mother tells him it is time to get in the car. Marcus starts shouting, kicks the door, and refuses to put on his shoes. After forty minutes of pleading, she calls the school and says he is sick. Within minutes Marcus is calm and playing a video game. Over the semester he falls further behind, and each Monday the classroom feels more frightening.",
+    els:[
+      { t:"His mother says it is time to get in the car for school", s:"A", why:"This comes right before the meltdown and sets it off. It is the demand the behavior responds to." },
+      { t:"Marcus shouts, kicks the door, and refuses to put on his shoes", s:"B", why:"This is what Marcus does, described in observable terms." },
+      { t:"His mother calls the school and he stays home", s:"CI", why:"This follows the meltdown the same morning and takes the demand away." },
+      { t:"Within minutes Marcus is calm", s:"CI", why:"The relief arrives right after the demand is lifted, which is what makes the meltdown more likely next time." },
+      { t:"He falls further behind, and the classroom feels more frightening each Monday", s:"CD", why:"This builds over the semester. It is the slow cost of a fast payoff." }
+    ],
+    fn:"escape",
+    fwhy:"The meltdown reliably ends the demand to go to school. That is escape, which is negative reinforcement by another name.",
+    fwrong:{ attention:"His mother is with him throughout, but the reliable change after the meltdown is that school is cancelled.",
+             tangible:"He ends up with a video game, but the meltdown is aimed at the demand, not at an item. Ask what disappears.",
+             automatic:"The behavior starts when the demand appears and stops when it is removed, which points to a social function." },
+    ellis:{ A:"His mother says it is time for school.", B:"One possible belief: “If I go in, I'll freeze when the teacher calls on me, and everyone will laugh.”", C:"Dread, a racing heart, and the urge to refuse." },
+    contrast:"In the functional chain, C is what the environment does after the behavior, and the school being cancelled is what maintains the meltdown. In Ellis's model, C is Marcus's own dread, and it flows from B, a belief, not a behavior." },
+  { id:"ivy", who:"Ivy, 6",
+    vignette:"When her father takes a work call at the kitchen table, Ivy whines, tugs his sleeve, and climbs onto his lap. He mutes the call, says “What is it, sweetheart?” and talks with her for a minute or two. Over the following weeks Ivy whines during almost every call, and her father has started taking calls in the car.",
+    els:[
+      { t:"Her father starts a work call and turns to his screen", s:"A", why:"This comes just before the whining and marks the moment his attention moves away from her." },
+      { t:"Ivy whines, tugs his sleeve, and climbs onto his lap", s:"B", why:"This is what Ivy does, specific enough to count." },
+      { t:"He mutes the call and talks with her for a minute or two", s:"CI", why:"This follows the whining right away and delivers what was missing, his attention." },
+      { t:"Ivy whines during almost every call", s:"CD", why:"This is the pattern growing over weeks, a sign that the behavior is being reinforced." },
+      { t:"Her father has started taking calls in the car", s:"CD", why:"This develops over weeks and costs both of them. It also removes the occasion rather than the payoff." }
+    ],
+    fn:"attention",
+    fwhy:"The whining reliably brings her father's attention back to her, and it grows across weeks because it keeps working.",
+    fwrong:{ escape:"Nothing unpleasant is being removed from Ivy. Something she wants, her father's attention, is being added.",
+             tangible:"She doesn't get an item or activity. She gets him.",
+             automatic:"The whining happens when he is on a call and stops when he turns to her, so it runs through another person." },
+    ellis:{ A:"Dad is on a call and not looking at her.", B:"One possible belief: “Dad doesn't care about me when he's working.”", C:"Hurt, then whining and clinging." },
+    contrast:"The functional chain puts the father's response in C, because his attention is what keeps the whining going. Ellis's model puts Ivy's hurt in C and asks what she believes about the call. One model targets what follows the behavior, the other targets the meaning in between." },
+  { id:"jonah", who:"Jonah, 16",
+    vignette:"At 10 p.m. on a school night, Jonah's mother asks him to hand over his phone, which is the house rule. Jonah argues loudly, calls the rule ridiculous, and keeps texting. After ten minutes she says, “Fine, thirty more minutes.” He keeps the phone. By the end of the month he is sleeping about five hours on school nights, and the arguments start earlier each evening.",
+    els:[
+      { t:"His mother asks for the phone at 10 p.m.", s:"A", why:"This comes just before the argument and sets it off." },
+      { t:"Jonah argues loudly and keeps texting", s:"B", why:"This is what Jonah does in response, observable and specific." },
+      { t:"She gives him thirty more minutes with the phone", s:"CI", why:"This follows the argument within minutes and hands him what he wanted." },
+      { t:"He is sleeping about five hours on school nights", s:"CD", why:"This accumulates across the month. It is a cost, not a payoff." },
+      { t:"The arguments start earlier each evening", s:"CD", why:"This develops over weeks and shows the arguing being strengthened." }
+    ],
+    fn:"tangible",
+    fwhy:"The arguing reliably gets Jonah continued access to an item he wants, his phone. That is the tangible function.",
+    fwrong:{ escape:"He does avoid handing the phone over, which looks like escape. But what the argument reliably produces is more time with an item, not relief from a task.",
+             attention:"His mother engages with him, but the argument ends when he gets the phone, not when he gets her attention.",
+             automatic:"The arguing depends on his mother's response. Without her, there is nothing to argue for." },
+    ellis:{ A:"His mother asks for the phone.", B:"One possible belief: “This is unfair. I can't stand being cut off while everyone else is still talking.”", C:"Anger, then arguing." },
+    contrast:"In the functional chain, C is the extra thirty minutes, and the remedy is changing what follows the argument. In Ellis's model, C is Jonah's anger, and the remedy is examining the belief that being cut off is unbearable." },
+  { id:"ruth", who:"Ruth, 45",
+    vignette:"Late at night, alone at her desk answering email, Ruth picks at the skin around her fingernails. She barely notices she is doing it. The picking produces a satisfying sensation that holds her attention. No one is around to react. By morning her fingers are sore, and she has started hiding her hands in meetings.",
+    els:[
+      { t:"Sitting alone at her desk late at night, reading email", s:"A", why:"This is the setting just before the picking starts." },
+      { t:"Ruth picks at the skin around her fingernails", s:"B", why:"This is the behavior itself, observable and specific." },
+      { t:"A satisfying sensation that holds her attention", s:"CI", why:"This comes with the behavior itself, right away." },
+      { t:"Her fingers are sore the next morning", s:"CD", why:"This shows up hours later. It is a cost, not what maintains the picking." },
+      { t:"She hides her hands in meetings", s:"CD", why:"This develops over time as a social cost of the habit." }
+    ],
+    fn:"automatic",
+    fwhy:"Ruth is alone and the picking produces its own sensory effect. No one else's response is involved, which is the automatic function.",
+    fwrong:{ attention:"No one is present to respond. Attention needs an audience.",
+             escape:"No task or demand is removed. The payoff comes from the sensation the behavior itself produces.",
+             tangible:"She doesn't get an item or activity from anyone." },
+    ellis:{ A:"A rough edge of skin catches her attention while she reads.", B:"One possible belief: “I have to get this smooth. I can't leave it like that.”", C:"A strong urge, then picking, and shame by morning." },
+    contrast:"With an automatic function, the functional chain has no social C to change, which is why treatment looks for other ways to compete with the sensation. Ellis's model still asks about a belief, here a rule about not tolerating the rough edge." },
+  { id:"lucia", who:"Lucia, 29",
+    vignette:"In the weekly team meeting, Lucia's manager asks her to present the quarterly numbers. Lucia says she suddenly feels ill and leaves the room. The manager hands the presentation to a coworker, and Lucia's racing heart settles within minutes. Since then her manager has stopped asking her to present, and Lucia was passed over for a promotion that required client presentations.",
+    els:[
+      { t:"Her manager asks her to present the numbers", s:"A", why:"This is the request right before she leaves." },
+      { t:"Lucia says she feels ill and leaves the room", s:"B", why:"This is what Lucia does, observable and specific." },
+      { t:"The presentation is handed to a coworker", s:"CI", why:"This follows right away and removes the feared task." },
+      { t:"Her racing heart settles within minutes", s:"CI", why:"The relief comes right after the task is gone, which strengthens leaving." },
+      { t:"Her manager stops asking her to present", s:"CD", why:"This develops over weeks and quietly shrinks her world." },
+      { t:"She is passed over for a promotion", s:"CD", why:"This is the delayed cost of the avoidance, months later." }
+    ],
+    fn:"escape",
+    fwhy:"Leaving reliably removes the feared presentation and the anxiety with it. That is escape, the same mechanism the reading calls avoidance.",
+    fwrong:{ attention:"Leaving draws some notice, but the reliable change is that the presentation goes away.",
+             tangible:"She gains no item or activity. She loses a task.",
+             automatic:"The behavior happens only when the request arrives and works by removing it, which is a social function." },
+    ellis:{ A:"Asked to present in the meeting.", B:"One possible belief: “I'll stumble over the numbers and everyone will see I'm incompetent.”", C:"Panic, then leaving." },
+    contrast:"The functional chain shows the relief that maintains leaving, and it points to exposure without escape. Ellis's model points to the belief about being seen as incompetent. Both can be true at once, and they suggest different first moves." },
+  { id:"harold", who:"Harold, 79",
+    vignette:"In the evenings, when his assisted-living unit is quiet and visitors have gone home, Harold presses his call button every twenty minutes with vague complaints, a draft, a pillow, a noise. Each time, an aide comes in, adjusts something, and chats for a few minutes. Over the past month the presses have doubled, and the aides now describe Harold as “demanding” and take longer to answer.",
+    els:[
+      { t:"The unit is quiet and visitors have gone home", s:"A", why:"This is the setting just before the presses begin, when company is scarce." },
+      { t:"Harold presses the call button with a vague complaint", s:"B", why:"This is the behavior, observable and countable." },
+      { t:"An aide comes in and chats for a few minutes", s:"CI", why:"This follows each press right away and supplies company." },
+      { t:"The presses have doubled over the month", s:"CD", why:"This is the behavior growing across weeks, a sign that it is being reinforced." },
+      { t:"Aides call him “demanding” and take longer to answer", s:"CD", why:"This develops over the month and is a cost for Harold." }
+    ],
+    fn:"attention",
+    fwhy:"Each press reliably brings a person into the room for a chat. The vague complaints are the route, and company is the payoff.",
+    fwrong:{ escape:"Nothing unpleasant is being removed. Company is being added.",
+             tangible:"The pillow or the draft gets adjusted, but the complaints are vague and change each time. What stays constant is that someone comes and talks.",
+             automatic:"The behavior works through the aides. Without them, the button does nothing." },
+    ellis:{ A:"Evening quiet, no one around.", B:"One possible belief: “Nobody would notice if something happened to me.”", C:"Loneliness and worry, then pressing the button." },
+    contrast:"The functional chain suggests giving Harold company on a schedule rather than in response to presses. Ellis's model suggests examining the belief that no one would notice. The same moment supports two different interventions." }
+];
+var DRAW = 4;
+
+var order=[], ci=0, assign={}, checkedOnce=false, fTried=[], els=[];
+var session={ elTotal:0, elFirst:0, fnTotal:0, fnFirst:0 };
+var round={ elTotal:0, elFirst:0, fnTotal:0, fnFirst:0 };
+
+function $(id){ return document.getElementById(id); }
+function esc(s){return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function shuffle(a){ for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+function slot(id){ for(var i=0;i<SLOTS.length;i++) if(SLOTS[i].id===id) return SLOTS[i]; }
+function fnc(id){ for(var i=0;i<FUNCS.length;i++) if(FUNCS[i].id===id) return FUNCS[i]; }
+
+function renderLegend(){
+  $("legend").innerHTML='<b>The chain.</b> <div class="row"><b>Antecedent:</b> what happens just before &nbsp;&middot;&nbsp; <b>Behavior:</b> what the person does &nbsp;&middot;&nbsp; <b>Consequence:</b> what follows, immediately and later</div>'+
+    '<div class="row"><b>Functions:</b> '+FUNCS.map(function(f){return '<b>'+f.name+'</b> ('+esc(f.gloss.replace(/\.$/,"").toLowerCase())+')';}).join(' &nbsp;&middot;&nbsp; ')+'</div>';
+}
+function pct(a,b){ return b? Math.round(100*a/b)+'%' : '0%'; }
+function renderAcc(){
+  var s=session;
+  $("acc").innerHTML = (s.elTotal||s.fnTotal) ?
+    'First-try accuracy this session: chain pieces <b>'+s.elFirst+' of '+s.elTotal+'</b> ('+pct(s.elFirst,s.elTotal)+'), functions <b>'+s.fnFirst+' of '+s.fnTotal+'</b> ('+pct(s.fnFirst,s.fnTotal)+')' :
+    'First-try accuracy this session: nothing checked yet';
+}
+
+function newRound(){
+  order=shuffle(CASES.slice()).slice(0,DRAW); ci=0;
+  round={ elTotal:0, elFirst:0, fnTotal:0, fnFirst:0 };
+  $("work").classList.remove("hidden"); $("resultsPanel").classList.add("hidden");
+  renderCase();
+}
+
+function renderCase(){
+  var c=order[ci];
+  assign={}; checkedOnce=false; fTried=[];
+  $("pbarfill").style.width=(ci/order.length*100)+"%";
+  $("pcount").textContent="Case "+(ci+1)+" of "+order.length;
+  $("qtop").textContent="Case "+(ci+1)+" of "+order.length+" · "+c.who;
+  $("vignette").textContent=c.vignette;
+  els=shuffle(c.els.map(function(e,i){ return { i:i, t:e.t, s:e.s, why:e.why }; }));
+  var box=$("elements"); box.innerHTML="";
+  els.forEach(function(e,k){
+    var d=document.createElement("div"); d.className="el"; d.id="el-"+k;
+    var lab="el-t-"+k;
+    d.innerHTML='<p class="txt" id="'+lab+'">'+esc(e.t)+'</p>';
+    var seg=document.createElement("div"); seg.className="seg"; seg.setAttribute("role","group"); seg.setAttribute("aria-labelledby",lab);
+    SLOTS.forEach(function(s){
+      var b=document.createElement("button"); b.type="button"; b.textContent=s.name; b.setAttribute("aria-pressed","false");
+      b.setAttribute("data-slot", s.id);
+      b.addEventListener("click", function(){ setSlot(k, s.id); });
+      seg.appendChild(b);
+    });
+    d.appendChild(seg);
+    var w=document.createElement("p"); w.className="why hidden"; w.id="why-"+k; d.appendChild(w);
+    box.appendChild(d);
+  });
+  $("chainfb").innerHTML=""; $("checkbtn").disabled=false; $("checkbtn").classList.remove("hidden");
+  $("step2").classList.add("hidden"); $("step3").classList.add("hidden");
+  $("ellis").classList.add("hidden"); $("ellis").innerHTML=""; $("revealbtn").setAttribute("aria-expanded","false");
+  $("revealbtn").disabled=false; $("nextbtn").classList.add("hidden");
+  renderAcc();
+}
+
+function setSlot(k, sid){
+  var d=$("el-"+k); if(d.classList.contains("ok")) return;
+  assign[k]=sid;
+  Array.prototype.forEach.call(d.querySelectorAll(".seg button"), function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-slot")===sid ? "true":"false"); });
+  if(d.classList.contains("no")){ d.classList.remove("no"); $("why-"+k).classList.add("hidden"); }
+}
+
+function checkChain(){
+  var missing=els.filter(function(e,k){ return !assign[k]; }).length;
+  if(missing){ $("chainfb").innerHTML='<p class="msg">Assign every piece first. '+missing+' still '+(missing===1?'needs':'need')+' a place.</p>'; return; }
+  var wrong=0;
+  els.forEach(function(e,k){
+    var d=$("el-"+k); if(d.classList.contains("ok")) return;
+    var ok = assign[k]===e.s;
+    if(!checkedOnce){ session.elTotal++; round.elTotal++; if(ok){ session.elFirst++; round.elFirst++; } }
+    var w=$("why-"+k); w.classList.remove("hidden");
+    if(ok){
+      d.className="el ok";
+      w.textContent=slot(e.s).name+". "+e.why;
+      Array.prototype.forEach.call(d.querySelectorAll(".seg button"), function(b){ b.disabled=true; });
+    } else {
+      wrong++; d.className="el no";
+      w.textContent="Not "+slot(assign[k]).name.toLowerCase()+". "+SLOTWHY[e.s]+" "+e.why;
+    }
+  });
+  checkedOnce=true;
+  renderAcc();
+  if(wrong){
+    $("chainfb").innerHTML='<p class="verdict no">'+wrong+' '+(wrong===1?'piece needs':'pieces need')+' a new place. Read the reason under each red piece, move it, and check again.</p>';
+    var firstWrong=document.querySelector(".el.no .seg button"); if(firstWrong) firstWrong.focus();
+  } else {
+    $("checkbtn").classList.add("hidden");
+    $("chainfb").innerHTML='<p class="verdict ok">Chain complete.</p>'+chainHTML();
+    showStep2();
+  }
+}
+
+function chainHTML(){
+  var c=order[ci];
+  var h='<div class="chain" aria-label="Completed chain">';
+  SLOTS.forEach(function(s){
+    var items=c.els.filter(function(e){return e.s===s.id;});
+    h+='<div class="link"><h4>'+esc(s.name)+'</h4><ul>'+items.map(function(e){return '<li>'+esc(e.t)+'</li>';}).join("")+'</ul></div>';
+  });
+  return h+'</div>';
+}
+
+function showStep2(){
+  $("step2").classList.remove("hidden");
+  var g=$("fgrid"); g.innerHTML=""; $("ffb").innerHTML="";
+  shuffle(FUNCS.slice()).forEach(function(f){
+    var b=document.createElement("button"); b.type="button"; b.className="opt"; b.setAttribute("data-id", f.id);
+    b.innerHTML='<span class="nm">'+esc(f.name)+'</span><span class="gl">'+esc(f.gloss)+'</span>';
+    b.addEventListener("click", function(){ pickFn(f.id); });
+    g.appendChild(b);
+  });
+  var first=g.querySelector(".opt"); if(first) first.focus();
+}
+
+function pickFn(id){
+  var c=order[ci];
+  if(fTried.indexOf(c.fn)>=0 || fTried.indexOf(id)>=0) return;
+  fTried.push(id);
+  if(fTried.length===1){ session.fnTotal++; round.fnTotal++; if(id===c.fn){ session.fnFirst++; round.fnFirst++; } }
+  var b=document.querySelector('#fgrid .opt[data-id="'+id+'"]');
+  if(id===c.fn){
+    Array.prototype.forEach.call(document.querySelectorAll("#fgrid .opt"), function(x){
+      var xid=x.getAttribute("data-id"); x.disabled=true;
+      x.className = xid===c.fn ? "opt correct" : (fTried.indexOf(xid)>=0 ? "opt wrong" : "opt dim");
+    });
+    $("ffb").innerHTML='<p class="verdict ok">'+(fTried.length===1?"Correct on the first try.":"Correct.")+'</p><p class="explain"><b>'+esc(fnc(c.fn).name)+'.</b> '+esc(c.fwhy)+'</p>';
+    $("step3").classList.remove("hidden");
+    $("revealbtn").focus();
+  } else {
+    b.className="opt wrong"; b.disabled=true;
+    $("ffb").innerHTML='<p class="verdict no">Not '+esc(fnc(id).name.toLowerCase())+'.</p><p class="explain">'+esc(c.fwrong[id])+' Try another.</p>';
+    var nx=document.querySelector("#fgrid .opt:not(:disabled)"); if(nx) nx.focus();
+  }
+  renderAcc();
+}
+
+function reveal(){
+  var c=order[ci];
+  var beh = function(sid){ return c.els.filter(function(e){return e.s===sid;}).map(function(e){return esc(e.t);}).join("<br>"); };
+  $("ellis").innerHTML='<div class="compare">'+
+    '<div class="col"><h3>Functional ABC</h3><dl><dt>A, antecedent</dt><dd>'+beh("A")+'</dd><dt>B, behavior</dt><dd>'+beh("B")+'</dd><dt>C, consequence</dt><dd>'+beh("CI")+'<br><i>Later:</i> '+beh("CD")+'</dd><dt>Function</dt><dd>'+esc(fnc(c.fn).name)+'</dd></dl></div>'+
+    '<div class="col"><h3>Ellis\'s ABC</h3><dl><dt>A, activating event</dt><dd>'+esc(c.ellis.A)+'</dd><dt>B, belief</dt><dd>'+esc(c.ellis.B)+'</dd><dt>C, emotional and behavioral consequence</dt><dd>'+esc(c.ellis.C)+'</dd></dl></div>'+
+    '</div><div class="contrast"><b>What changed.</b> '+esc(c.contrast)+'</div>';
+  $("ellis").classList.remove("hidden");
+  $("revealbtn").setAttribute("aria-expanded","true"); $("revealbtn").disabled=true;
+  var nb=$("nextbtn"); nb.classList.remove("hidden");
+  nb.textContent = ci===order.length-1 ? "See your results" : "Next case";
+  nb.focus();
+}
+
+function nextCase(){
+  if(ci===order.length-1){ finish(); return; }
+  ci++; renderCase(); window.scrollTo({top:0,behavior:"smooth"});
+  var f=document.querySelector("#elements .seg button"); if(f) f.focus();
+}
+
+function finish(){
+  $("pbarfill").style.width="100%"; $("pcount").textContent="Complete";
+  $("work").classList.add("hidden");
+  var rp=$("resultsPanel"); rp.classList.remove("hidden");
+  rp.innerHTML='<h2>Your results</h2><p class="score">This round, first try: chain pieces <b>'+round.elFirst+' of '+round.elTotal+'</b>, functions <b>'+round.fnFirst+' of '+round.fnTotal+'</b>.</p>'+
+    '<p class="selfnote">Each round draws four cases at random from six, and the session accuracy above keeps counting across rounds until you close the page. Nothing is saved or sent. The habit to carry into the interview is the reading\'s three questions, asked in order. What happened just before? What exactly did you do? What happened right after, and what happened later?</p>';
+  var act=document.createElement("div"); act.className="actions";
+  var again=document.createElement("button"); again.type="button"; again.className="btn secondary"; again.id="againbtn"; again.textContent="Try again with new cases";
+  again.addEventListener("click", function(){ newRound(); var f=document.querySelector("#elements .seg button"); if(f) f.focus(); });
+  act.appendChild(again); rp.appendChild(act);
+  again.focus(); window.scrollTo({top:0,behavior:"smooth"});
+}
+
+$("checkbtn").addEventListener("click", checkChain);
+$("revealbtn").addEventListener("click", reveal);
+$("nextbtn").addEventListener("click", nextCase);
+
+window.__tool = {
+  SLOTS:SLOTS, FUNCS:FUNCS, CASES:CASES, DRAW:DRAW,
+  current: function(){ return order[ci]; },
+  caseIndex: function(){ return ci; },
+  elements: function(){ return els.map(function(e){ return { text:e.t, slot:e.s }; }); },
+  setSlot: setSlot, check: checkChain, pickFn: pickFn, reveal: reveal, next: nextCase, newRound: newRound,
+  stats: function(){ return JSON.parse(JSON.stringify(session)); }
+};
+
+renderLegend();
+newRound();
+</script>
+</body>
+</html>

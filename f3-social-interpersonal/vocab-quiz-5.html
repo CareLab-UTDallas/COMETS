@@ -95,7 +95,7 @@
 
 <p style="margin:0 0 8px 0;">About 12 minutes</p>
 
-<p style="margin:0 0 8px 0;">This module moves the unit of analysis from the individual to the relationship, and it brings a precise vocabulary for the patterns that live between people. This self-test checks whether those terms are solid. You'll answer ten questions covering the interpersonal feedback loop and circular causality, family systems, the learning terms (negative reinforcement, avoidance, safety behavior, extinction), the transdiagnostic idea, and the change-conversation terms (motivational interviewing, the righting reflex). One term in particular, negative reinforcement, may be the most misunderstood in all of psychology, so read that one carefully.</p>
+<p style="margin:0 0 8px 0;">This module moves the unit of analysis from the individual to the relationship, and it brings a precise vocabulary for the patterns that live between people. This self-test checks whether those terms are solid. You'll answer sixteen questions covering the interpersonal feedback loop and circular causality, family systems, the learning terms (negative reinforcement, avoidance, safety behavior, extinction), the transdiagnostic idea, the change-conversation terms (motivational interviewing, the righting reflex), and the terms added on interviewer bias, family structure, and functional analysis. One term in particular, negative reinforcement, may be the most misunderstood in all of psychology, so read that one carefully.</p>
 
 <p style="margin:0 0 8px 0;">Best done <strong>after</strong> the reading and before the practice activities, since the rest of the module leans on these terms. Each answer comes with an explanation and a pointer back to the reading, and you can reveal a hint before answering. You'll get a score at the end.</p>
 
@@ -108,7 +108,7 @@
 <div class="wrap">
   <div class="masthead">
     <h1>Interpersonal Vocabulary Builder</h1>
-    <p class="sub">Ten items on the core Foundations 3 terms, built to move each one from recognition to fluency. These interpersonal terms are easy to recognize but hard to produce from memory, and one of them (negative reinforcement) is among the most misunderstood terms in psychology. Pick an answer to see whether it's right and why.</p>
+    <p class="sub">Sixteen items on the core Foundations 3 terms, built to move each one from recognition to fluency. These interpersonal terms are easy to recognize but hard to produce from memory, and one of them (negative reinforcement) is among the most misunderstood terms in psychology. Pick an answer to see whether it's right and why.</p>
   </div>
 
   <div class="progress" aria-hidden="true">
@@ -275,6 +275,90 @@ var QUIZ = [
     explain:"The righting reflex is the almost irresistible urge to set someone straight when you see them headed toward a problem. It comes from caring, but it backfires: when you argue one side of a person's ambivalence, they feel compelled to argue the other, and they end up voicing the reasons to stay stuck. Motivational interviewing deliberately resists this reflex.",
     hint:"Caring urge to fix, that talks people into defending the problem.",
     src:"Foundations 3, Righting Reflex vs. Motivational Interviewing"
+},
+  {
+    term: "Fundamental attribution error",
+    prompt: "An interviewer writes \"unmotivated student\" after hearing that the client lost her housing and now commutes an hour to class. This note shows:",
+    options: [
+      { id:"a", text:"The availability heuristic, because a recent case came to mind" },
+      { id:"b", text:"The fundamental attribution error, explaining behavior by a trait while underweighting the situation" },
+      { id:"c", text:"Just-world thinking, because the client is blamed for a crime" },
+      { id:"d", text:"Accurate case conceptualization, since motivation is a trait" }
+    ],
+    correct:"b",
+    explain:"The fundamental attribution error is the tendency to explain what other people do by who they are while underweighting the situation they were in. The corrective move is to ask for the sequence before settling on a trait, which also brings the loop into view.",
+    hint:"How much of the client's situation made it into the note?",
+    src:"Foundations 3, The Interviewer's Mind: Biases in Clinical Judgment"
+  },
+  {
+    term: "Primacy effect",
+    prompt: "In Asch's classic study, why did the order of the same six traits matter?",
+    options: [
+      { id:"a", text:"Traits heard last always outweighed traits heard first" },
+      { id:"b", text:"Order made no difference to the overall impression" },
+      { id:"c", text:"Hearing the positive traits first produced a much more favorable impression than hearing the identical list in reverse" },
+      { id:"d", text:"Only negative traits influenced impressions" }
+    ],
+    correct:"c",
+    explain:"Early information colors what comes later. In an intake, the referral note, the first five minutes, and the first striking statement all arrive first, so the corrective move is to write your first impression down on purpose and revisit it at the end.",
+    hint:"First in, loudest.",
+    src:"Foundations 3, The Interviewer's Mind: Biases in Clinical Judgment"
+  },
+  {
+    term: "Detouring and triangulation",
+    prompt: "Parents who avoid their own conflict unite around managing their teenager's trouble. Family researchers call this:",
+    options: [
+      { id:"a", text:"Detouring, a form of triangulation in which the parents' conflict is routed through the child" },
+      { id:"b", text:"Disengagement, because the family has rigid boundaries" },
+      { id:"c", text:"Differentiation of self" },
+      { id:"d", text:"Extinction of the parents' conflict" }
+    ],
+    correct:"a",
+    explain:"Bowen described the triangle, in which a strained two-person relationship pulls in a third person. When the third person is a child and the strain is the parents' conflict, the pattern is called detouring. In one study, detouring predicted later increases in children's externalizing problems.",
+    hint:"The conflict takes a detour.",
+    src:"Foundations 3, Family Systems: The Person in the Web"
+  },
+  {
+    term: "Enmeshment and disengagement",
+    prompt: "In Minuchin's structural model, family boundaries fall on a continuum. Which pairing is correct?",
+    options: [
+      { id:"a", text:"Enmeshed means rigid boundaries, disengaged means diffuse boundaries" },
+      { id:"b", text:"Enmeshed means diffuse boundaries and overinvolvement, disengaged means rigid boundaries and low connectedness" },
+      { id:"c", text:"Both terms describe healthy families" },
+      { id:"d", text:"Both terms refer to individual personality traits" }
+    ],
+    correct:"b",
+    explain:"Minuchin placed boundaries on a continuum from disengaged (rigid, high autonomy, low connectedness) to enmeshed (diffuse, overinvolved). The clinical question is where a family falls and where its current shape is costing someone.",
+    hint:"Too blurry versus too rigid.",
+    src:"Foundations 3, Family Systems: The Person in the Web"
+  },
+  {
+    term: "Expressed emotion",
+    prompt: "Expressed emotion is best described as:",
+    options: [
+      { id:"a", text:"How openly a client expresses feelings in session" },
+      { id:"b", text:"A measure of how relatives talk about a family member with a psychiatric condition, made up of criticism, hostility, and emotional overinvolvement, that predicts relapse" },
+      { id:"c", text:"A therapy technique for venting anger" },
+      { id:"d", text:"A diagnosis given to family members" }
+    ],
+    correct:"b",
+    explain:"Expressed emotion is rated from how relatives talk about the person. A meta-analysis of 27 studies found it reliably predicted relapse in schizophrenia, and a later review extended the link to a range of disorders. Hold it with a no-fault stance, since overinvolvement can feel like devotion from the inside.",
+    hint:"It is measured in the relatives, not the client.",
+    src:"Foundations 3, Family Systems: The Person in the Web"
+  },
+  {
+    term: "Functional analysis",
+    prompt: "A child whines during her father's work calls, and he stops to talk with her each time. In a functional analysis, the whining most likely serves which function?",
+    options: [
+      { id:"a", text:"Escape" },
+      { id:"b", text:"Tangible" },
+      { id:"c", text:"Attention" },
+      { id:"d", text:"Automatic" }
+    ],
+    correct:"c",
+    explain:"A functional analysis maps antecedent, behavior, and consequence to find what maintains a behavior. Here the consequence that reliably follows is the father's attention. Note that this ABC is not Ellis's ABC, in which B stands for a belief rather than a behavior.",
+    hint:"What does she reliably get right after whining?",
+    src:"Foundations 3, Reading the Function: Antecedents, Behavior, and Consequences"
   }
 ];
 
