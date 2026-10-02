@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Deep links: #case=1..8 opens a fixed case. #mode=random opens a randomized invented profile. -->
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decide Whether a Profile Can Be Interpreted</title>
+<style>
+  :root{--bg:#ffffff; --card:#f7faf8; --ink:#17251d; --muted:#41544a; --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b;}
+  *{box-sizing:border-box;}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.55;}
+  .wrap{max-width:820px; margin:0 auto; padding:14px 14px 16px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:22px; margin:0 0 4px;}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
+  .warn{font-size:13px; color:#7a3d00; background:#fff3e6; border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px; margin:0 0 10px;}
+  .chips{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 10px;}
+  .chips button{font:inherit; font-size:13px; cursor:pointer; border:1px solid #cfe0d7; border-radius:20px; background:#eef4f1; color:var(--green); padding:4px 11px;}
+  .chips button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .chips button.done:not(.on){border-color:#9cc3ae; background:#dcebe3;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:0 0 10px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:18px; margin:0 0 6px;}
+  .setup{font-size:14px; color:var(--teach); margin:0 0 8px;}
+  .tw{overflow-x:auto;}
+  table{border-collapse:collapse; width:100%; font-size:14px;}
+  th,td{border:1px solid #cfe0d7; padding:5px 6px; text-align:center; vertical-align:top;}
+  th{background:#eef4f1; color:var(--green); font-weight:600;}
+  td.hot{background:#fff7ef;}
+  .steps{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 8px; font-size:13px; color:var(--muted);}
+  .steps span{border:1px solid #cfe0d7; border-radius:12px; padding:2px 9px; background:#fff;}
+  .steps span.cur{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .steps span.ok{background:#dcebe3;}
+  .q{font-weight:600; margin:0 0 8px;}
+  .opts{display:flex; flex-direction:column; gap:6px;}
+  .opts button{font:inherit; font-size:15px; text-align:left; cursor:pointer; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--ink); padding:8px 12px;}
+  .opts button:hover:not(:disabled){border-color:#9cc3ae;}
+  .opts button:focus-visible, button.b:focus-visible, .chips button:focus-visible{outline:3px solid #b35900; outline-offset:2px;}
+  .opts button.right{background:#e3f0e9; border-color:var(--green);}
+  .opts button.wrong{background:#fbeee4; border-color:#e3b58f; color:#6b4a2f;}
+  .opts button:disabled{cursor:default;}
+  .fb{margin:10px 0 0; padding:8px 10px; border-radius:6px; font-size:14px; color:var(--teach); background:#fff7ef; border:1px solid #f0d9c2; border-left:4px solid var(--accent);}
+  .fb.ok{background:#f0f7f3; border-color:#cfe0d7; border-left-color:var(--green);}
+  .fb strong{color:#8a4600;}
+  .fb.ok strong{color:var(--green);}
+  .nav{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0 0;}
+  button.b{font:inherit; font-size:15px; cursor:pointer; border-radius:8px; padding:9px 16px;}
+  .primary{background:var(--green); color:#eef4f1; border:1px solid var(--green);}
+  .secondary{background:#eef4f1; color:var(--green); border:1px solid #cfe0d7;}
+  .status{font-size:13px; color:var(--muted);}
+  .hidden{display:none !important;}
+  .small{font-size:12px; color:var(--muted); margin:8px 0 0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Decide whether a profile can be interpreted</h1>
+  <p class="lede">Each case is an invented validity-scale profile from a 335-item True/False inventory, with T scores for the scales and a raw count of unscorable responses. Work through the decision in order, one question at a time. The reasoning appears after every choice, so a wrong answer teaches as much as a right one.</p>
+  <div class="warn"><strong>Nothing here is saved.</strong> The profiles are invented and contain no test items. Practice as often as you like.</div>
+  <div class="chips" id="chips"></div>
+  <div class="card">
+    <h2 id="cTitle"></h2>
+    <p class="setup" id="cSetup"></p>
+    <div class="tw"><table id="prof"></table></div>
+  </div>
+  <div class="card">
+    <div class="steps" id="steps"></div>
+    <p class="q" id="q" aria-live="polite"></p>
+    <div class="opts" id="opts"></div>
+    <div class="fb hidden" id="fb" aria-live="polite"></div>
+    <div class="nav">
+      <button class="b primary hidden" id="next" type="button">Next question</button>
+      <button class="b secondary" id="newc" type="button">New random profile</button>
+      <span class="status" id="status"></span>
+    </div>
+  </div>
+  <p class="small">Thresholds and decision rules are paraphrased from the interpretation chapter of the publisher's manual (Tables 5-2 to 5-12 and pp. 29 to 39, 72), as cited on the Canvas page. Use the manual's full tables during a real interpretation.</p>
+</div>
+<script>
+var SC=["CRIN","VRIN","TRIN","F","Fp","Fs","FBS","RBS","L","K"];
+// Fixed cases. t: T scores (TRIN as string with T or F). hist: whether history or other evidence corroborates dysfunction. med: substantial medical problems documented.
+var FIXED=[
+ {k:"1", title:"Case 1. A clean profile", setup:"Outpatient intake. The person has a documented history of treatment for low mood.", cns:0, t:{CRIN:52,VRIN:50,TRIN:"54T",F:60,Fp:50,Fs:53,FBS:56,RBS:54,L:48,K:44}, hist:true, med:false},
+ {k:"2", title:"Case 2. Inconsistency first", setup:"Court-ordered evaluation. Records describe repeated hospitalizations.", cns:2, t:{CRIN:84,VRIN:78,TRIN:"60T",F:104,Fp:93,Fs:75,FBS:70,RBS:87,L:52,K:38}, hist:true, med:false},
+ {k:"3", title:"Case 3. Fixed False answering", setup:"Pre-employment screening.", cns:0, t:{CRIN:72,VRIN:51,TRIN:"85F",F:47,Fp:41,Fs:42,FBS:62,RBS:50,L:81,K:71}, hist:false, med:false},
+ {k:"4", title:"Case 4. Raised F with a low Fp", setup:"Inpatient unit. The chart documents a severe depressive episode.", cns:0, t:{CRIN:60,VRIN:55,TRIN:"54T",F:88,Fp:58,Fs:64,FBS:70,RBS:72,L:44,K:35}, hist:true, med:false},
+ {k:"5", title:"Case 5. Somatic over-reporting", setup:"Disability evaluation. No medical records were provided.", cns:1, t:{CRIN:57,VRIN:55,TRIN:"50",F:78,Fp:58,Fs:103,FBS:92,RBS:80,L:52,K:44}, hist:false, med:false},
+ {k:"6", title:"Case 6. Many unscorable responses", setup:"Outpatient intake. The person left a run of items blank near the end.", cns:21, t:{CRIN:54,VRIN:51,TRIN:"54T",F:63,Fp:50,Fs:53,FBS:59,RBS:58,L:56,K:50}, hist:true, med:false},
+ {k:"7", title:"Case 7. Under-reporting", setup:"Child custody evaluation.", cns:0, t:{CRIN:45,VRIN:43,TRIN:"60F",F:44,Fp:41,Fs:42,FBS:48,RBS:43,L:77,K:68}, hist:false, med:false},
+ {k:"8", title:"Case 8. Over-reporting without corroboration", setup:"Personal injury evaluation. No history of mental health treatment and no corroborating records.", cns:0, t:{CRIN:63,VRIN:60,TRIN:"54T",F:94,Fp:84,Fs:80,FBS:84,RBS:79,L:48,K:38}, hist:false, med:false}
+];
+function trinVal(s){ s=String(s); var n=parseInt(s,10); return {n:n, dir:/F$/.test(s)?"F":(/T$/.test(s)?"T":"")}; }
+
+// Bands, paraphrased from the manual.
+function cnsBand(c){ return c>=15?"high":(c>=1?"some":"none"); }
+function incBand(c){ var tr=trinVal(c.t.TRIN).n;
+  if(c.t.CRIN>=80||c.t.VRIN>=80||tr>=80) return "invalid";
+  if(c.t.CRIN>=70||c.t.VRIN>=70||tr>=70) return "caution";
+  return "ok"; }
+function fBand(t){ return t>=100?"invalid":(t>=90?"may":(t>=75?"possible":"none")); }
+function fpBand(t){ return t>=100?"invalid":(t>=70?"possible":"none"); }
+function overDecision(c){ // returns key
+  var f=fBand(c.t.F), fp=fpBand(c.t.Fp);
+  if(f==="invalid"||fp==="invalid") return "invalid";
+  if(fp==="possible"&&!c.hist) return "likely";
+  if((f==="possible"||f==="may")&&!c.hist) return "likely";
+  if(f!=="none"||fp!=="none") return "weigh";
+  return "none"; }
+function somDecision(c){ var a=[];
+  if(c.t.Fs>=80) a.push("fs"); if(c.t.FBS>=78) a.push("fbs"); if(c.t.RBS>=75) a.push("rbs");
+  return a; }
+function somKey(c){ var a=somDecision(c); var strong=(c.t.Fs>=100||c.t.FBS>=90||c.t.RBS>=90);
+  if(!a.length) return "none"; return strong?"strong":"possible"; }
+function underKey(c){ if(c.t.L>=80||c.t.K>=70) return "strong"; if(c.t.L>=65||c.t.K>=60) return "possible"; return "none"; }
+
+// Steps, each with options and feedback built from the case.
+function stepsFor(c){
+  var S=[];
+  var cb=cnsBand(c.cns);
+  S.push({name:"Unscorable", q:"Start with the count of unscorable responses (raw "+c.cns+"). What does it mean for the profile?",
+    opts:[{k:"none",t:"No concern. Every item has a scorable answer."},
+          {k:"some",t:"Scores on some of the shorter scales may be affected. Check the percentage answered on each scale."},
+          {k:"high",t:"Scores on some scales may be invalid. Check the percentage answered on every scale before reading it."}],
+    ans:cb,
+    why:{none:"A count of 0 means the person gave a scorable answer to every item, so no scale is affected (Table 5-2).",
+         some:"A count from 1 to 14 can still affect the shorter scales. Any scale with less than 90% of its items answered cannot be read as showing no problem, though a raised score on it is still interpretable (p. 29, Table 5-2).",
+         high:"A count of 15 or more raises concern that scores on some scales are invalid. Find which scales have less than 90% of their items answered. On those, a score that is not raised is uninterpretable, and a raised score may underestimate the problem (p. 29, Table 5-2)."}});
+  var ib=incBand(c), tr=trinVal(c.t.TRIN);
+  var which=[]; if(c.t.CRIN>=70) which.push("CRIN "+c.t.CRIN); if(c.t.VRIN>=70) which.push("VRIN "+c.t.VRIN); if(tr.n>=70) which.push("TRIN "+c.t.TRIN);
+  S.push({name:"Inconsistency", q:"Now read CRIN, VRIN, and TRIN. What do they say?",
+    opts:[{k:"ok",t:"No concern about inconsistent responding. Go on to over-reporting."},
+          {k:"caution",t:"Some evidence of inconsistent responding. Go on, and interpret the remaining scales with some caution."},
+          {k:"invalid",t:"The protocol is invalid because of inconsistent responding. Stop here."}],
+    ans:ib,
+    why:{ok:"All three are below 70T, so the person responded consistently enough for the content-based scales to mean something (Tables 5-3 to 5-5).",
+         caution:"At least one of them is in the 70 to 79 range ("+which.join(", ")+"). That is some evidence of inconsistent responding, so the over-reporting, under-reporting, and substantive scales are read with some caution (Tables 5-3 to 5-5).",
+         invalid:"At least one of them is 80 or higher ("+which.filter(function(w){return parseInt(w.replace(/^\D+/,''),10)>=80;}).join(", ")+"). The protocol is invalid, and the over-reporting, under-reporting, and substantive scales cannot be interpreted (p. 30). TRIN counts in either direction, 80T or 80F."}});
+  if(ib==="invalid"){
+    S.push({name:"Decision", q:"F, the over-reporting scales, and L and K are all printed on the report. What do you do with them?",
+      opts:[{k:"stop",t:"Report the protocol as invalid because of inconsistent responding and interpret none of them."},
+            {k:"readF",t:"Report over-reporting if F is high, since F is a separate scale."},
+            {k:"readSub",t:"Interpret the substantive scales with a caution, since only one validity scale is high."}],
+      ans:"stop",
+      why:{stop:"Inconsistent responding comes first because it compromises your ability to judge the other two threats (p. 29). Random and fixed answering raise the over-reporting scales on their own, so you judge over-reporting only once inconsistency has been ruled out (p. 33). The write-up says the protocol is invalid and reports no substantive findings. Whether to readminister is a supervision decision (p. 29)."+(tr.dir==="F"&&tr.n>=70&&(c.t.L>=65||c.t.K>=60)?" The raised L and K here are a by-product of the fixed False answering, since most of their items are keyed False (p. 37).":""),
+           readF:"Not this one. Random and fixed answering raise F on their own, so over-reporting cannot be inferred until inconsistent responding is ruled out (p. 33).",
+           readSub:"Not this one. At 80 or higher on CRIN, VRIN, or TRIN, the substantive scales cannot be interpreted (p. 30)."}});
+    return S;
+  }
+  var od=overDecision(c);
+  var fTxt="F is "+c.t.F+" and Fp is "+c.t.Fp+". "+(c.hist?"The setup gives history or evidence of genuine dysfunction.":"The setup gives no history or corroborating evidence of dysfunction.");
+  S.push({name:"Over-reporting", q:"Read F and Fp. "+fTxt+" What do they say?",
+    opts:[{k:"none",t:"No evidence of over-reporting of psychological symptoms."},
+          {k:"weigh",t:"Possible over-reporting, but the level can occur with genuine, documented dysfunction. Weigh it against the history and note it."},
+          {k:"likely",t:"Over-reporting is likely, since nothing outside the test corroborates this level of dysfunction."},
+          {k:"invalid",t:"The protocol is invalid because of over-reporting. Do not interpret the substantive scales."}],
+    ans:od,
+    why:{none:"F is below 75 and Fp is below 70, the ranges with no evidence of over-reporting (Tables 5-6 and 5-7).",
+         weigh:"F or Fp is raised but below 100. Genuine psychological problems, reported accurately, can also produce these levels. With history or corroborating evidence, note the possibility and weigh it. A lower Fp makes over-reporting less likely as the explanation for a raised F (p. 33, Tables 5-6 and 5-7).",
+         likely:"F or Fp is raised, and nothing outside the test documents dysfunction. For a person with no history or corroborating evidence, the manual reads these levels as likely or very likely over-reporting (Tables 5-6 and 5-7). That is a statement about the response style, not about intent, which cannot be inferred from the test alone (p. 32).",
+         invalid:"F or Fp is 100 or higher. That level is uncommon even in people with genuine, severe difficulties, so the protocol is invalid and the substantive scales are not interpreted (Tables 5-6 and 5-7, p. 33)."}});
+  if(od==="invalid"){
+    S.push({name:"Decision", q:"What does the write-up say about the substantive scales?",
+      opts:[{k:"stop",t:"The protocol is invalid because of over-reporting, and the substantive scales are not interpreted."},
+            {k:"mal",t:"The person was malingering, so the substantive scales are not interpreted."},
+            {k:"free",t:"The person has no real problems, since the over-reporting scales are raised."}],
+      ans:"stop",
+      why:{stop:"Report the response style and its consequence. Over-reporting is a description of the self-presentation, and the test scores alone cannot establish faking or malingering (p. 32). A finding of over-reporting also does not show that the person is free of dysfunction (p. 33).",
+           mal:"Not this one. The test scores alone cannot establish faking or malingering (p. 32). Intent is a supervision question answered with history, records, and the interview.",
+           free:"Not this one. A person can over-report and also have genuine problems, so a raised over-reporting scale does not rule out genuine problems (p. 33)."}});
+    return S;
+  }
+  var sk=somKey(c);
+  var sTxt="Fs is "+c.t.Fs+", FBS is "+c.t.FBS+", and RBS is "+c.t.RBS+".";
+  var lim=[]; if(c.t.Fs>=80) lim.push("RC1, MLS, and NUC (Fs)"); if(c.t.FBS>=78) lim.push("RC1, MLS, NUC, and COG (FBS)"); if(c.t.RBS>=75) lim.push("COG (RBS)");
+  S.push({name:"Somatic and cognitive", q:"Read the somatic and cognitive over-reporting scales. "+sTxt+" What follows?",
+    opts:[{k:"none",t:"No concern. The somatic and cognitive scales can be read as usual."},
+          {k:"possible",t:"Possible over-reporting of somatic or cognitive complaints. Read the affected scales cautiously."},
+          {k:"strong",t:"Likely over-reporting of somatic or cognitive complaints. The affected scales may be invalid and are read cautiously."}],
+    ans:sk,
+    why:{none:"Fs is below 80, FBS below 78, and RBS below 75, so none raises a concern (Tables 5-8 to 5-10).",
+         possible:"At least one is in its middle range (Fs 80 to 99, FBS 78 to 89, or RBS 75 to 89), and none reaches its top range. These can occur with substantial medical problems or emotional dysfunction, but they could also reflect exaggeration. Read "+lim.join(", ")+" cautiously (Tables 5-8 to 5-10).",
+         strong:"At least one reaches its top range (Fs 100 or more, FBS 90 or more, or RBS 90 or more), which indicates likely over-reporting of those complaints. Read "+lim.join(", ")+" cautiously (p. 34, Tables 5-8 to 5-10). The rest of the protocol is not invalidated by these scales."}});
+  var uk=underKey(c);
+  S.push({name:"Under-reporting", q:"Read L ("+c.t.L+") and K ("+c.t.K+"). What do they say?",
+    opts:[{k:"none",t:"No evidence of under-reporting."},
+          {k:"possible",t:"Possible under-reporting. A substantive scale that is not raised is read with caution, and raised scales may understate the problem."},
+          {k:"strong",t:"Under-reporting is indicated. Scales that are not raised cannot rule out problems, and raised scales may understate them."}],
+    ans:uk,
+    why:{none:"L is below 65 and K below 60, the ranges with no evidence of under-reporting (Tables 5-11 and 5-12).",
+         possible:"L is 65 to 79 or K is 60 to 69. That is possible under-reporting, which for L may partly reflect a traditional upbringing and for K may reflect genuinely good adjustment. Read the absence of elevation on the substantive scales with caution (Tables 5-11 and 5-12)."+(trinVal(c.t.TRIN).dir==="F"&&trinVal(c.t.TRIN).n>=70?" Fixed False answering also raises L and K, since most of their items are keyed False (p. 37).":""),
+         strong:"L is 80 or higher or K is 70 or higher. Substantial under-reporting is indicated, so nonelevated and low substantive scores cannot be relied on to rule out problems, and raised scores may underestimate them (p. 37, Tables 5-11 and 5-12)."+(trinVal(c.t.TRIN).dir==="F"&&trinVal(c.t.TRIN).n>=70?" Here TRIN shows fixed False answering, which artificially raises both scales (p. 37).":"")}});
+  // Final decision
+  var fin;
+  if(ib==="caution"||od==="weigh"||od==="likely"||sk!=="none"||uk!=="none"||cb!=="none") fin="caveat"; else fin="clean";
+  S.push({name:"Decision", q:"Putting it together, what does the protocol support?",
+    opts:[{k:"clean",t:"Interpret the substantive scales with no validity caveat."},
+          {k:"caveat",t:"Interpret the substantive scales, opening the write-up with the validity caveats you found."},
+          {k:"stop",t:"Interpret nothing. The protocol is invalid."}],
+    ans:fin,
+    why:{clean:"No step raised a concern, so the protocol is interpretable without caveats. The write-up still opens with validity, stating that the responses were consistent and showed no over- or under-reporting (pp. 29, 72).",
+         caveat:"The protocol is interpretable, but at least one step raised a concern. Open the write-up with each caveat and its consequence for the scales it touches, then interpret in the manual's order (pp. 39, 72).",
+         stop:"Not this one. No step reached an invalidating level. Only CRIN, VRIN, or TRIN at 80 or more, or F or Fp at 100 or more, makes the whole protocol uninterpretable (pp. 30, 33)."}});
+  return S;
+}
+
+// Random profile generator. Builds a profile aimed at a chosen pattern so practice covers every branch.
+function ri(a,b){ return a+Math.floor(Math.random()*(b-a+1)); }
+function randomCase(){
+  var pat=["clean","inc","over","som","under","cns","weigh"][ri(0,6)];
+  var c={k:"R", title:"Random profile", cns:0, hist:Math.random()<0.5, med:false,
+    t:{CRIN:ri(40,66),VRIN:ri(40,66),TRIN:(function(){var n=ri(50,66);return n===50?"50":n+(Math.random()<0.5?"T":"F");})(),F:ri(44,72),Fp:ri(41,66),Fs:ri(42,75),FBS:ri(40,75),RBS:ri(40,72),L:ri(40,62),K:ri(35,58)}};
+  if(pat==="inc"){ var s=["CRIN","VRIN","TRIN"][ri(0,2)]; var v=ri(70,95); if(s==="TRIN") c.t.TRIN=v+(Math.random()<0.5?"T":"F"); else c.t[s]=v; c.t.F=ri(60,110); }
+  if(pat==="over"){ c.t.F=ri(75,110); c.t.Fp=ri(50,105); }
+  if(pat==="weigh"){ c.hist=true; c.t.F=ri(75,95); c.t.Fp=ri(45,69); }
+  if(pat==="som"){ c.t.Fs=ri(80,110); c.t.FBS=ri(70,95); c.t.RBS=ri(60,95); }
+  if(pat==="under"){ c.t.L=ri(60,90); c.t.K=ri(55,75); }
+  if(pat==="cns"){ c.cns=ri(1,25); }
+  c.setup=c.hist?"The setup documents a history of significant psychological difficulties.":"No history or corroborating evidence of dysfunction is available.";
+  return c;
+}
+
+var CASES=FIXED.slice(), cur=null, ci=0, step=0, steps=[], tried=false, firstRight=0, answered=0, done={};
+var el=function(id){return document.getElementById(id);};
+function renderChips(){
+  var h=""; for(var i=0;i<FIXED.length;i++){ h+='<button type="button" data-i="'+i+'" class="'+(i===ci&&cur.k!=="R"?"on ":"")+(done[FIXED[i].k]?"done":"")+'">Case '+FIXED[i].k+'</button>'; }
+  h+='<button type="button" data-i="R" class="'+(cur&&cur.k==="R"?"on":"")+'">Random</button>';
+  el('chips').innerHTML=h;
+  Array.prototype.forEach.call(el('chips').querySelectorAll('button'),function(b){ b.onclick=function(){ var i=b.getAttribute('data-i'); if(i==="R") loadCase(randomCase()); else { ci=+i; loadCase(FIXED[ci]); } }; });
+}
+function hot(s,v){ var n=(s==="TRIN")?trinVal(v).n:v;
+  var th={CRIN:70,VRIN:70,TRIN:70,F:75,Fp:70,Fs:80,FBS:78,RBS:75,L:65,K:60}; return n>=th[s]; }
+function loadCase(c){
+  cur=c; step=0; steps=stepsFor(c);
+  el('cTitle').textContent=c.title; el('cSetup').textContent=c.setup+" T scores are linear T against the normative sample. The unscorable count is a raw number.";
+  var h='<tr><th>CNS raw</th>'; SC.forEach(function(s){h+='<th>'+s+'</th>';}); h+='</tr><tr><td'+(c.cns>=1?' class="hot"':'')+'>'+c.cns+'</td>';
+  SC.forEach(function(s){ h+='<td'+(hot(s,c.t[s])?' class="hot"':'')+'>'+c.t[s]+'</td>'; }); h+='</tr>';
+  el('prof').innerHTML=h; renderChips(); renderStep();
+}
+function renderSteps(){ var h=""; steps.forEach(function(s,i){ h+='<span class="'+(i===step?"cur":(i<step?"ok":""))+'">'+(i+1)+". "+s.name+'</span>'; }); el('steps').innerHTML=h; }
+function renderStep(){
+  tried=false; var s=steps[step]; renderSteps();
+  el('q').textContent=s.q;
+  var order=s.opts.slice();
+  var h=""; order.forEach(function(o){ h+='<button type="button" data-k="'+o.k+'">'+o.t+'</button>'; }); el('opts').innerHTML=h;
+  Array.prototype.forEach.call(el('opts').querySelectorAll('button'),function(b){ b.onclick=function(){ choose(b); }; });
+  el('fb').className='fb hidden'; el('fb').innerHTML=''; el('next').classList.add('hidden'); setStatus(); report();
+}
+function choose(b){
+  var s=steps[step], k=b.getAttribute('data-k'), ok=(k===s.ans);
+  if(!tried){ answered++; if(ok) firstRight++; tried=true; }
+  if(ok){ b.classList.add('right'); Array.prototype.forEach.call(el('opts').querySelectorAll('button'),function(x){x.disabled=true;});
+    el('fb').className='fb ok'; el('fb').innerHTML='<strong>Right.</strong> '+s.why[k];
+    if(step<steps.length-1){ el('next').textContent='Next question'; el('next').classList.remove('hidden'); }
+    else { done[cur.k]=true; el('next').textContent=(cur.k==="R")?'Another random profile':'Next case'; el('next').classList.remove('hidden'); renderChips(); }
+  } else { b.classList.add('wrong'); b.disabled=true; el('fb').className='fb'; el('fb').innerHTML='<strong>Not this one.</strong> '+(s.why[k]||'')+' Try again.'; }
+  setStatus(); report();
+}
+el('next').onclick=function(){ if(step<steps.length-1){ step++; renderStep(); } else if(cur.k==="R"){ loadCase(randomCase()); } else { ci=(ci+1)%FIXED.length; loadCase(FIXED[ci]); } };
+el('newc').onclick=function(){ loadCase(randomCase()); };
+function setStatus(){ el('status').textContent=answered?('First-try accuracy this session: '+firstRight+' of '+answered):''; }
+function report(){ try{ parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:document.documentElement.scrollHeight}),'*'); }catch(e){} }
+window.addEventListener('load',report); window.addEventListener('resize',report);
+function fromHash(){ var h=location.hash||''; if(/mode=random/.test(h)) return "R"; var m=/case=(\d+)/.exec(h); if(m){ var i=+m[1]-1; if(i>=0&&i<FIXED.length) return i; } return 0; }
+function openHash(){ var r=fromHash(); if(r==="R") loadCase(randomCase()); else { ci=r; loadCase(FIXED[ci]); } }
+window.addEventListener('hashchange',openHash);
+openHash();
+window.__tool={ cases:FIXED, stepsFor:stepsFor, randomCase:randomCase, loadCase:loadCase,
+  state:function(){ return {case:cur, step:step, steps:steps.map(function(s){return {name:s.name, ans:s.ans, opts:s.opts.map(function(o){return o.k;})};}), firstRight:firstRight, answered:answered}; } };
+</script>
+</body>
+</html>
