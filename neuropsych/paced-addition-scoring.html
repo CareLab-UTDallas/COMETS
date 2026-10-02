@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<!--
+  Score a Paced Serial Addition Record (COMETS, neuropsych)
+  Deep links (combine with &):
+    #profile=steady|slows|alternate|misunderstood   simulated examinee profile
+    #len=12|50                                      12-digit warm-up series or full 50-digit series
+    #pace=3.0|2.4|2.0|1.6                           seconds per digit (series 1 to 4), optional
+    #seed=<integer>                                 reproduce one invented series, optional
+  Example: #profile=alternate&len=50
+  All digit series are invented by a seeded generator and exclude the digit 7. No test series are included.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Score a Paced Serial Addition Record</title>
+<style>
+  :root{--bg:#ffffff; --card:#f7faf8; --ink:#17251d; --muted:#41544a; --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b;}
+  *{box-sizing:border-box;}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.55;}
+  .wrap{max-width:820px; margin:0 auto; padding:14px 14px 16px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:22px; margin:0 0 4px;}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
+  .warn{font-size:13px; color:#7a3d00; background:#fff3e6; border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px; margin:0 0 10px;}
+  .chips{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 8px;}
+  .chips button{font:inherit; font-size:13px; cursor:pointer; border:1px solid #cfe0d7; border-radius:20px; background:#eef4f1; color:var(--green); padding:4px 11px;}
+  .chips button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .chips button.done:not(.on){border-color:#9cc3ae; background:#dcebe3;}
+  .chips button:disabled{opacity:.45; cursor:default;}
+  .chiplabel{font-size:12px; color:var(--muted); margin:0 0 3px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:0 0 10px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:18px; margin:0 0 6px;}
+  .setup{font-size:14px; color:var(--teach); margin:0 0 8px;}
+  table{border-collapse:collapse; width:100%; font-size:14px;}
+  th,td{border:1px solid #cfe0d7; padding:5px 8px; text-align:left; vertical-align:top;}
+  th{background:#eef4f1; color:var(--green); font-weight:600;}
+  .rules{font-size:14px; color:var(--teach); margin:0; padding-left:18px;}
+  .rules li{margin:0 0 4px;}
+  details summary{cursor:pointer; color:var(--green); font-weight:600;}
+  .q{font-weight:600; margin:0 0 8px;}
+  .opts{display:flex; flex-direction:column; gap:6px;}
+  .opts button{font:inherit; font-size:15px; text-align:left; cursor:pointer; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--ink); padding:8px 12px;}
+  .opts button:hover:not(:disabled){border-color:#9cc3ae;}
+  .opts button.right{background:#e3f0e9; border-color:var(--green);}
+  .opts button.wrong{background:#fbeee4; border-color:#e3b58f; color:#6b4a2f;}
+  .opts button:disabled{cursor:default;}
+  .fb{margin:10px 0 0; padding:8px 10px; border-radius:6px; font-size:14px; color:var(--teach); background:#fff7ef; border:1px solid #f0d9c2; border-left:4px solid var(--accent);}
+  .fb.ok{background:#f0f7f3; border-color:#cfe0d7; border-left-color:var(--green);}
+  .fb strong{color:#8a4600;}
+  .fb.ok strong{color:var(--green);}
+  .fb ul{margin:6px 0 0; padding-left:18px;}
+  .fb li{margin:0 0 4px;}
+  .nav{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0 0;}
+  button.b{font:inherit; font-size:15px; cursor:pointer; border-radius:8px; padding:9px 16px;}
+  .primary{background:var(--green); color:#eef4f1; border:1px solid var(--green);}
+  .secondary{background:#eef4f1; color:var(--green); border:1px solid #cfe0d7;}
+  .status{font-size:13px; color:var(--muted);}
+  .hidden{display:none !important;}
+  .small{font-size:12px; color:var(--muted); margin:8px 0 0;}
+  button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent); outline-offset:2px;}
+  /* record */
+  .rec{font-size:13px; font-variant-numeric:tabular-nums;}
+  .rec th,.rec td{padding:4px 6px;}
+  .rec td.n{font-weight:600; color:var(--green);}
+  .rec tr.first td{color:var(--muted);}
+  .rec tr.pause td{background:#eef4f1; font-style:italic; color:var(--teach);}
+  .rec tr.bad td{background:#fbeee4;}
+  .rec tr.good td{background:#f0f7f3;}
+  .mk{display:flex; gap:3px; flex-wrap:nowrap;}
+  .mk button{font:inherit; font-size:13px; min-width:34px; padding:2px 6px; cursor:pointer; border:1px solid #b9cfc3; border-radius:6px; background:#fff; color:var(--ink);}
+  .mk button[aria-pressed="true"]{background:var(--green); color:#fff; border-color:var(--green);}
+  .mk button.dy[aria-pressed="true"]{background:var(--accent); border-color:var(--accent);}
+  .legend{font-size:13px; color:var(--teach); margin:6px 0 8px;}
+  .nums{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px 12px;}
+  .nums label{display:block; font-size:13px; color:var(--teach);}
+  .nums input{font:inherit; font-size:15px; width:100%; padding:6px 8px; border:1px solid #b9cfc3; border-radius:6px; margin-top:2px;}
+  .nums input.bad{border-color:var(--accent); background:#fff7ef;}
+  .nums input.good{border-color:var(--green); background:#f0f7f3;}
+  @media (max-width:640px){
+    .rec thead{display:none;}
+    .rec,.rec tbody,.rec tr{display:block; width:100%;}
+    .rec tr{display:grid; grid-template-columns:1fr 1fr; gap:0 8px; border:1px solid var(--line); border-radius:8px; margin:0 0 6px; padding:5px 8px; background:#fff;}
+    .rec td{border:none; padding:1px 0; display:block;}
+    .rec td[data-l]::before{content:attr(data-l) " "; color:var(--muted); font-size:12px;}
+    .rec td.wide{grid-column:1 / -1;}
+    .rec td.ctl{grid-column:1 / -1; padding-top:4px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Score a paced serial addition record</h1>
+  <p class="lede">A simulated examinee hears an invented series of single digits and says a sum after each one. Mark every response the way the record form is marked, mark the dyads, then enter the trial numbers. Every mark and number is checked against the timing and scoring rules, with the reason for each difference.</p>
+  <div class="warn"><strong>Nothing here is saved.</strong> Every series is invented and excludes the digit 7. None of the course series appears here, and T scores are not computed.</div>
+
+  <p class="chiplabel" id="lProf">Examinee profile</p>
+  <div class="chips" id="profChips" role="group" aria-labelledby="lProf"></div>
+  <p class="chiplabel" id="lLen">Series length</p>
+  <div class="chips" id="lenChips" role="group" aria-labelledby="lLen"></div>
+  <p class="chiplabel" id="lPace">Pace</p>
+  <div class="chips" id="paceChips" role="group" aria-labelledby="lPace"></div>
+
+  <div class="card">
+    <details>
+      <summary>Scoring rules used here</summary>
+      <ul class="rules">
+        <li>The examinee adds the digit just heard to the digit heard before it, never to the sum just spoken. After 8, 2, and 5 the sums are 10 and 7. Saying 15 after the 5 adds it to the sum just spoken.</li>
+        <li>A full series has 50 digits, none of them a 7. The first digit has nothing before it, so a series allows 49 sums. The four series run at 3.0, 2.4, 2.0, and 1.6 seconds per digit.</li>
+        <li>An answer is correct when it is the sum of the two most recent digits and is given before the next digit sounds. A self-correction made before the next digit sounds is credited. One made after it is not.</li>
+        <li>On the form, a correct response gets a check mark (✓). An incorrect or late response is written beside the printed sum (✗ here). An item with no response gets a line through the printed sum (Miss here).</li>
+        <li>Late answers follow the program's rule. A correct sum given after the next digit sounds is written beside the printed sum with no check mark. It counts as attempted but is not credited.</li>
+        <li>Trial score is the number correct, out of 49. The total of the four trials is out of 196.</li>
+        <li>Percentage correct of attempted and percentage attempted (attempted divided by items possible) are written on the form as a description. They are not normed.</li>
+        <li>A dyad is a correct response immediately preceded by a correct response. The first response of a series cannot be a dyad.</li>
+      </ul>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2 id="cTitle"></h2>
+    <p class="setup" id="cSetup"></p>
+    <p class="legend">Mark each item. ✓ correct and credited. ✗ a response that is not credited. Miss for no response. D marks a dyad. Times are seconds from the first digit.</p>
+    <table class="rec" id="rec"></table>
+  </div>
+
+  <div class="card">
+    <h2>Trial numbers</h2>
+    <div class="nums">
+      <label>Trial correct (of <span id="possA"></span>)<input id="nCorrect" inputmode="decimal" autocomplete="off"></label>
+      <label>Items attempted<input id="nAtt" inputmode="decimal" autocomplete="off"></label>
+      <label>Percentage correct of attempted<input id="nPctC" inputmode="decimal" autocomplete="off"></label>
+      <label>Percentage attempted<input id="nPctA" inputmode="decimal" autocomplete="off"></label>
+      <label>Dyads<input id="nDyad" inputmode="decimal" autocomplete="off"></label>
+    </div>
+    <p class="small">Enter percentages as whole numbers or with decimals. Rounding to the nearest whole percent is accepted.</p>
+    <div class="nav">
+      <button class="b primary" id="check" type="button">Check marks and numbers</button>
+      <button class="b secondary" id="newSeries" type="button">New series</button>
+      <button class="b secondary" id="clear" type="button">Clear marks</button>
+    </div>
+    <div class="fb hidden" id="fb" aria-live="polite"></div>
+  </div>
+
+  <div class="card hidden" id="qCard">
+    <h2>Decision</h2>
+    <p class="q" id="q"></p>
+    <div class="opts" id="opts"></div>
+    <div class="fb hidden" id="qfb" aria-live="polite"></div>
+    <div class="nav"><button class="b primary hidden" id="qNext" type="button">Next question</button></div>
+  </div>
+
+  <p class="status" id="status" aria-live="polite"></p>
+  <p class="small" id="seedLine"></p>
+  <p class="small">Rules are paraphrased from the sources cited on the Canvas page. Use the program's administration sheet during a real administration.</p>
+</div>
+<script>
+(function(){
+var PACES=[30,24,20,16]; // tenths of a second per digit, series 1 to 4
+var DIGITS=[1,2,3,4,5,6,8,9]; // the digit 7 is excluded
+var PROF={
+  steady:{label:"Steady", who:"Mr. Edward Lyle", short:"Mr. Lyle", age:66, pace:0,
+    setup:"works at an even pace."},
+  slows:{label:"Slows at faster paces", who:"Ms. Helen Pierce", short:"Ms. Pierce", age:74, pace:2,
+    setup:"keeps up at the slower paces."},
+  alternate:{label:"Alternate-answer strategy", who:"Mr. Victor Hall", short:"Mr. Hall", age:63, pace:3,
+    setup:"kept up well on the first series."},
+  misunderstood:{label:"Misunderstood instructions", who:"Ms. Alice Turner", short:"Ms. Turner", age:81, pace:0, lock:true,
+    setup:"said she understood the sample sets. This profile runs in series 1, the only trial during which the sheet allows stopping for a misunderstanding."}
+};
+var PKEYS=["steady","slows","alternate","misunderstood"];
+// behavior probabilities: ok, wrong sum, running total, late, self-correct before next digit, self-correct after, omission
+var BEH=["ok","wrong","run","late","scB","scA","omit"];
+var STEADY=[0.80,0.05,0.03,0.03,0.04,0.02,0.03];
+var SLOW_FAST=[0.42,0.08,0.06,0.12,0.03,0.06,0.23];
+var ALT_ENTER=[0.02,0.08,0.30,0.55];
+
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; var t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function probs(profile,p){
+  if(profile==="slows"){ var f=p/3; return STEADY.map(function(v,j){ return v+(SLOW_FAST[j]-v)*f; }); }
+  return STEADY;
+}
+
+// Generate an invented response record. Times are integers in tenths of a second from the first digit.
+function generate(seed, profile, len, paceIdx){
+  var rnd=mulberry32(seed>>>0);
+  var ri=function(a,b){ return a+Math.floor(rnd()*(b-a+1)); };
+  var isi=PACES[paceIdx];
+  var d=[]; for(var i=0;i<len;i++) d.push(DIGITS[ri(0,DIGITS.length-1)]);
+  var items=[], busy=0, lastSpoken=null, altLeft=0, altSkip=0;
+  var K = profile==="misunderstood" ? (len===12?6:10) : 0;
+  function wrongVal(s){ var opts=[-3,-2,-1,1,2,3].map(function(x){return s+x;}).filter(function(v){return v>=1;}); return opts[ri(0,opts.length-1)]; }
+  function draw(){ var pr=probs(profile,paceIdx), r=rnd(), acc=0; for(var j=0;j<pr.length;j++){ acc+=pr[j]; if(r<acc) return BEH[j]; } return "ok"; }
+  for(var k=1;k<len;k++){
+    var t=k*isi, next=(k<len-1)?(k+1)*isi:null, sum=d[k-1]+d[k], beh;
+    var it={n:k+1, digit:d[k], at:t, next:next, sum:sum, said:null, saidAt:null, corr:null, corrAt:null, beh:null, pauseAfter:false};
+    if(K && k+1<=K){
+      // adds non-overlapping pairs: 1st+2nd, 3rd+4th, ...
+      if((k+1)%2===0){ beh = rnd()<0.1 ? "pairWrong" : "pair"; } else beh="omit";
+      if(k+1===K) it.pauseAfter=true;
+    } else if(profile==="alternate" && (altLeft>0 || rnd()<ALT_ENTER[paceIdx])){
+      if(altLeft<=0){ altLeft=ri(6,14); altSkip=0; }
+      if(altSkip>0){ beh="omit"; altSkip--; } else { beh="ok"; altSkip=ri(1,2); }
+      altLeft--;
+    } else beh=draw();
+    // realize the behavior, respecting the earliest moment the examinee can speak again
+    var lo, hi=(next!==null?next-2:t+isi-2);
+    if(beh==="run"){ if(lastSpoken===null || lastSpoken+d[k]===sum) beh="wrong"; }
+    if(beh==="late" && next===null) beh="ok";
+    if(beh==="scA" && next===null) beh="scB";
+    if(beh==="ok"||beh==="wrong"||beh==="run"||beh==="pair"||beh==="pairWrong"){
+      lo=Math.max(t+7,busy);
+      if(lo>hi){ beh="omit"; }
+      else {
+        it.saidAt=ri(lo,hi);
+        it.said = (beh==="ok"||beh==="pair") ? sum : (beh==="run" ? lastSpoken+d[k] : wrongVal(sum));
+      }
+    } else if(beh==="late"){
+      lo=Math.max(next+1,busy); it.saidAt=ri(lo,lo+7); it.said=sum;
+    } else if(beh==="scB"){
+      lo=Math.max(t+5,busy); var top=(next!==null?next-1:t+isi+15);
+      if(lo+2>top){ beh="omit"; }
+      else { it.saidAt=ri(lo,Math.min(top-2,lo+6)); it.said=wrongVal(sum); it.corrAt=ri(it.saidAt+2,Math.min(top,it.saidAt+6)); it.corr=sum; }
+    } else if(beh==="scA"){
+      lo=Math.max(t+6,busy);
+      if(lo>next-2){ beh="omit"; }
+      else { it.saidAt=ri(lo,next-2); it.said=wrongVal(sum); it.corrAt=ri(Math.max(next+1,it.saidAt+2),next+6); it.corr=sum; }
+    }
+    it.beh=beh;
+    if(it.said!==null){ var lastAt=it.corrAt!==null?it.corrAt:it.saidAt; busy=lastAt+4; lastSpoken=it.corr!==null?it.corr:it.said; }
+    if(it.pauseAfter){ busy=0; }
+    items.push(it);
+  }
+  return {seed:seed>>>0, profile:profile, len:len, pace:paceIdx, isi:isi, digits:d, items:items};
+}
+
+// Score a record from its observable content only (values and times).
+function scoreRecord(rec){
+  var out=[], prevCorrect=false, c=0, a=0, dy=0;
+  rec.items.forEach(function(it,k){
+    var attempted = it.said!==null, fin=null;
+    if(attempted){
+      if(it.next===null || it.saidAt<it.next) fin=it.said;
+      if(it.corr!==null && (it.next===null || it.corrAt<it.next)) fin=it.corr;
+    }
+    var correct = fin!==null && fin===it.sum;
+    var dyad = correct && k>0 && prevCorrect;
+    if(correct) c++; if(attempted) a++; if(dyad) dy++;
+    out.push({n:it.n, attempted:attempted, correct:correct, dyad:dyad, mark: correct?"ok":(attempted?"x":"miss")});
+    prevCorrect=correct;
+  });
+  var P=rec.items.length;
+  return {items:out, possible:P, correct:c, attempted:a, dyads:dy, pctCorrect: a? 100*c/a : null, pctAttempted: 100*a/P};
+}
+
+function s(t){ return (t/10).toFixed(1); }
+function lastSpokenBefore(rec,time){
+  var best=null, bt=-1;
+  rec.items.forEach(function(it){
+    if(it.said!==null && it.saidAt<time && it.saidAt>bt){ bt=it.saidAt; best=it.said; }
+    if(it.corr!==null && it.corrAt<time && it.corrAt>bt){ bt=it.corrAt; best=it.corr; }
+  });
+  return best;
+}
+// The reason an item is scored as it is, from the record alone.
+function explain(rec,k){
+  var it=rec.items[k], prevDigit=rec.digits[it.n-2], nx=it.next===null?null:s(it.next);
+  var pair=prevDigit+" and "+it.digit;
+  if(it.said===null) return "No response was given, so the printed sum gets a line through it. The item is missed and is not counted as attempted.";
+  var onFirst = it.next===null || it.saidAt<it.next;
+  var onCorr = it.corr!==null && (it.next===null || it.corrAt<it.next);
+  if(onCorr && it.corr===it.sum) return "The first answer, "+it.said+", was wrong, but the examinee corrected it to "+it.corr+" at "+s(it.corrAt)+" s, before the next digit at "+nx+" s. A self-correction made before the next digit sounds is credited.";
+  if(onFirst && it.said===it.sum && it.corr===null) return it.sum+" is the sum of "+pair+", given at "+s(it.saidAt)+" s"+(nx!==null?", before the next digit at "+nx+" s.":". It is the last digit of the series.");
+  if(!onFirst) return "The examinee said "+it.said+" at "+s(it.saidAt)+" s, after the next digit sounded at "+nx+" s. An answer is credited only if given before the next digit sounds"+(it.said===it.sum?", so a right sum given late receives no credit. The program's rule is to write a late correct answer beside the printed sum with no check mark. It counts as attempted.":". The late answer is written beside the printed sum and counts as attempted.");
+  if(it.corr!==null && !onCorr) return "The first answer, "+it.said+", was wrong. The correction to "+it.corr+" came at "+s(it.corrAt)+" s, after the next digit sounded at "+nx+" s. A self-correction made after the next digit sounds is not credited.";
+  var prevSpoken=lastSpokenBefore(rec,it.saidAt);
+  if(prevSpoken!==null && it.said===prevSpoken+it.digit) return "The examinee said "+it.said+", which adds the digit just heard ("+it.digit+") to the sum just spoken ("+prevSpoken+"). The task is the sum of the two most recent digits, "+pair+", which is "+it.sum+".";
+  return it.said+" is not the sum of "+pair+", which is "+it.sum+". Write "+it.said+" beside the printed sum.";
+}
+
+var QUESTIONS={
+  steady:[{q:"Partway through a series the examinee falls silent for several digits. What do you do?", opts:[
+    ["Say nothing, keep writing, and record the silent items as missed. Note the pattern on the form.",1,"The sheet gives no prompt for an examinee who falls silent. The instruction to pick up the addition was given before the recording started, so you keep writing."],
+    ["Pause the recording and remind the examinee to pick up the addition.",0,"Within a series the sheet allows one interruption, stopping during the first trial for an obvious misunderstanding. The pauses come between series. A pause of about 7 seconds after series 1, 2, and 3 is part of the standard administration with the course recording, and a longer pause is allowed only in extreme cases, to let the examinee calm down. Silence in the middle of a series is none of these."],
+    ["Move the playback position back a few digits so the examinee can rejoin.",0,"The recording is never rewound. Even when you stop for a misunderstanding, you begin again where you left off."],
+    ["Leave the silent items off the count of items possible.",0,"A full series allows 49 sums whatever the examinee does. Silent items stay in the count and are recorded as missed."]]}],
+  slows:[{q:"Suppose Ms. Pierce asks to stop during series 3. How is the total reported?", opts:[
+    ["Stop the recording and write the series reached and what she said. The total is a modified administration and is not compared with the full-length norms or the short-form norms.",1,"The sheet has no rule for an examinee who asks to stop, so the battery sets one. A test ended early is a modified administration. Neither the full-length norms nor the 50- and 100-item short-form norms are applied to it."],
+    ["Apply the 100-item short-form norms, since series 1 and 2 were completed.",0,"The battery rule says the short-form norms are not applied to a test ended early, even when the first two series are complete."],
+    ["Score the items not given as missed and compare the total with the full-length norms.",0,"A test ended early is a modified administration. Its total is not compared with the full-length norms."],
+    ["Keep the recording running and encourage her to finish.",0,"The battery rule is to stop the recording. Coaching once the recording is running is not part of the administration."]]},
+   {q:"Her accuracy fell as the pace quickened. What do the two percentages add?", opts:[
+    ["They describe how she worked and are written on the form. They are not normed.",1,"The sheet asks for percentage correct of attempted and percentage attempted, and both are a description. The trial score, the number correct, is the score the norms use."],
+    ["They replace the trial score when many items were missed.",0,"The trial score is always the number correct out of 49. The percentages sit beside it as a description."],
+    ["They are compared with norms to show how much she slowed.",0,"The percentages are not normed. Only the total correct is used with the norms."]]}],
+  alternate:[{q:"In the faster series most of Mr. Hall's correct responses stand alone between missed items, and the dyad count is low. What do you do?", opts:[
+    ["Record the pattern as an observation beside the trial score and dyad count. The series total reflects a changed task, and your supervisor will want to know it.",1,"This is the alternate answer strategy, adding two digits, letting one go by, and adding the next two. The total can stay respectable while the examinee no longer does the task as instructed, and the dyad count falls when the strategy is used."],
+    ["Pause the recording and repeat the instructions.",0,"The sheet allows stopping within a series only during the first trial, for an obvious misunderstanding. The pause of about 7 seconds between series is part of the standard administration, and a longer pause is only for an examinee who needs to calm down. A change of strategy in a later series is recorded, not corrected."],
+    ["Credit only the responses that are dyads.",0,"The trial score is the number correct. Every correct sum given before the next digit receives credit, whether or not it is a dyad."],
+    ["Treat the series total as equal to a total obtained by adding every pair.",0,"The total can stay respectable while the examinee is no longer doing the task as instructed. The dyad count shows the difference."]]}],
+  misunderstood:[{q:"In series 1 Ms. Turner adds the first and second digits, then the third and fourth. What do you do?", opts:[
+    ["Pause the recording, explain the task again, then press play without rewinding.",1,"The sheet allows stopping the tape during the first trial when the examinee has obviously misunderstood, and names this pattern. It says not to rewind but to begin again where you left off. On the digital file that means pause, then play from the same point."],
+    ["Pause, explain the task again, and move back to the first digit of the series.",0,"The sheet says not to rewind. Begin again where you left off."],
+    ["Wait until the end of series 1 and explain the task again between trials.",0,"The provision for a misunderstanding applies during the first trial, so you stop once the misunderstanding is obvious. The pause between trials is something else. A pause of about 7 seconds after series 1, 2, and 3 is part of the standard administration with the course recording, and a longer pause is allowed only in extreme cases, to let the examinee calm down."],
+    ["Coach her aloud on each digit without stopping the recording.",0,"Coaching during a series is not among the interruptions the sheet allows. Its provision for a misunderstanding is to stop the tape during the first trial."]]},
+   {q:"How are her pair sums before the pause scored?", opts:[
+    ["Each pair sum that is the sum of the two most recent digits, given before the next digit, is credited. None is a dyad, because none is immediately preceded by a correct response.",1,"Sums given before the pause are scored by the usual rule. After the third and fourth digits, their sum is the sum of the two most recent digits, which is the scoring rule. The item before each pair sum had no response, and the first response of a series cannot be a dyad."],
+    ["None is credited, because she misunderstood the instructions.",0,"Credit depends on the response, the sum of the two most recent digits given before the next digit sounds. A pair sum given after the second digit of the pair meets it."],
+    ["Each pair sum is credited, and so is the silent item before it.",0,"An item with no response gets a line through the printed sum and no credit."]]}]
+};
+
+var el=function(id){return document.getElementById(id);};
+function esc(x){return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function newSeed(){ return (Math.floor(Math.random()*900000)+100000); }
+
+var cfg={profile:"steady", len:12, pace:0, seed:newSeed()};
+var rec, marks, checked=false, qi=0, qTried=false, qShown=false;
+var stats={marks:[0,0], nums:[0,0], dec:[0,0]}, doneProf={};
+
+function parseHash(){
+  var h=(location.hash||"").replace(/^#/,""), o={};
+  h.split("&").forEach(function(p){ var kv=p.split("="); if(kv.length===2) o[decodeURIComponent(kv[0])]=decodeURIComponent(kv[1]); });
+  var c={profile:"steady", len:12, pace:null, seed:newSeed()};
+  if(PROF[o.profile]) c.profile=o.profile;
+  if(o.len==="50") c.len=50;
+  var pi=["3.0","2.4","2.0","1.6"].indexOf(o.pace); if(pi<0 && o.pace){ pi=["3","2.4","2","1.6"].indexOf(o.pace); }
+  c.pace = pi>=0 ? pi : PROF[c.profile].pace;
+  if(PROF[c.profile].lock) c.pace=0;
+  if(/^\d{1,9}$/.test(o.seed||"")) c.seed=parseInt(o.seed,10);
+  return c;
+}
+
+function chips(){
+  var pc=el("profChips"); pc.innerHTML="";
+  PKEYS.forEach(function(k){ var b=document.createElement("button"); b.type="button"; b.textContent=PROF[k].label; b.dataset.k=k;
+    b.setAttribute("aria-pressed", cfg.profile===k?"true":"false"); if(cfg.profile===k) b.classList.add("on"); if(doneProf[k]) b.classList.add("done");
+    b.addEventListener("click",function(){ cfg.profile=k; cfg.pace=PROF[k].pace; cfg.seed=newSeed(); build(); }); pc.appendChild(b); });
+  var lc=el("lenChips"); lc.innerHTML="";
+  [[12,"Warm-up, 12 digits"],[50,"Full series, 50 digits"]].forEach(function(x){ var b=document.createElement("button"); b.type="button"; b.textContent=x[1]; b.dataset.len=x[0];
+    b.setAttribute("aria-pressed", cfg.len===x[0]?"true":"false"); if(cfg.len===x[0]) b.classList.add("on");
+    b.addEventListener("click",function(){ cfg.len=x[0]; cfg.seed=newSeed(); build(); }); lc.appendChild(b); });
+  var ac=el("paceChips"); ac.innerHTML="";
+  PACES.forEach(function(p,i){ var b=document.createElement("button"); b.type="button"; b.textContent="Series "+(i+1)+", "+s(p)+" s"; b.dataset.pace=i;
+    b.setAttribute("aria-pressed", cfg.pace===i?"true":"false"); if(cfg.pace===i) b.classList.add("on");
+    if(PROF[cfg.profile].lock && i>0) b.disabled=true;
+    b.addEventListener("click",function(){ cfg.pace=i; cfg.seed=newSeed(); build(); }); ac.appendChild(b); });
+}
+
+function build(){
+  rec=generate(cfg.seed, cfg.profile, cfg.len, cfg.pace);
+  marks=rec.items.map(function(){ return {mark:null, dyad:false}; });
+  checked=false; qi=0; qShown=false;
+  chips();
+  var P=PROF[cfg.profile];
+  el("cTitle").textContent=P.label+", series "+(cfg.pace+1)+", "+(cfg.len===12?"warm-up":"full series");
+  el("cSetup").textContent=P.who+", "+P.age+", hears "+cfg.len+" invented digits, one every "+s(rec.isi)+" s. "+P.short+" "+P.setup+" "+(cfg.len===12?"A 12-digit series allows 11 sums.":"A 50-digit series allows 49 sums.");
+  el("possA").textContent=rec.items.length;
+  el("seedLine").textContent="Invented series number "+rec.seed+".";
+  ["nCorrect","nAtt","nPctC","nPctA","nDyad"].forEach(function(id){ el(id).value=""; el(id).className=""; });
+  el("fb").className="fb hidden"; el("fb").innerHTML="";
+  el("qCard").classList.add("hidden");
+  renderRec(); status(); report();
+}
+
+function renderRec(){
+  var h='<thead><tr><th scope="col">Digit</th><th scope="col">Heard</th><th scope="col">Sounded</th><th scope="col">Printed sum</th><th scope="col">Examinee said</th><th scope="col">Self-correction</th><th scope="col">Next digit</th><th scope="col">Mark</th></tr></thead><tbody>';
+  h+='<tr class="first"><td class="n" data-l="Digit">1</td><td data-l="Heard">'+rec.digits[0]+'</td><td data-l="Sounded">0.0 s</td><td class="wide" colspan="5">No sum. The first digit has nothing before it.</td></tr>';
+  rec.items.forEach(function(it,k){
+    var said = it.said===null ? "No response" : it.said+" at "+s(it.saidAt)+" s";
+    var corr = it.corr===null ? "None" : it.corr+" at "+s(it.corrAt)+" s";
+    var nx = it.next===null ? "None, last digit" : s(it.next)+" s";
+    var m=marks[k];
+    function mb(v,txt,lab){ return '<button type="button" data-k="'+k+'" data-v="'+v+'" aria-label="Digit '+it.n+', '+lab+'" aria-pressed="'+(m.mark===v)+'">'+txt+'</button>'; }
+    h+='<tr id="r'+k+'"><td class="n" data-l="Digit">'+it.n+'</td><td data-l="Heard">'+it.digit+'</td><td data-l="Sounded">'+s(it.at)+' s</td><td data-l="Printed sum">'+it.sum+'</td>'+
+       '<td data-l="Said">'+esc(said)+'</td><td data-l="Correction">'+esc(corr)+'</td><td data-l="Next digit">'+nx+'</td>'+
+       '<td class="ctl"><div class="mk">'+mb("ok","✓","correct")+mb("x","✗","not credited")+mb("miss","Miss","no response")+
+       '<button type="button" class="dy" data-k="'+k+'" data-v="dyad" aria-label="Digit '+it.n+', dyad" aria-pressed="'+m.dyad+'">D</button></div></td></tr>';
+    if(it.pauseAfter) h+='<tr class="pause"><td class="wide" colspan="8">The examiner paused the recording here and then pressed play again. Times stay on the recording\'s clock.</td></tr>';
+  });
+  el("rec").innerHTML=h+'</tbody>';
+}
+
+el("rec").addEventListener("click",function(e){
+  var b=e.target.closest("button[data-k]"); if(!b) return;
+  var k=+b.dataset.k, v=b.dataset.v;
+  if(v==="dyad"){ marks[k].dyad=!marks[k].dyad; b.setAttribute("aria-pressed",String(marks[k].dyad)); }
+  else { marks[k].mark = marks[k].mark===v ? null : v;
+    Array.prototype.forEach.call(b.parentNode.querySelectorAll("button:not(.dy)"),function(x){ x.setAttribute("aria-pressed",String(marks[k].mark===x.dataset.v)); }); }
+  report();
+});
+
+var MARKWORD={ok:"correct (✓)", x:"not credited (✗)", miss:"no response (Miss)"};
+function num(id){ var v=el(id).value.replace(/%/g,"").trim(); if(v==="") return null; var n=Number(v); return isFinite(n)?n:NaN; }
+function f1(x){ return (Math.round(x*10)/10).toString(); }
+
+function check(){
+  var key=scoreRecord(rec), issues=[], markRight=0;
+  rec.items.forEach(function(it,k){
+    var km=key.items[k], m=marks[k], ok=true, row=el("r"+k), lab="Digit "+it.n+". ";
+    if(m.mark===null){ ok=false; issues.push(lab+"Not marked. The key is "+MARKWORD[km.mark]+". "+explain(rec,k)); }
+    else if(m.mark!==km.mark){ ok=false; issues.push(lab+"You marked it "+MARKWORD[m.mark]+". The key is "+MARKWORD[km.mark]+". "+explain(rec,k)); }
+    if(m.dyad!==km.dyad){ ok=false;
+      var why;
+      if(km.dyad) why="It is correct and the item before it is correct, so it is a dyad.";
+      else if(!km.correct) why="It is not correct, so it cannot be a dyad.";
+      else if(k===0) why="It is the first response of the series, which cannot be a dyad.";
+      else why="The item before it was not correct, so this correct response is not a dyad.";
+      issues.push(lab+(m.dyad?"You marked a dyad. ":"You did not mark a dyad. ")+why); }
+    if(ok) markRight++;
+    row.classList.toggle("bad",!ok); row.classList.toggle("good",ok);
+  });
+  // what the student's own marks imply
+  var own={c:0,a:0,d:0}; marks.forEach(function(m){ if(m.mark==="ok") own.c++; if(m.mark==="ok"||m.mark==="x") own.a++; if(m.dyad) own.d++; });
+  var P=key.possible, numRight=0;
+  function chk(id,expect,exact,label,why,ownVal){
+    var v=num(id), good;
+    if(expect===null){ good = (v===null || el(id).value.trim()==="" ); }
+    else good = v!==null && !isNaN(v) && (exact ? v===expect : Math.abs(v-expect)<=0.5+1e-9);
+    el(id).className = good?"good":"bad";
+    if(good) numRight++;
+    else { var shown = expect===null ? "no value" : (exact?expect:f1(expect)+"%");
+      var msg=label+". "+(v===null?"Not entered.":"You entered "+el(id).value.trim()+".")+" The key is "+shown+". "+why;
+      if(ownVal!==undefined && v!==null && !isNaN(v) && (exact ? v===ownVal : Math.abs(v-ownVal)<=0.5+1e-9) && ownVal!==expect) msg+=" Your number matches your own marks, so the difference is in the marks above.";
+      issues.push(msg); }
+  }
+  chk("nCorrect",key.correct,true,"Trial correct","The trial score is the number of items credited, out of "+P+".",own.c);
+  chk("nAtt",key.attempted,true,"Items attempted","Attempted counts every item with a response, credited or not. Only items with no response are left out.",own.a);
+  chk("nPctC",key.pctCorrect,false,"Percentage correct of attempted",key.attempted?"Divide the number correct by the number attempted, "+key.correct+" of "+key.attempted+", which is "+f1(key.pctCorrect)+"%.":"No item was attempted, so there is nothing to divide by.", own.a?100*own.c/own.a:undefined);
+  chk("nPctA",key.pctAttempted,false,"Percentage attempted","Divide the number attempted by the items possible, "+key.attempted+" of "+P+", which is "+f1(key.pctAttempted)+"%.",100*own.a/P);
+  chk("nDyad",key.dyads,true,"Dyads","A dyad is a correct response immediately preceded by a correct response. Count the items that qualify.",own.d);
+  if(!checked){ stats.marks[0]+=markRight; stats.marks[1]+=rec.items.length; stats.nums[0]+=numRight; stats.nums[1]+=5; checked=true; }
+  var fb=el("fb");
+  if(!issues.length){ fb.className="fb ok"; fb.innerHTML="<strong>All marks and numbers match the key.</strong> "+key.correct+" of "+P+" correct, "+key.attempted+" attempted, "+key.dyads+" dyads."; doneProf[cfg.profile]=true; chips(); }
+  else { fb.className="fb"; fb.innerHTML="<strong>"+issues.length+(issues.length===1?" difference.":" differences.")+"</strong> "+markRight+" of "+rec.items.length+" items fully right. Fix the rows shaded in orange and check again.<ul>"+issues.map(function(x){return "<li>"+esc(x)+"</li>";}).join("")+"</ul>"; }
+  if(!qShown){ qShown=true; qi=0; showQ(); }
+  status(); report();
+  return {issues:issues.length, markRight:markRight, numRight:numRight};
+}
+
+function showQ(){
+  var qs=QUESTIONS[cfg.profile], Q=qs[qi]; qTried=false;
+  el("qCard").classList.remove("hidden");
+  el("q").textContent="Question "+(qi+1)+" of "+qs.length+". "+Q.q;
+  var o=el("opts"); o.innerHTML="";
+  shuffle(Q.opts.slice()).forEach(function(op){ var b=document.createElement("button"); b.type="button"; b.textContent=op[0]; b.addEventListener("click",function(){ choose(b,op); }); o.appendChild(b); });
+  el("qfb").className="fb hidden"; el("qfb").innerHTML=""; el("qNext").classList.add("hidden");
+  report();
+}
+function choose(b,op){
+  if(!qTried){ qTried=true; stats.dec[1]++; if(op[1]) stats.dec[0]++; }
+  var fb=el("qfb");
+  if(op[1]){
+    b.classList.add("right"); Array.prototype.forEach.call(el("opts").children,function(x){x.disabled=true;});
+    fb.className="fb ok"; fb.innerHTML="<strong>Right.</strong> "+esc(op[2]);
+    var qs=QUESTIONS[cfg.profile];
+    if(qi<qs.length-1){ el("qNext").textContent="Next question"; el("qNext").classList.remove("hidden"); }
+    else { el("qNext").textContent="New series"; el("qNext").classList.remove("hidden"); }
+  } else {
+    b.classList.add("wrong"); b.disabled=true;
+    fb.className="fb"; fb.innerHTML="<strong>Not this one.</strong> "+esc(op[2])+" Try again.";
+  }
+  status(); report();
+}
+el("qNext").addEventListener("click",function(){ var qs=QUESTIONS[cfg.profile]; if(qi<qs.length-1){ qi++; showQ(); } else { cfg.seed=newSeed(); build(); } });
+
+function status(){
+  var t=stats.marks[1]+stats.nums[1]+stats.dec[1];
+  el("status").textContent = t ? "First try this session. Item marks "+stats.marks[0]+" of "+stats.marks[1]+", trial numbers "+stats.nums[0]+" of "+stats.nums[1]+", decisions "+stats.dec[0]+" of "+stats.dec[1]+"." : "First-try accuracy appears here after your first check.";
+}
+
+el("check").addEventListener("click",check);
+el("newSeries").addEventListener("click",function(){ cfg.seed=newSeed(); build(); });
+el("clear").addEventListener("click",function(){ marks=rec.items.map(function(){return {mark:null,dyad:false};}); renderRec(); el("fb").className="fb hidden"; report(); });
+
+function report(){ try{ parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:document.documentElement.scrollHeight}),'*'); }catch(e){} }
+window.addEventListener("load",report); window.addEventListener("resize",report);
+window.addEventListener("hashchange",function(){ cfg=parseHash(); build(); });
+
+window.__tool={
+  profiles:PROF, questions:QUESTIONS, paces:PACES, generate:generate, score:scoreRecord, explain:explain, check:check,
+  get record(){ return rec; },
+  state:function(){ return {profile:cfg.profile, len:cfg.len, pace:cfg.pace, seed:cfg.seed, marks:JSON.parse(JSON.stringify(marks)), checked:checked, question:qi, stats:JSON.parse(JSON.stringify(stats))}; }
+};
+cfg=parseHash(); build();
+})();
+</script>
+</body>
+</html>

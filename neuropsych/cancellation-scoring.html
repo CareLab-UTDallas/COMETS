@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Score a Cancellation Sheet</title>
+<style>
+  :root{--bg:#ffffff; --card:#f7faf8; --ink:#17251d; --muted:#41544a; --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b; --ok:#2f6b4f; --okbg:#e8f3ec; --no:#9a3412; --nobg:#fbeee6;}
+  *{box-sizing:border-box;}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.55;}
+  .wrap{max-width:820px; margin:0 auto; padding:14px 14px 16px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:22px; margin:0 0 4px;}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
+  .warn{font-size:13px; color:#7a3d00; background:#fff3e6; border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px; margin:0 0 10px;}
+  .tabs{display:flex; flex-wrap:wrap; gap:4px; margin:0 0 8px;}
+  .tabs button{font:inherit; font-size:14px; cursor:pointer; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--green); padding:5px 12px;}
+  .tabs button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .tabs button.done:not(.on){border-color:#9cc3ae; background:#eef4f1;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px;}
+  .eyebrow{font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:var(--accent); margin:0 0 2px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:18px; margin:0 0 4px;}
+  .facts{font-size:14px; color:var(--teach); margin:0 0 8px;}
+  .sheet{background:#fff; border:1px solid var(--line); border-radius:6px; padding:4px; overflow-x:auto;}
+  .sheet svg{display:block; width:100%; min-width:520px; height:auto;}
+  .legend{font-size:12.5px; color:var(--muted); margin:6px 0 10px;}
+  .toggles{display:flex; flex-wrap:wrap; gap:14px; font-size:14px; margin:0 0 10px;}
+  .toggles label{display:flex; gap:6px; align-items:center; cursor:pointer;}
+  .toggles input{accent-color:var(--green);}
+  fieldset{border:1px solid var(--line); border-radius:8px; background:#fff; margin:0 0 10px; padding:8px 12px 10px;}
+  legend{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:15px; padding:0 4px;}
+  .nums{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:8px;}
+  .nums label{display:grid; gap:2px; font-size:13px; color:var(--muted); font-weight:600;}
+  input[type=number]{font:inherit; font-size:15px; width:100%; padding:6px 8px; border:1px solid var(--line); border-radius:6px; color:var(--ink);}
+  .yn{display:grid; gap:6px; font-size:14px;}
+  .yn .q{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px;}
+  .seg{display:flex; gap:4px;}
+  .seg button{font:inherit; font-size:13.5px; cursor:pointer; border:1px solid #cfe0d7; border-radius:6px; background:#fff; color:var(--green); padding:4px 10px;}
+  .seg button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .fb{margin:10px 0 0; border-radius:8px; border:1px solid var(--line); background:#fff; padding:10px 12px; font-size:14px; color:var(--teach);}
+  .fb h3{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:16px; margin:0 0 6px;}
+  .fb p{margin:0 0 5px;}
+  .tag{display:inline-block; font-size:12px; font-weight:600; border-radius:99px; padding:1px 8px; margin-right:6px;}
+  .tag.ok{background:var(--okbg); color:var(--ok);}
+  .tag.no{background:var(--nobg); color:var(--no);}
+  .nav{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0 0;}
+  button.b{font:inherit; font-size:15px; cursor:pointer; border-radius:8px; padding:9px 16px;}
+  .primary{background:var(--green); color:#eef4f1; border:1px solid var(--green);}
+  .secondary{background:#eef4f1; color:var(--green); border:1px solid #cfe0d7;}
+  button.b:disabled{opacity:.45; cursor:default;}
+  button:focus-visible,input:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .status{font-size:13px; color:var(--muted);}
+  .ref{font-size:12.5px; color:var(--muted); margin:8px 0 0;}
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Score a cancellation sheet</h1>
+  <p class="lede">Each case shows an examiner's scoring sheet after a completed test. The layout is an original practice sheet with the same logic as the published cancellation sheet, seven hidden columns with five targets each, and it is not the published stimulus. Count the omissions, apply both norm sets, and name the search route. As on the Canvas page, a search still running at 5 minutes is stopped and recorded as 300 s.</p>
+  <div class="warn"><strong>Nothing here is saved.</strong> Keep the Canvas page open for the age-and-schooling norm table and the original criteria.</div>
+  <div class="tabs" id="tabs"></div>
+  <div class="card">
+    <p class="eyebrow" id="eyebrow"></p>
+    <h2 id="title"></h2>
+    <p class="facts" id="facts"></p>
+    <div class="toggles">
+      <label><input type="checkbox" id="showCols"> Show the hidden columns</label>
+      <label><input type="checkbox" id="showRoute"> Connect the targets in circling order</label>
+    </div>
+    <div class="sheet" id="sheet"></div>
+    <p class="legend">Circled targets carry the examiner's order number. Numbers in a box were circled after the single prompt. A target with no circle was omitted. Column lines and the route are off until you turn them on.</p>
+
+    <fieldset><legend>Counts</legend>
+      <div class="nums">
+        <label for="n-circ">Targets circled (of 35)<input type="number" id="n-circ" min="0" max="35"></label>
+        <label for="n-left">Left omissions (3 left columns)<input type="number" id="n-left" min="0" max="15"></label>
+        <label for="n-right">Right omissions (3 right columns)<input type="number" id="n-right" min="0" max="15"></label>
+        <label for="n-center">Center-column omissions<input type="number" id="n-center" min="0" max="5"></label>
+        <label for="n-prompt">Targets found after the prompt<input type="number" id="n-prompt" min="0" max="35"></label>
+      </div>
+    </fieldset>
+    <fieldset><legend>Classification</legend>
+      <div class="yn" id="yn"></div>
+    </fieldset>
+    <div class="fb hidden" id="fb"></div>
+  </div>
+  <div class="nav">
+    <button class="b secondary" id="back" type="button">Back</button>
+    <button class="b secondary" id="next" type="button">Next</button>
+    <button class="b primary" id="check" type="button">Check my scoring</button>
+    <span class="status" id="status"></span>
+  </div>
+  <p class="ref">Criteria from the test's original authors (1989) and from a 2019 age-and-schooling norm study, as taught on the Canvas page. Practice cases are invented.</p>
+</div>
+<script>
+// ----- layout -----
+function rng(seed){ var a=seed>>>0; return function(){ a|=0; a=a+0x6D2B79F5|0; var t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+var W=700, H=520, COLW=W/7, TOP=26, BOT=H-18;
+function layout(){
+  var r=rng(20260926), items=[], targets=[];
+  for(var c=0;c<7;c++){
+    var placed=[];
+    function ok(x,y){ return placed.every(function(p){ return Math.hypot(p[0]-x,p[1]-y)>34; }); }
+    // five targets, spread down the column
+    for(var k=0;k<5;k++){
+      var band=(BOT-TOP)/5, tries=0, x, y;
+      do{ x=c*COLW+14+r()*(COLW-28); y=TOP+k*band+14+r()*(band-28); tries++; }while(!ok(x,y)&&tries<200);
+      placed.push([x,y]); targets.push({c:c,k:k,x:x,y:y});
+    }
+    for(var d=0;d<13;d++){
+      var tries2=0, x2, y2;
+      do{ x2=c*COLW+12+r()*(COLW-24); y2=TOP+10+r()*(BOT-TOP-20); tries2++; }while(!ok(x2,y2)&&tries2<300);
+      if(tries2<300){ placed.push([x2,y2]); items.push({x:x2,y:y2,t:Math.floor(r()*5),rot:(r()-.5)*30}); }
+    }
+  }
+  return {targets:targets, items:items};
+}
+var L=layout();
+function targetIcon(x,y){ return '<g transform="translate('+x.toFixed(1)+' '+y.toFixed(1)+')"><path d="M-7 5 Q-7 -8 0 -9 Q7 -8 7 5 L9 7 L-9 7 Z" fill="#1c1c1c"/><circle cx="0" cy="9" r="2.2" fill="#1c1c1c"/><rect x="-1.2" y="-12" width="2.4" height="3.5" fill="#1c1c1c"/></g>'; }
+function distractor(o){
+  var s='<g transform="translate('+o.x.toFixed(1)+' '+o.y.toFixed(1)+') rotate('+o.rot.toFixed(0)+')">';
+  if(o.t===0) s+='<path d="M-8 8 L-8 -1 L0 -9 L8 -1 L8 8 Z" fill="#1c1c1c"/>';
+  else if(o.t===1) s+='<path d="M0 -9 L2.6 -3 L9 -3 L4 1 L6 8 L0 4 L-6 8 L-4 1 L-9 -3 L-2.6 -3 Z" fill="#1c1c1c"/>';
+  else if(o.t===2) s+='<path d="M-9 0 Q-2 -8 6 0 Q-2 8 -9 0 Z M6 0 L10 -5 L10 5 Z" fill="#1c1c1c"/>';
+  else if(o.t===3) s+='<path d="M-1.5 9 L-1.5 2 L-8 2 L0 -9 L8 2 L1.5 2 L1.5 9 Z" fill="#1c1c1c"/>';
+  else s+='<path d="M-8 -4 L8 -4 L6 8 L-6 8 Z M-3 -4 Q-3 -9 0 -9 Q3 -9 3 -4" fill="#1c1c1c" stroke="#1c1c1c" stroke-width="1.5"/>';
+  return s+'</g>';
+}
+// ----- cases -----
+function idx(c,k){ return c*5+k; }
+function route(strategy, seed){
+  var ids=L.targets.map(function(b,i){return i;});
+  if(strategy==="vertical") return ids.sort(function(a,b){ var A=L.targets[a],B=L.targets[b]; return A.c-B.c || ((A.c%2===0)?(A.y-B.y):(B.y-A.y)); });
+  if(strategy==="horizontal") return ids.sort(function(a,b){ var A=L.targets[a],B=L.targets[b]; return A.k-B.k || ((A.k%2===0)?(A.x-B.x):(B.x-A.x)); });
+  var r=rng(seed); for(var i=ids.length-1;i>0;i--){ var j=Math.floor(r()*(i+1)); var t=ids[i]; ids[i]=ids[j]; ids[j]=t; } return ids;
+}
+var CASES=[
+ {title:"Case 1", who:"Woman, age 65, 16 years of schooling", time:118, strategy:"vertical", seed:1,
+  missed:[], prompt:[], ans:{circ:35,left:0,right:0,center:0,prompt:0, gA:false,gN:false,mT:false,mA:false,mTime:false, strat:"vertical"},
+  why:["All 35 targets were circled, so every count is 0 and no criterion is met.","For age 65 and 16 years of schooling, the age-and-schooling norms' pathological total begins at 3 and the maximum time is 225 s, so 118 s is within limits.","The route runs column by column from the upper left, one of the two organized patterns the test's authors described in healthy examinees."]},
+ {title:"Case 2", who:"Man, age 75, 13 years of schooling", time:142, strategy:"horizontal", seed:2,
+  missed:[idx(0,1),idx(1,3),idx(2,4),idx(5,2)], prompt:[idx(0,4)], ans:{circ:31,left:3,right:1,center:0,prompt:1, gA:true,gN:false,mT:true,mA:false,mTime:false, strat:"horizontal"},
+  why:["31 of 35 circled, so 4 omissions, 3 in the left columns and 1 in the right. One target was found after the prompt, the boxed number.","Original criteria. A total below 32 meets the criterion for a suspected attentional deficit. Three left omissions is fewer than the 6 needed to suspect neglect.","Age-and-schooling norms. For age 75 and 13 years of schooling, pathological omissions begin at 4, so the total is at the cutoff. The asymmetry is 3 minus 1, or 2, below the cutoff of 3. The time of 142 s is under the 230 s maximum.","The route sweeps across the sheet in rows, the other organized pattern. This is the results-line example on the Canvas page."]},
+ {title:"Case 3", who:"Woman, age 70, 8 years of schooling", time:160, strategy:"vertical", seed:3,
+  missed:[idx(0,0),idx(0,3),idx(1,2)], prompt:[], ans:{circ:32,left:3,right:0,center:0,prompt:0, gA:false,gN:false,mT:false,mA:true,mTime:false, strat:"vertical"},
+  why:["32 circled, so 3 omissions, all in the left columns.","Original criteria. A total of 32 is not below 32, and 3 is fewer than 6 on one side, so neither criterion is met.","Age-and-schooling norms. For age 70 and 8 years of schooling, pathological omissions begin at 4, so the total is within limits. The asymmetry of 3 meets the cutoff of 3 or more. The time of 160 s is under the 228 s maximum.","This is the protocol from the Predict box on the Canvas page. The two norm sets disagree, and the report names which set each statement comes from."]},
+ {title:"Case 4", who:"Man, age 80, 5 years of schooling", time:251, strategy:"disorganized", seed:44,
+  missed:[idx(0,0),idx(0,1),idx(0,2),idx(0,4),idx(1,1),idx(1,3),idx(2,0),idx(3,2),idx(6,3)], prompt:[idx(1,4),idx(2,2)], ans:{circ:26,left:7,right:1,center:1,prompt:2, gA:true,gN:true,mT:true,mA:true,mTime:true, strat:"disorganized"},
+  why:["26 circled, so 9 omissions, 7 in the left columns, 1 in the right, and 1 in the center column. Two targets were found after the prompt.","Original criteria. The total is below 32, and 7 left omissions is 6 or more on one side, so both criteria are met, a suspected attentional deficit and suspected left neglect.","Age-and-schooling norms. For age 80 and 5 years of schooling, pathological omissions begin at 4, so 9 is pathological. The asymmetry is 7 minus 1, or 6. The time of 251 s is above the 233 s maximum.","The route jumps across the sheet without a column or row plan. The test's authors warn that reading a route is subjective, so describe what you see."]},
+ {title:"Case 5", who:"Woman, age 60, 16 years of schooling", time:95, strategy:"horizontal", seed:5,
+  missed:[idx(1,0),idx(4,4)], prompt:[], ans:{circ:33,left:1,right:1,center:0,prompt:0, gA:false,gN:false,mT:false,mA:false,mTime:false, strat:"horizontal"},
+  why:["33 circled, so 2 omissions, 1 on each side.","Original criteria. A total of 33 is not below 32. Neither criterion is met.","Age-and-schooling norms. For age 60 and 16 years of schooling, pathological omissions begin at 3, so 2 is within limits. The asymmetry is 0, and 95 s is under the 222 s maximum.","The row-by-row route is organized. Two scattered omissions in a fast, organized search are common enough in healthy adults that the norm sets do not flag them."]}
+];
+var Q=[["gA","Original criteria, attentional deficit suspected (total below 32)?"],["gN","Original criteria, neglect suspected (6 or more omissions on one side)?"],["mT","Age-and-schooling norms, total omissions pathological for age and schooling?"],["mA","Age-and-schooling norms, asymmetry of 3 or more?"],["mTime","Age-and-schooling norms, time above the maximum for age?"]];
+var STRATS=[["vertical","Organized, columns"],["horizontal","Organized, rows"],["disorganized","Disorganized"]];
+
+var el=function(id){return document.getElementById(id);}, cur=0;
+var st=CASES.map(function(){return {n:{}, yn:{}, strat:null, checked:false};});
+CASES.forEach(function(c,k){ var b=document.createElement('button'); b.type='button'; b.textContent=c.title; b.addEventListener('click',function(){save(); go(k);}); el('tabs').appendChild(b); });
+Q.forEach(function(q){ var d=document.createElement('div'); d.className='q'; var s=document.createElement('span'); s.textContent=q[1]; var g=document.createElement('div'); g.className='seg'; [["yes",true],["no",false]].forEach(function(o){ var b=document.createElement('button'); b.type='button'; b.textContent=o[0]; b.dataset.k=q[0]; b.dataset.v=o[0]; b.addEventListener('click',function(){ st[cur].yn[q[0]]=o[1]; st[cur].checked=false; paint(); }); g.appendChild(b); }); d.appendChild(s); d.appendChild(g); el('yn').appendChild(d); });
+(function(){ var d=document.createElement('div'); d.className='q'; var s=document.createElement('span'); s.textContent='Scanning strategy'; var g=document.createElement('div'); g.className='seg'; STRATS.forEach(function(o){ var b=document.createElement('button'); b.type='button'; b.textContent=o[1]; b.dataset.s=o[0]; b.addEventListener('click',function(){ st[cur].strat=o[0]; st[cur].checked=false; paint(); }); g.appendChild(b); }); d.appendChild(s); d.appendChild(g); el('yn').appendChild(d); })();
+var NUMS=[["circ","n-circ"],["left","n-left"],["right","n-right"],["center","n-center"],["prompt","n-prompt"]];
+NUMS.forEach(function(p){ el(p[1]).addEventListener('input',function(){ st[cur].n[p[0]]=el(p[1]).value; st[cur].checked=false; el('fb').classList.add('hidden'); }); });
+el('showCols').addEventListener('change',function(){ drawSheet(); });
+el('showRoute').addEventListener('change',function(){ drawSheet(); });
+
+function drawSheet(){
+  var c=CASES[cur], s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Practice scoring sheet"><rect width="'+W+'" height="'+H+'" fill="#ffffff"/>';
+  s+='<circle cx="'+W/2+'" cy="'+(H-6)+'" r="4" fill="#1c1c1c"/>';
+  if(el('showCols').checked){ for(var i=1;i<7;i++) s+='<line x1="'+(i*COLW)+'" y1="6" x2="'+(i*COLW)+'" y2="'+(H-14)+'" stroke="#b8ccc2" stroke-dasharray="4 4"/>'; ["L3","L2","L1","C","R1","R2","R3"].forEach(function(t,i){ s+='<text x="'+(i*COLW+COLW/2)+'" y="16" font-size="12" fill="#6b7f74" text-anchor="middle">'+t+'</text>'; }); }
+  L.items.forEach(function(o){ s+=distractor(o); });
+  var order=route(c.strategy,c.seed).filter(function(i){ return c.missed.indexOf(i)<0 && c.prompt.indexOf(i)<0; }).concat(c.prompt);
+  if(el('showRoute').checked){ var pts=order.map(function(i){ return L.targets[i].x.toFixed(1)+','+L.targets[i].y.toFixed(1); }).join(' '); s+='<polyline points="'+pts+'" fill="none" stroke="#b35900" stroke-width="1.6" stroke-opacity=".75"/>'; }
+  L.targets.forEach(function(b){ s+=targetIcon(b.x,b.y); });
+  order.forEach(function(i,n){ var b=L.targets[i], pr=c.prompt.indexOf(i)>=0;
+    s+='<ellipse cx="'+b.x.toFixed(1)+'" cy="'+(b.y-1).toFixed(1)+'" rx="14" ry="13" fill="none" stroke="#1f4fa3" stroke-width="1.8"/>';
+    var tx=b.x+15, ty=b.y-10;
+    if(pr) s+='<rect x="'+(tx-2)+'" y="'+(ty-11)+'" width="'+(String(n+1).length*8+5)+'" height="14" fill="none" stroke="#1f4fa3" stroke-width="1.2"/>';
+    s+='<text x="'+tx.toFixed(1)+'" y="'+ty.toFixed(1)+'" font-size="12" fill="#1f4fa3" font-family="Arial,Helvetica,sans-serif">'+(n+1)+'</text>'; });
+  el('sheet').innerHTML=s+'</svg>';
+}
+function save(){ NUMS.forEach(function(p){ st[cur].n[p[0]]=el(p[1]).value; }); }
+function go(k){ cur=Math.max(0,Math.min(CASES.length-1,k)); var c=CASES[cur];
+  el('eyebrow').textContent='Case '+(cur+1)+' of '+CASES.length; el('title').textContent=c.who; el('facts').textContent='Completion time '+c.time+' s, within the 5-minute limit. '+(c.prompt.length?'The examinee stopped early, the single prompt was given, and more targets were circled afterward.':'The examinee did not stop early, so no prompt was given.');
+  NUMS.forEach(function(p){ el(p[1]).value=st[cur].n[p[0]]||''; });
+  el('showRoute').checked=false; drawSheet(); el('status').textContent=''; paint(); }
+function paint(){
+  var s=st[cur], c=CASES[cur];
+  Array.prototype.forEach.call(el('yn').querySelectorAll('button[data-k]'),function(b){ var v=s.yn[b.dataset.k]; b.classList.toggle('on', v!==undefined && ((v&&b.dataset.v==='yes')||(!v&&b.dataset.v==='no'))); });
+  Array.prototype.forEach.call(el('yn').querySelectorAll('button[data-s]'),function(b){ b.classList.toggle('on', s.strat===b.dataset.s); });
+  Array.prototype.forEach.call(el('tabs').children,function(b,j){ b.classList.toggle('on',j===cur); b.classList.toggle('done',st[j].checked); });
+  el('back').disabled=(cur===0); el('next').disabled=(cur===CASES.length-1);
+  var fb=el('fb');
+  if(!s.checked){ fb.classList.add('hidden'); report(); return; }
+  var a=c.ans, h='<h3>Expert scoring</h3>', names={circ:"Targets circled",left:"Left omissions",right:"Right omissions",center:"Center-column omissions",prompt:"Targets found after the prompt"};
+  NUMS.forEach(function(p){ var v=parseInt(s.n[p[0]],10), ok=v===a[p[0]]; h+='<p><span class="tag '+(ok?'ok':'no')+'">'+(ok?'Match':(isNaN(v)?'Blank':'You gave '+v))+'</span>'+names[p[0]]+' '+a[p[0]]+'</p>'; });
+  Q.forEach(function(q){ var v=s.yn[q[0]], ok=v===a[q[0]]; h+='<p><span class="tag '+(ok?'ok':'no')+'">'+(ok?'Match':(v===undefined?'Blank':'Check'))+'</span>'+q[1]+' '+(a[q[0]]?'Yes':'No')+'</p>'; });
+  var sname={}; STRATS.forEach(function(o){ sname[o[0]]=o[1]; }); var okS=s.strat===a.strat;
+  h+='<p><span class="tag '+(okS?'ok':'no')+'">'+(okS?'Match':'Check')+'</span>Scanning strategy '+sname[a.strat]+'</p>';
+  c.why.forEach(function(w){ h+='<p>'+w+'</p>'; });
+  fb.innerHTML=h; fb.classList.remove('hidden'); report();
+}
+el('back').addEventListener('click',function(){ save(); go(cur-1); });
+el('next').addEventListener('click',function(){ save(); go(cur+1); });
+el('check').addEventListener('click',function(){ save(); st[cur].checked=true; el('showRoute').checked=true; el('showCols').checked=true; drawSheet(); paint(); });
+function report(){ try{ parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:document.documentElement.scrollHeight}),'*'); }catch(e){} }
+window.addEventListener('load',report); window.addEventListener('resize',report);
+go(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<!--
+  Cue and Code a Picture-Naming Response (COMETS practice tool)
+  Deep links (location.hash):
+    #part=1            Part 1, Next step (cueing decisions). Add &card=N (1 to 16) to open one scenario.
+    #part=2            Part 2, Code it (C, S, P, X). Add &card=N (1 to 15).
+    #part=3            Part 3, Basal and discontinue on the full form. Add &case=A|B|C|D|new.
+    #part=4            Part 4, Short form. Add &case=A|B|C|new.
+  The target objects are invented practice targets, not test items.
+  Rules are paraphrased from the Canvas page source. Nothing is stored.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cue and Code a Picture-Naming Response</title>
+<style>
+  :root{--bg:#ffffff; --card:#f7faf8; --ink:#17251d; --muted:#41544a; --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b;}
+  *{box-sizing:border-box;}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.55;}
+  .wrap{max-width:820px; margin:0 auto; padding:14px 14px 16px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:22px; margin:0 0 4px;}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
+  .warn{font-size:13px; color:#7a3d00; background:#fff3e6; border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px; margin:0 0 10px;}
+  .chips{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 10px;}
+  .chips button{font:inherit; font-size:13px; cursor:pointer; border:1px solid #cfe0d7; border-radius:20px; background:#eef4f1; color:var(--green); padding:4px 11px;}
+  .chips button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .chips button.done:not(.on){border-color:#9cc3ae; background:#dcebe3;}
+  .tabs button{font-size:14px; padding:6px 13px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:0 0 10px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:18px; margin:0 0 6px;}
+  .setup{font-size:14px; color:var(--teach); margin:0 0 8px;}
+  .target{display:inline-block; font-size:13px; background:#eef4f1; border:1px solid #cfe0d7; border-radius:6px; padding:1px 8px; color:var(--green); margin:0 0 8px;}
+  table{border-collapse:collapse; width:100%; font-size:14px;}
+  th,td{border:1px solid #cfe0d7; padding:5px 8px; text-align:left; vertical-align:top;}
+  th{background:#eef4f1; color:var(--green); font-weight:600;}
+  .rules th{width:130px;}
+  .rec{margin:8px 0 0;}
+  .rec th:first-child{width:96px;}
+  .rec td.new{background:#fff7ef;}
+  .q{font-weight:600; margin:0 0 8px;}
+  .opts{display:flex; flex-direction:column; gap:6px;}
+  .opts button{font:inherit; font-size:15px; text-align:left; cursor:pointer; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--ink); padding:8px 12px;}
+  .opts button:hover:not(:disabled){border-color:#9cc3ae;}
+  .opts button.right{background:#e3f0e9; border-color:var(--green);}
+  .opts button.wrong{background:#fbeee4; border-color:#e3b58f; color:#6b4a2f;}
+  .opts button:disabled{cursor:default;}
+  .fb{margin:10px 0 0; padding:8px 10px; border-radius:6px; font-size:14px; color:var(--teach); background:#fff7ef; border:1px solid #f0d9c2; border-left:4px solid var(--accent);}
+  .fb.ok{background:#f0f7f3; border-color:#cfe0d7; border-left-color:var(--green);}
+  .fb strong{color:#8a4600;}
+  .fb.ok strong{color:var(--green);}
+  .fb ul{margin:4px 0 0; padding-left:18px;}
+  .fb li{margin:0 0 4px;}
+  .fb li.ok strong{color:var(--green);}
+  .nav{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0 0;}
+  button.b{font:inherit; font-size:15px; cursor:pointer; border-radius:8px; padding:9px 16px;}
+  .primary{background:var(--green); color:#eef4f1; border:1px solid var(--green);}
+  .secondary{background:#eef4f1; color:var(--green); border:1px solid #cfe0d7;}
+  .status{font-size:13px; color:var(--muted);}
+  .acc{font-size:13px; color:var(--muted); margin:0 0 10px;}
+  .hidden{display:none !important;}
+  .small{font-size:12px; color:var(--muted); margin:8px 0 0;}
+  button:focus-visible, input:focus-visible{outline:3px solid #b35900; outline-offset:2px;}
+  .order{display:flex; flex-wrap:wrap; gap:4px; margin:6px 0 10px; font-size:13px;}
+  .order span{border:1px solid #cfe0d7; border-radius:5px; padding:1px 6px; background:#fff;}
+  .order span.turn{border:none; background:none; color:var(--muted); font-style:italic; padding:1px 2px;}
+  .grid{display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); gap:4px; margin:6px 0 10px;}
+  .grid button{font:inherit; font-size:12px; line-height:1.2; cursor:pointer; min-width:0; padding:3px 0; border:1px solid #cfe0d7; border-radius:5px; background:#fff; color:var(--muted); text-align:center;}
+  .grid button b{display:block; font-size:14px; color:var(--ink); min-height:17px;}
+  .grid button.given{background:#fff;}
+  .grid button.notgiven{background:#f1f3f2;}
+  .grid button.cred{background:#e3f0e9; border-color:#9cc3ae;}
+  .grid button.basal{background:#cfe6da; border-color:var(--green);}
+  .grid button.stopL{box-shadow:inset 0 -4px 0 #1e4d3a;}
+  .grid button.stopR{box-shadow:inset 0 4px 0 #b35900;}
+  .grid button.stopL.stopR{box-shadow:inset 0 -4px 0 #1e4d3a, inset 0 4px 0 #b35900;}
+  .legend{font-size:12px; color:var(--muted); margin:0 0 8px;}
+  .fields{display:grid; grid-template-columns:1fr 1fr; gap:8px 14px; margin:6px 0 0;}
+  .fields label{display:flex; flex-direction:column; font-size:14px; color:var(--teach); gap:3px;}
+  .fields input{font:inherit; font-size:16px; width:100%; max-width:140px; padding:5px 8px; border:1px solid #b9cdc2; border-radius:6px; background:#fff; color:var(--ink);}
+  .fields input.okf{border-color:var(--green); background:#f0f7f3;}
+  .fields input.nof{border-color:#e3b58f; background:#fff7ef;}
+  .fields .grp{grid-column:1 / -1; font-weight:600; color:var(--green); font-size:14px; margin:4px 0 0;}
+  .sf{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:4px; margin:6px 0 10px;}
+  .sf div{border:1px solid #cfe0d7; border-radius:5px; background:#fff; text-align:center; font-size:12px; color:var(--muted); padding:3px 0;}
+  .sf div b{display:block; font-size:15px; color:var(--ink);}
+  @media (max-width:520px){ .fields{grid-template-columns:1fr;} .grid button{font-size:11px;} .grid button b{font-size:13px;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Cue and code a picture-naming response</h1>
+  <p class="lede">Choose the next cue and its exact words, circle the outcome, and apply the full-form and short-form rules. Each object named in a case is an invented practice target, not a test item. The Canvas page holds the published materials.</p>
+  <div class="warn"><strong>Nothing here is saved.</strong> All examinees, responses, and outcome sequences are invented.</div>
+  <div class="chips tabs" id="tabs" role="group" aria-label="Parts">
+    <button type="button" data-part="1">1. Next step</button>
+    <button type="button" data-part="2">2. Code it</button>
+    <button type="button" data-part="3">3. Basal and discontinue</button>
+    <button type="button" data-part="4">4. Short form</button>
+  </div>
+  <p class="acc" id="acc" aria-live="polite">No answers yet this session.</p>
+
+  <!-- Parts 1 and 2 share one stepper -->
+  <section id="secStep">
+    <div class="chips" id="chips" role="group" aria-label="Cases"></div>
+    <div class="card">
+      <h2 id="cTitle"></h2>
+      <span class="target" id="cTarget"></span>
+      <p class="setup" id="cSetup"></p>
+      <table class="rec" id="rec"></table>
+    </div>
+    <div class="card">
+      <p class="q" id="q"></p>
+      <div class="opts" id="opts"></div>
+      <div class="fb hidden" id="fb" aria-live="polite"></div>
+      <div class="nav">
+        <button class="b primary hidden" id="next" type="button">Next step</button>
+        <span class="status" id="status"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Part 3 -->
+  <section id="sec3" class="hidden">
+    <div class="chips" id="chips3" role="group" aria-label="Full-form cases"></div>
+    <div class="card">
+      <h2 id="t3"></h2>
+      <p class="setup" id="s3"></p>
+      <table class="rules">
+        <tr><th scope="row">Start</th><td>Item 30 for an adult, going forward.</td></tr>
+        <tr><th scope="row">Going back</th><td>An error before item 38 sends you to item 29, working backward until 8 consecutive items are named correctly without help (C). That run is the basal. Then go forward from the item after the error.</td></tr>
+        <tr><th scope="row">Credit</th><td>Items below the basal are credited as correct without being shown.</td></tr>
+        <tr><th scope="row">Stop</th><td>After 6 consecutive failures. Under the rigorous reading an X or a P is a failure. Under the lenient reading only an X is.</td></tr>
+        <tr><th scope="row">Total</th><td>C plus S, with credited items counted as correct. P never enters the total.</td></tr>
+      </table>
+      <p class="setup" style="margin-top:10px">Outcomes in the order given, as far as the lenient reading would take you</p>
+      <div class="order" id="order3"></div>
+      <p class="legend">Tap an item number to put it in the box you are filling. After a correct check, green cells are credited, darker green cells are the basal, a bar along the bottom marks the lenient stop, and an orange bar along the top marks the rigorous stop.</p>
+      <div class="grid" id="grid3"></div>
+    </div>
+    <div class="card">
+      <p class="q">Mark the record form</p>
+      <div class="fields">
+        <label>Lowest item of the basal<input id="p3-basal" inputmode="numeric" autocomplete="off"></label>
+        <label>Highest item credited without being shown (0 if none)<input id="p3-cred" inputmode="numeric" autocomplete="off"></label>
+        <div class="grp">Lenient reading (only X is a failure)</div>
+        <label>Last item given (60 if testing never stopped)<input id="p3-lastL" inputmode="numeric" autocomplete="off"></label>
+        <label>C plus S total<input id="p3-totL" inputmode="numeric" autocomplete="off"></label>
+        <div class="grp">Rigorous reading (X and P are failures)</div>
+        <label>Last item given (60 if testing never stopped)<input id="p3-lastR" inputmode="numeric" autocomplete="off"></label>
+        <label>C plus S total<input id="p3-totR" inputmode="numeric" autocomplete="off"></label>
+      </div>
+      <div class="nav">
+        <button class="b primary" id="p3-check" type="button">Check</button>
+        <button class="b secondary" id="p3-show" type="button">Show the solution</button>
+        <button class="b secondary" id="p3-new" type="button">New random case</button>
+      </div>
+      <div class="fb hidden" id="p3-fb" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- Part 4 -->
+  <section id="sec4" class="hidden">
+    <div class="chips" id="chips4" role="group" aria-label="Short-form cases"></div>
+    <div class="card">
+      <h2 id="t4"></h2>
+      <p class="setup" id="s4"></p>
+      <div class="sf" id="sf4"></div>
+    </div>
+    <div class="card">
+      <p class="q">Score the short form</p>
+      <div class="fields">
+        <label>C plus S total<input id="p4-tot" inputmode="numeric" autocomplete="off"></label>
+        <label>C count<input id="p4-c" inputmode="numeric" autocomplete="off"></label>
+        <label>S count<input id="p4-s" inputmode="numeric" autocomplete="off"></label>
+        <label>P count<input id="p4-p" inputmode="numeric" autocomplete="off"></label>
+      </div>
+      <p class="q" style="margin-top:12px">Where does testing start and stop on this form?</p>
+      <div class="opts" id="p4-opts"></div>
+      <div class="nav">
+        <button class="b primary" id="p4-check" type="button">Check</button>
+        <button class="b secondary" id="p4-new" type="button">New random case</button>
+      </div>
+      <div class="fb hidden" id="p4-fb" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <p class="small">Rules are paraphrased from the sources cited on the Canvas page. Use the manual during a real administration.</p>
+</div>
+<script>
+(function(){
+var el=function(id){return document.getElementById(id);};
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function report(){ try{ parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:document.documentElement.scrollHeight}),'*'); }catch(e){} }
+
+/* ---------- accuracy ---------- */
+var first={}; // key -> true/false (first try)
+function mark(key,ok){ if(!(key in first)) first[key]=!!ok; showAcc(); }
+function showAcc(){ var k=Object.keys(first), n=0; k.forEach(function(x){ if(first[x]) n++; }); el('acc').textContent = k.length ? ('Correct on the first try in '+n+' of '+k.length+' answers this session.') : 'No answers yet this session.'; }
+
+/* ---------- Part 1 ---------- */
+var A={
+  WAIT:"Wait. Keep the timer running and let the examinee keep trying.",
+  ANOTHER:"Ask for another name.",
+  STIM:"Give the stimulus cue.",
+  PHON:"Give the phonemic cue.",
+  REC:"Circle the outcome and turn to the next item.",
+  SHOW:"Ask the examinee to show you how it is used."
+};
+var W_PHON=[
+  ["“It starts with the sound ...” followed by only the underlined part of the word on the record form.",1,"This is the instructions' wording, and the sound you give is limited to the underlined part of the word."],
+  ["“It sounds like ...” followed by the underlined part of the word.",0,"The instructions forbid “It sounds like ...”. The required wording is “It starts with the sound ...”."],
+  ["“It starts with the sound ...” followed by the first half of the word.",0,"Say only the underlined part of the word on the record form. Giving more of the word than that is a listed error."]
+];
+function W_FRAME(resp){ return [
+  ["“It looks a little like that, but what the artist meant to draw was ...” completed with the stimulus cue phrase from the record form.",1,"For a misperception the instructions give this frame. It accepts what the examinee reported and then supplies the stimulus cue."],
+  ["“No, that is not "+resp+". Look again.”",0,"This corrects the examinee without giving the stimulus cue, and it is not the instructions' wording. Use “It looks a little like that, but what the artist meant to draw was ...” with the cue."],
+  ["“What is another name for it?”",0,"That prompt is for a close response. "+resp.charAt(0).toUpperCase()+resp.slice(1)+" is a different object, which shows the drawing was misperceived."],
+  ["“It starts with the sound ...” followed by the underlined part of the word.",0,"After a misperception the stimulus cue comes first. The phonemic cue follows it only if the name still does not come."]
+];}
+var W_ANOTHER=[
+  ["“What is another name for it?”",1,"This is the instructions' prompt for a close response."],
+  ["“Close, but that is not quite it. Try again.”",0,"The instructions give one prompt for a close response, “What is another name for it?”. Judging the answer aloud is not part of it."],
+  ["“It starts with the sound ...” followed by the underlined part of the word.",0,"The phonemic cue is not the first step after a close response. Ask “What is another name for it?” first."]
+];
+var W_STIM_DK=[
+  ["The stimulus cue phrase printed after the item on the record form.",1,"The stimulus cue is the phrase in parentheses after the item on the record form. It tells the examinee what kind of thing the picture shows."],
+  ["“It starts with the sound ...” followed by the underlined part of the word.",0,"Nothing shows that the object is recognized. The phonemic cue comes after the stimulus cue here, not in place of it."],
+  ["“What is another name for it?”",0,"That prompt is for a close response. The examinee has given no name to build on."]
+];
+var P1=[
+ {k:"a1", title:"A different object with a similar outline", target:"a padlock", setup:"Mr. Edward Lyle has been looking at the picture since you turned to it.",
+  rec:[["20 s","“A handbag. A little purse with a strap on top.” He stops and looks up at you."]],
+  steps:[
+   {q:"What do you do next?", opts:[
+     [A.STIM,1,"A handbag is a different object with a similar outline, so Mr. Lyle has misperceived the drawing. The 20 seconds have passed, and the stimulus cue is the step for misperception."],
+     [A.PHON,0,"He has not shown that he recognizes the object. The phonemic cue goes directly only after something that shows recognition, a correct description or demonstration or a phonemic paraphasia. After a misperception the stimulus cue comes first."],
+     [A.ANOTHER,0,"A handbag is not a close or more general name for a padlock. It is a different object with a similar outline, which is a misperception."],
+     [A.REC,0,"The cueing sequence is not finished. A misperception gets the stimulus cue."]]},
+   {q:"What exactly do you say?", opts:W_FRAME("a handbag")},
+   {q:"What do you do next?", add:[["After the cue","“Oh, for locking a gate. I know it now, but the word won't come.”"]], opts:[
+     [A.PHON,1,"The phonemic cue is given after the stimulus cue when the name still has not come. He now shows that he knows the object, so retrieval is the step that is failing."],
+     [A.STIM,0,"The stimulus cue has already been given. The next step in the sequence is the phonemic cue."],
+     [A.REC,0,"The sequence is not finished. Give the phonemic cue before you circle an outcome."]]},
+   {q:"What exactly do you say?", opts:W_PHON}
+  ]},
+ {k:"a2", title:"Only a part of the object", target:"a wheelbarrow", setup:"Ms. Margaret Webb studies the picture and points at its lower edge.",
+  rec:[["20 s","“A wheel. That's a wheel.” She says nothing more."]],
+  steps:[
+   {q:"What do you do next?", opts:[
+     [A.STIM,1,"Naming only a part of the object is a misperception. The 20 seconds have passed, and the stimulus cue is the step for misperception."],
+     [A.PHON,0,"Naming a part does not show that she recognizes the whole object. The phonemic cue goes directly only after something that shows recognition, a correct description or demonstration or a phonemic paraphasia."],
+     [A.ANOTHER,0,"A wheel is a part, not a close or more general name for the whole object. Naming only a part is a misperception."],
+     [A.WAIT,0,"The 20 seconds have passed and she has stopped. Waiting longer adds nothing."]]},
+   {q:"What exactly do you say?", opts:W_FRAME("a wheel")}
+  ]},
+ {k:"a3", title:"A correct description of use", target:"a colander", setup:"Ms. Helen Pierce nods as soon as the picture appears.",
+  rec:[["20 s","“You tip the pasta into it and the water runs out the little holes. I use one every week.”"]],
+  steps:[
+   {q:"What do you do next?", opts:[
+     [A.PHON,1,"A correct description shows that the object was recognized. The description is not scored as a stimulus cue, and the next step is the phonemic cue."],
+     [A.STIM,0,"The stimulus cue is only for an examinee who misperceives the picture or does not know what it is. Ms. Pierce has described it correctly."],
+     [A.ANOTHER,0,"She has given no name, close or otherwise. Her description already shows recognition, so the phonemic cue is next."],
+     [A.WAIT,0,"The 20 seconds have passed and she has stopped trying. Her description already tells you the next step."]]},
+   {q:"What exactly do you say?", opts:W_PHON}
+  ]},
+ {k:"a4", title:"A gesture with a few words", target:"a stapler", setup:"Mr. James Fuller presses the heel of his hand down twice on the table.",
+  rec:[["20 s","“Clack, clack. For the papers, you know.”"]],
+  steps:[
+   {q:"What do you do next?", opts:[
+     [A.PHON,1,"He has demonstrated the use of the object correctly, which shows it was recognized. The stimulus cue is not given, and the phonemic cue is next."],
+     [A.STIM,0,"A correct demonstration of use means the stimulus cue is not given. That cue is for misperception or not knowing the object."],
+     [A.SHOW,0,"He has already shown you. Asking again adds nothing, and the demonstration points to the phonemic cue."],
+     [A.REC,0,"The cueing sequence is not finished. After a correct demonstration, give the phonemic cue."]]},
+   {q:"What exactly do you say?", opts:W_PHON}
+  ]},
+ {k:"a5", title:"A related word", target:"a spatula", setup:"Ms. Alice Turner answers quickly.",
+  rec:[["6 s","“A ladle.” She frowns at the picture."]],
+  steps:[
+   {q:"What do you do next?", opts:[
+     [A.WAIT,1,"A related word, a ladle for a spatula, is a substitution. It is an error, not a close response, so it does not call for the prompt for another name. Only 6 seconds have passed. Let her keep trying, and if the name has not come by 20 seconds, follow the cueing sequence as usual."],
+     [A.ANOTHER,0,"A related word is a substitution, an error and not a close response. “What is another name for it?” is the prompt for a close response, a more general word for the object."],
+     [A.STIM,0,"Only 6 seconds have passed and she is still working on it. Allow 20 seconds before a stimulus cue."],
+     [A.PHON,0,"Only 6 seconds have passed. Let her keep trying before any cue."],
+     [A.REC,0,"A substitution is an error, but the item is not finished. Let her keep trying, and follow the cueing sequence if the name has not come by 20 seconds."]]},
+   {q:"What do you do next?", add:[["20 s","“Not a ladle. The flat one you slide under a pancake to turn it over.” She stops."]], opts:[
+     [A.PHON,1,"The 20 seconds have passed and the name has not come, so the cueing sequence goes on as usual. She has now described the object and its use correctly, which shows recognition. The next step is the phonemic cue, not the stimulus cue."],
+     [A.STIM,0,"The stimulus cue is for misperception or not knowing the object. She has described it correctly."],
+     [A.ANOTHER,0,"Her first answer was a substitution, not a close response, and she has now described the object. The description points to the phonemic cue."]]},
+   {q:"What exactly do you say?", opts:W_PHON}
+  ]},
+ {k:"a6", title:"A sound changed in the word", target:"a thimble", setup:"Mr. Victor Hall looks at the picture for a moment.",
+  rec:[["20 s","“A thimmel. A thimmel, for sewing.”"]],
+  steps:[
+   {q:"What do you do next?", opts:[
+     [A.PHON,1,"This is a phonemic paraphasia. Most of the target's sounds are intact. Like a correct description of use, it is evidence that he knows the object, so the next step is the phonemic cue."],
+     [A.STIM,0,"A phonemic paraphasia shows that he knows the object. The stimulus cue is for misperception or not knowing the object."],
+     [A.ANOTHER,0,"This is not a different or more general name. It is the target with a sound changed, which points to the phonemic cue."],
+     [A.REC,0,"The word he said is not the target, so the cueing sequence is not finished."]]},
+   {q:"What exactly do you say?", opts:W_PHON},
+   {q:"What do you do next?", add:[["After the cue","“A thimble. Yes, a thimble.”"]], opts:[
+     [A.REC,1,"He has named it after the phonemic cue. The sequence is finished. Circle P and write the first response in the margin as he said it."],
+     [A.STIM,0,"He has named the object. Nothing in the sequence comes after a correct name."],
+     [A.ANOTHER,0,"He has given the correct name. There is nothing left to ask."]]}
+  ]},
+ {k:"a7", title:"A close, more general word", target:"a lighthouse", setup:"Ms. Grace Dunn answers without hesitation.",
+  rec:[["5 s","“A tower.”"]],
+  steps:[
+   {q:"What do you do next?", opts:[
+     [A.ANOTHER,1,"A tower is a close, more general word for the object. Ask for another name first."],
+     [A.REC,0,"Accepting a close, general word without asking for another name is a listed error."],
+     [A.STIM,0,"A more general word shows she has seen the object correctly. The stimulus cue is for misperception or not knowing the object."],
+     [A.PHON,0,"After a close response the instructions ask for another name first."]]},
+   {q:"What exactly do you say?", opts:W_ANOTHER},
+   {q:"What do you do next?", add:[["20 s","“A tower by the sea, with a big lamp on top so the ships stay off the rocks.”"]], opts:[
+     [A.PHON,1,"She still cannot name it, and she has shown that she knows the object. The next step is the phonemic cue, not the stimulus cue."],
+     [A.STIM,0,"The stimulus cue is for misperception or not knowing the object. Her description is correct."],
+     [A.REC,0,"The sequence is not finished. A correct description points to the phonemic cue."]]},
+   {q:"What exactly do you say?", opts:W_PHON}
+  ]},
+ {k:"a8", title:"Silence, then not knowing", target:"a ladder", setup:"Mr. Leonard Price looks at the picture without speaking.",
+  rec:[["12 s","He is silent and still looking at the picture."]],
+  steps:[
+   {q:"What do you do next?", opts:[
+     [A.WAIT,1,"Allow 20 seconds before giving a stimulus cue. Only 12 have passed."],
+     [A.STIM,0,"Only 12 seconds have passed. Allow 20 seconds before giving a stimulus cue."],
+     [A.PHON,0,"Nothing he has done shows that he recognizes the object, and the 20 seconds have not passed."],
+     [A.REC,0,"He has not given a response yet. Moving on now would skip the wait and the cueing sequence."]]},
+   {q:"What do you do next?", add:[["20 s","“I don't know what that is.”"]], opts:[
+     [A.STIM,1,"He does not know what the object is, and the 20 seconds have passed. The stimulus cue is for an examinee who misperceives the picture or does not know what it is."],
+     [A.PHON,0,"He has not shown recognition by description, gesture, or a phonemic paraphasia. The phonemic cue follows the stimulus cue here."],
+     [A.ANOTHER,0,"He has given no name, so there is nothing close to ask about."]]},
+   {q:"What exactly do you say?", opts:W_STIM_DK}
+  ]},
+ {k:"a9", title:"Still trying at 20 seconds", target:"a kettle", setup:"Ms. Margaret Webb is working at the name out loud.",
+  rec:[["20 s","“It's a... the one on the stove... no, wait, I have it, it's a...” She is still searching."]],
+  steps:[
+   {q:"What do you do next?", opts:[
+     [A.WAIT,1,"Do not move on to a cue while the examinee is still working on the name. Let her keep guessing aloud."],
+     [A.STIM,0,"She is still working on the name. Cueing now is a listed error, even though 20 seconds have passed."],
+     [A.PHON,0,"She is still working on the name. Let her finish before any cue."],
+     [A.REC,0,"She has not finished. Turning the page now would cut off her answer."]]},
+   {q:"What do you do next?", add:[["31 s","“A kettle.”"]], opts:[
+     [A.REC,1,"She named it without any cue. Circle C."],
+     [A.STIM,0,"She has named the object. No cue follows a correct name."],
+     [A.ANOTHER,0,"Her answer is the target name, not a close word."]]}
+  ]},
+ {k:"a10", title:"A switch on the wall", target:"a doorbell", setup:"Mr. Edward Lyle squints at the picture.",
+  rec:[["20 s","“A light switch.” He waits."]],
+  steps:[
+   {q:"What do you do next?", opts:[
+     [A.STIM,1,"A light switch is a different object with a similar outline, a misperception. The 20 seconds have passed, so give the stimulus cue."],
+     [A.ANOTHER,0,"A light switch is a different object, not a close or more general name. This is a misperception."],
+     [A.PHON,0,"Nothing shows he recognizes the object. After a misperception the stimulus cue comes first."]]},
+   {q:"What exactly do you say?", opts:W_FRAME("a light switch")}
+  ]},
+ {k:"a11", title:"Misperceived, then described", target:"a teapot", setup:"Ms. Helen Pierce tilts her head at the picture.",
+  rec:[["20 s","“A watering can, for the garden.”"]],
+  steps:[
+   {q:"What do you do next?", opts:[
+     [A.STIM,1,"A watering can has a similar outline but is a different object, so this is a misperception. Give the stimulus cue."],
+     [A.PHON,0,"She has not shown she recognizes the object. After a misperception the stimulus cue comes first."],
+     [A.ANOTHER,0,"A watering can is a different object, not a close or more general name."]]},
+   {q:"What exactly do you say?", opts:W_FRAME("a watering can")},
+   {q:"What do you do next?", add:[["After the cue","“Oh, of course. You pour the tea out of it into the cups. The word is gone.”"]], opts:[
+     [A.PHON,1,"The phonemic cue is given after the stimulus cue when the name has not come. Her description now shows recognition."],
+     [A.STIM,0,"The stimulus cue has been given. The phonemic cue is the next step."],
+     [A.ANOTHER,0,"She has given no name to ask about. The next step in the sequence is the phonemic cue."]]},
+   {q:"What exactly do you say?", opts:W_PHON}
+  ]},
+ {k:"a12", title:"Talking around the word", target:"a paperclip", setup:"Mr. James Fuller answers slowly.",
+  rec:[["20 s","“The little bent wire you slide on to hold some pages together.”"]],
+  steps:[
+   {q:"What do you do next?", opts:[
+     [A.PHON,1,"This is a circumlocution, a correct description given in place of the name. It shows the object was recognized, so the next step is the phonemic cue."],
+     [A.STIM,0,"Giving the stimulus cue to an examinee who described the object correctly is a listed error."],
+     [A.ANOTHER,0,"He has not given a name, close or otherwise. His description points to the phonemic cue."]]},
+   {q:"What exactly do you say?", opts:W_PHON}
+  ]},
+ {k:"a13", title:"Knowing it without showing it", target:"a corkscrew", setup:"Mr. Victor Hall sighs at the picture.",
+  rec:[["20 s","“I know exactly what that is. I just can't say it.”"]],
+  steps:[
+   {q:"Which statement about your next step is right?", opts:[
+     ["You may ask the examinee to show how the object is used, or ask what it does, and neither is a stimulus cue.",1,"The instructions allow, but do not require, a question about where the object is found, what it does, or what kind of thing it is, or “Show me how you use it.” An answer to any of them is not scored as a stimulus cue, and a correct demonstration or description would show recognition."],
+     ["Give the stimulus cue.",0,"He says he knows the object, so nothing points to not knowing it or misperceiving it. The stimulus cue is for those two cases."],
+     ["Give the phonemic cue.",0,"He has claimed recognition but not shown it. The phonemic cue goes directly only when recognition is shown by description, gesture, or a phonemic paraphasia."]]},
+   {q:"You decide to ask for a demonstration. What do you say?", opts:[
+     ["“Show me how you use it.”",1,"The instructions allow this wording. The examinee's response to it is not scored as a stimulus cue."],
+     ["“It looks a little like that, but what the artist meant to draw was ...” with the stimulus cue phrase.",0,"That frame is for a misperception. He has not misperceived anything."],
+     ["“It sounds like ...” followed by the underlined part of the word.",0,"The instructions forbid this wording, and recognition has not yet been shown."]]},
+   {q:"What do you do next?", add:[["After the question","He twists one hand in the air above the other, then pulls upward. “Pop.”"]], opts:[
+     [A.PHON,1,"He has demonstrated the use correctly, which shows the object was recognized. The stimulus cue is not given, and the phonemic cue is next."],
+     [A.STIM,0,"A correct demonstration of use means the stimulus cue is not given."],
+     [A.REC,0,"The cueing sequence is not finished. A correct demonstration points to the phonemic cue."]]},
+   {q:"What exactly do you say?", opts:W_PHON}
+  ]},
+ {k:"a14", title:"A quick, correct name", target:"a rolling pin", setup:"Ms. Grace Dunn answers right away.",
+  rec:[["4 s","“A rolling pin.”"]],
+  steps:[
+   {q:"What do you do next?", opts:[
+     [A.REC,1,"She named the object correctly with no cue. Circle C and turn to the next item."],
+     [A.ANOTHER,0,"Her answer is the target name, not a close or general word. There is nothing to query."],
+     [A.WAIT,0,"The 20-second wait applies before a stimulus cue. She has already named the object correctly."]]}
+  ]},
+ {k:"a15", title:"A different shape with a slot", target:"a mailbox", setup:"Mr. Leonard Price leans toward the screen.",
+  rec:[["20 s","“A birdhouse. On a post.”"]],
+  steps:[
+   {q:"What do you do next?", opts:[
+     [A.STIM,1,"A birdhouse on a post is a different object with a similar outline. That is a misperception, and the 20 seconds have passed."],
+     [A.PHON,0,"He has not shown that he recognizes the object. After a misperception the stimulus cue comes first."],
+     [A.REC,0,"The cueing sequence is not finished. A misperception gets the stimulus cue."]]},
+   {q:"What exactly do you say?", opts:W_FRAME("a birdhouse")}
+  ]},
+ {k:"a16", title:"Choosing the words of the phonemic cue", target:"a padlock", setup:"Ms. Alice Turner has described the object correctly and still cannot name it. You are about to give the phonemic cue, and you remember how a colleague phrases it.",
+  rec:[["20 s","“The heavy thing with the loop you snap shut on a gate.”"]],
+  steps:[
+   {q:"Your colleague says “It sounds like ...” to make the cue friendlier. What do you say?", opts:[
+     ["“It starts with the sound ...” followed by only the underlined part of the word.",1,"The instructions are explicit. Do not say “It sounds like ...”. Say “It starts with the sound ...”, and give only the underlined part."],
+     ["“It sounds like ...” followed by the underlined part of the word.",0,"The instructions forbid this wording, however friendly it sounds."],
+     ["“It starts with the sound ...” followed by the underlined part and then a word that rhymes with the target.",0,"Say only the underlined part of the word on the record form. A rhyme adds a second cue the instructions do not include."]]},
+   {q:"What do you write in the margin?", opts:[
+     ["Her description as she said it, beside the item.",1,"Write each incorrect or cued response in the margin as the examinee said it. A supervisor can then check your coding and rescore the item if a rule changes."],
+     ["Nothing. The margin is only for misperceptions.",0,"The margin holds every incorrect or cued response, written as the examinee said it."],
+     ["Your own summary, such as “described it”.",0,"Write the response as the examinee said it, so a supervisor can check the coding."]]}
+  ]}
+];
+
+/* ---------- Part 2 ---------- */
+var CL={C:"C, correct without a cue",S:"S, correct after the stimulus cue",P:"P, correct after the phonemic cue",X:"X, incorrect"};
+var P2=[
+ {k:"b1", title:"Named at once", target:"a rolling pin", setup:"Mr. Edward Lyle.", rec:[["5 s","“A rolling pin.”"]], code:"C",
+  why:{C:"He named the object with no cue of any kind.",S:"No stimulus cue was given.",P:"No phonemic cue was given.",X:"The response is the correct name."}},
+ {k:"b2", title:"A misperception, then the stimulus cue", target:"a padlock", setup:"Ms. Margaret Webb.", rec:[["20 s","“A handbag.”"],["Examiner","“It looks a little like that, but what the artist meant to draw was ...” with the stimulus cue."],["After the cue","“Oh. A padlock.”"]], code:"S",
+  why:{C:"She named it only after a cue. C is correct without a cue.",S:"She misperceived the drawing, received the stimulus cue, and then named it.",P:"No phonemic cue was given. The name came after the stimulus cue.",X:"She produced the correct name after the stimulus cue, so the item is not incorrect."},
+  q2:{q:"What goes in the margin?", opts:[["“handbag”, written as she said it.",1,"Write each incorrect or cued response in the margin beside the item as the examinee said it."],["Nothing, since she named it in the end.",0,"The item was cued, and cued responses are written in the margin so a supervisor can check the coding."],["The word “misperception” only.",0,"Write the examinee's own words. The label can be added, but the response itself is what lets a supervisor rescore."]]}},
+ {k:"b3", title:"A description, then the phonemic cue", target:"a colander", setup:"Ms. Helen Pierce.", rec:[["20 s","“The bowl with holes for draining pasta.”"],["Examiner","“It starts with the sound ...” with the underlined part."],["After the cue","“A colander.”"]], code:"P",
+  why:{C:"She named it only after a cue.",S:"Her description is not scored as a stimulus cue, and no stimulus cue was given.",P:"She described it correctly, received the phonemic cue, and then named it.",X:"She produced the correct name after the phonemic cue."},
+  q2:{q:"Does this item add to the C plus S total that you compare with the short-form norms?", opts:[["No. It is reported in the P count.",1,"Phonemically cued names never enter the total. Report the P count beside the total, since the pattern of cues is part of the result."],["Yes, one point, because she named it.",0,"Phonemically cued names never enter the total."],["Half a point.",0,"There is no partial credit. P is counted separately and never enters the total."]]}},
+ {k:"b4", title:"A close word, then another name", target:"a lighthouse", setup:"Ms. Grace Dunn.", rec:[["5 s","“A tower.”"],["Examiner","“What is another name for it?”"],["9 s","“A lighthouse.”"]], code:"C",
+  why:{C:"The program's rule codes a correct name after “What is another name for it?” as C. That prompt is neither the stimulus cue nor the phonemic cue.",S:"No stimulus cue was given. The program's rule codes a correct name after “What is another name for it?” as C, since the prompt is not a cue.",P:"No phonemic cue was given.",X:"She produced the correct name."},
+  q2:{q:"What goes in the margin?", opts:[["“tower”, written as she said it.",1,"Her first response was incorrect, and incorrect responses are written in the margin as the examinee said them."],["Nothing, since no cue was given.",0,"The margin holds incorrect responses as well as cued ones. “Tower” was incorrect."]]}},
+ {k:"b5", title:"Answering what it does", target:"a corkscrew", setup:"Mr. Victor Hall.", rec:[["15 s","“I know it.”"],["Examiner","“What does it do?”"],["22 s","“It opens a wine bottle. A corkscrew!”"]], code:"C",
+  why:{C:"You may ask what the object does. An answer to that question is not scored as a stimulus cue, and he then named it with no cue.",S:"Asking what the object does is not the stimulus cue, and an answer to it is not scored as one.",P:"No phonemic cue was given.",X:"He produced the correct name."}},
+ {k:"b6", title:"A paraphasia, then the phonemic cue", target:"a thimble", setup:"Mr. James Fuller.", rec:[["20 s","“A thimmel.”"],["Examiner","“It starts with the sound ...” with the underlined part."],["After the cue","“A thimble.”"]], code:"P",
+  why:{C:"His first word was not the target. He named it only after the phonemic cue.",S:"No stimulus cue was given. A phonemic paraphasia points straight to the phonemic cue.",P:"He gave a phonemic paraphasia, received the phonemic cue, and then named it.",X:"He produced the correct name after the phonemic cue."}},
+ {k:"b7", title:"The paraphasia again after the cue", target:"a thimble", setup:"Ms. Alice Turner.", rec:[["20 s","“A thimmel.”"],["Examiner","“It starts with the sound ...” with the underlined part."],["After the cue","“Thimmel. Yes, a thimmel.”"]], code:"X",
+  why:{C:"The target name never came.",S:"No stimulus cue was given, and the name never came.",P:"She did not produce the name after the phonemic cue.",X:"She never produced the correct name, even after the phonemic cue."},
+  q2:{q:"What goes in the margin?", opts:[["“thimmel”, written as she said it.",1,"Write incorrect responses as the examinee said them. A supervisor can then see that the error kept most of the target's sounds."],["The target word, so the record shows what was meant.",0,"The margin records the examinee's words, not the target."],["Nothing. X already says it was wrong.",0,"X does not show what kind of error it was. The margin holds incorrect responses as said."]]}},
+ {k:"b8", title:"Both cues, then the name", target:"a wheelbarrow", setup:"Mr. Leonard Price.", rec:[["20 s","“A wheel.”"],["Examiner","Stimulus cue, in the misperception frame."],["After the cue","“For hauling dirt in the garden. The word is...”"],["Examiner","“It starts with the sound ...” with the underlined part."],["After the cue","“A wheelbarrow.”"]], code:"P",
+  why:{C:"He named it only after two cues.",S:"He did not name it after the stimulus cue. The name came only after the phonemic cue that followed.",P:"The name came after the phonemic cue. The code records the cue that produced the name.",X:"He produced the correct name after the phonemic cue."}},
+ {k:"b9", title:"Both cues, no name", target:"a doorbell", setup:"Ms. Helen Pierce.", rec:[["20 s","“A light switch.”"],["Examiner","Stimulus cue, in the misperception frame."],["After the cue","“A switch, then.”"],["Examiner","“It starts with the sound ...” with the underlined part."],["After the cue","“A switch. I don't know.”"]], code:"X",
+  why:{C:"The target name never came.",S:"She did not name it after the stimulus cue.",P:"She did not name it after the phonemic cue either.",X:"Neither cue produced the correct name, so the item is incorrect."}},
+ {k:"b10", title:"A demonstration, then the phonemic cue", target:"a stapler", setup:"Mr. Edward Lyle.", rec:[["20 s","He bangs his palm on the table twice. “For papers.”"],["Examiner","“It starts with the sound ...” with the underlined part."],["After the cue","“A stapler.”"]], code:"P",
+  why:{C:"He named it only after the phonemic cue.",S:"A correct demonstration means the stimulus cue is not given, and none was.",P:"He showed recognition by gesture, received the phonemic cue, and then named it.",X:"He produced the correct name after the phonemic cue."}},
+ {k:"b11", title:"A long search, then the name", target:"a kettle", setup:"Ms. Margaret Webb.", rec:[["20 s","“The one on the stove... no... wait...” Still searching."],["Examiner","Waits."],["31 s","“A kettle.”"]], code:"C",
+  why:{C:"She named it with no cue. Time alone does not change the code.",S:"No stimulus cue was given. You waited while she was still working on the name.",P:"No phonemic cue was given.",X:"She produced the correct name."}},
+ {k:"b12", title:"A related word, then the name", target:"a spatula", setup:"Ms. Alice Turner.", rec:[["6 s","“A ladle.”"],["Examiner","Waits while she keeps trying."],["12 s","“No, a spatula.”"]], code:"C",
+  why:{C:"A related word is a substitution, an error, so you let her keep trying. She then named it with no cue.",S:"No stimulus cue was given.",P:"No phonemic cue was given.",X:"She produced the correct name."}},
+ {k:"b13", title:"Not knowing, then the stimulus cue", target:"a ladder", setup:"Mr. Leonard Price.", rec:[["20 s","“I don't know what that is.”"],["Examiner","Reads the stimulus cue phrase."],["After the cue","“Oh, a ladder.”"]], code:"S",
+  why:{C:"He named it only after the stimulus cue.",S:"He did not know the object, received the stimulus cue, and then named it.",P:"No phonemic cue was given.",X:"He produced the correct name after the stimulus cue."},
+  q2:{q:"Does this item add to the C plus S total that you compare with the short-form norms?", opts:[["Yes, one point.",1,"The total counts items named spontaneously or after the stimulus cue. That is how both short-form norm sets were scored."],["No. Only spontaneous names count toward the total.",0,"The norms count C plus S. Record the C count as well, but the total compared with the norms includes S."],["No. Cued items never count.",0,"Only phonemically cued items are kept out of the total. Names after the stimulus cue count."]]}},
+ {k:"b14", title:"A misperception, then the name", target:"a teapot", setup:"Mr. James Fuller.", rec:[["20 s","“A watering can.”"],["Examiner","Stimulus cue, in the misperception frame."],["After the cue","“A teapot, of course.”"]], code:"S",
+  why:{C:"He named it only after the stimulus cue.",S:"He misperceived the drawing, received the stimulus cue, and then named it.",P:"No phonemic cue was given.",X:"He produced the correct name after the stimulus cue."}},
+ {k:"b15", title:"No response through both cues", target:"a mailbox", setup:"Mr. Victor Hall.", rec:[["20 s","“I don't know what that is.”"],["Examiner","Reads the stimulus cue phrase."],["After the cue","Silence."],["Examiner","“It starts with the sound ...” with the underlined part."],["After the cue","He shakes his head."]], code:"X",
+  why:{C:"No name came.",S:"He gave no name after the stimulus cue.",P:"He gave no name after the phonemic cue.",X:"Neither cue produced the name, so the item is incorrect."}}
+];
+P2.forEach(function(c){
+  c.steps=[{q:"Which outcome do you circle?", fixed:true, opts:["C","S","P","X"].map(function(k){ return [CL[k], k===c.code?1:0, c.why[k]]; })}];
+  if(c.q2){ c.q2.add=[]; c.steps.push(c.q2); }
+});
+
+/* ---------- Stepper for Parts 1 and 2 ---------- */
+var part=1, cur=0, step=0, tried=false, done={};
+function cases(){ return part===1?P1:P2; }
+function buildChips(){
+  var ch=el('chips'); ch.innerHTML='';
+  cases().forEach(function(c,i){ var b=document.createElement('button'); b.type='button'; b.textContent=String(i+1); b.title=c.title; b.setAttribute('aria-label',(part===1?'Scenario ':'Card ')+(i+1)+', '+c.title); b.addEventListener('click',function(){load(i);}); ch.appendChild(b); });
+}
+function recRows(){ var c=cases()[cur], rows=c.rec.map(function(r){return [r,false];}); for(var s=1;s<=step && s<c.steps.length;s++){ (c.steps[s].add||[]).forEach(function(r){rows.push([r, s===step]);}); } return rows; }
+function load(i){ cur=i; step=0; render(); }
+function render(){
+  var c=cases()[cur], s=c.steps[step]; tried=false;
+  Array.prototype.forEach.call(el('chips').children,function(b,j){ b.classList.toggle('on',j===cur); b.setAttribute('aria-pressed',j===cur?'true':'false'); b.classList.toggle('done',!!done[part+'-'+cases()[j].k]); });
+  el('cTitle').textContent=(part===1?'Scenario ':'Card ')+(cur+1)+'. '+c.title;
+  el('cTarget').textContent='Practice target, '+c.target;
+  el('cSetup').textContent=c.setup;
+  var h='<tr><th scope="col">When</th><th scope="col">What happened</th></tr>';
+  recRows().forEach(function(x){ var cls=x[1]?' class="new"':''; h+='<tr><td'+cls+'>'+esc(x[0][0])+'</td><td'+cls+'>'+esc(x[0][1])+'</td></tr>'; });
+  el('rec').innerHTML=h;
+  el('q').textContent='Step '+(step+1)+' of '+c.steps.length+'. '+s.q;
+  var o=el('opts'); o.innerHTML='';
+  var idx=s.opts.map(function(_,i){return i;}); if(!s.fixed) shuffle(idx);
+  idx.forEach(function(i){ var op=s.opts[i]; var b=document.createElement('button'); b.type='button'; b.textContent=op[0]; b.setAttribute('data-i',i); b.addEventListener('click',function(){choose(b,op);}); o.appendChild(b); });
+  el('fb').className='fb hidden'; el('fb').innerHTML=''; el('next').classList.add('hidden'); el('status').textContent=''; report();
+}
+function choose(b,op){
+  var c=cases()[cur];
+  if(!tried){ mark('p'+part+'-'+c.k+'-'+step, !!op[1]); tried=true; }
+  var fb=el('fb');
+  if(op[1]){
+    b.classList.add('right');
+    Array.prototype.forEach.call(el('opts').children,function(x){x.disabled=true;});
+    fb.className='fb ok'; fb.innerHTML='<strong>Right.</strong> '+esc(op[2]);
+    var last=(step===c.steps.length-1);
+    if(last) done[part+'-'+c.k]=true;
+    el('next').textContent= last ? (cur<cases().length-1 ? 'Next case' : 'Back to the first case') : 'Next step';
+    el('next').classList.remove('hidden');
+    if(last){ el('status').textContent='Case finished.'; Array.prototype.forEach.call(el('chips').children,function(x,j){ x.classList.toggle('done',!!done[part+'-'+cases()[j].k]); }); }
+  } else {
+    b.classList.add('wrong'); b.disabled=true;
+    fb.className='fb'; fb.innerHTML='<strong>Not this one.</strong> '+esc(op[2])+' Try again.';
+  }
+  report();
+}
+el('next').addEventListener('click',function(){ var c=cases()[cur]; if(step<c.steps.length-1){ step++; render(); } else { load(cur<cases().length-1?cur+1:0); } });
+
+/* ---------- Part 3 engine ---------- */
+function isFail(o,reading){ return o==='X' || (reading==='R' && o==='P'); }
+// out: string of 60 chars, out[i-1] is the outcome the examinee would produce on item i.
+function simulate(out){
+  var o=function(i){ return out.charAt(i-1); };
+  var trig=null, i;
+  for(i=30;i<=37;i++){ if(o(i)!=='C'){ trig=i; break; } }
+  var back=[], basal=30, ok=true, why='';
+  if(trig!==null){
+    if(o(trig)!=='X'){ ok=false; why='first miss not X'; }
+    var run=0, j=29;
+    while(j>=1){ back.push(j); if(o(j)==='C') run++; else run=0; if(run===8) break; j--; }
+    if(run<8){ ok=false; why='no basal'; basal=1; } else basal=j;
+    // backward-only reading vs reading that joins items 30 to trig-1
+    var lead=trig-30, need=8-lead, allC=true;
+    if(lead>0){ for(var k=29;k>29-need;k--){ if(o(k)!=='C'){ allC=false; break; } } if(allC){ ok=false; why='basal ambiguous'; } }
+    // no 6 failures in a row during the backward phase under either reading
+    var f=0; back.forEach(function(it){ if(isFail(o(it),'R')) f++; else f=0; if(f>=6){ ok=false; why='stop while going back'; } });
+    // forward items after the error and before 38 are kept to C so the error rule fires once
+    for(i=trig+1;i<=Math.max(trig+1,37);i++){ if(i<=60 && o(i)!=='C'){ ok=false; why='resume not C'; } }
+  }
+  function forward(reading){
+    var given=[], f=0, last=60, run=[];
+    var fwd=[]; for(i=30;i<=60;i++) fwd.push(i);
+    for(var n=0;n<fwd.length;n++){ var it=fwd[n]; given.push(it); if(isFail(o(it),reading)){ f++; run.push(it); } else { f=0; run=[]; } if(f===6){ last=it; break; } }
+    var allGiven=back.concat(given), cs=0, c=0, s=0, p=0;
+    allGiven.forEach(function(it){ var x=o(it); if(x==='C'){c++;cs++;} else if(x==='S'){s++;cs++;} else if(x==='P') p++; });
+    return {last:last, stopped:f===6, run:f===6?run.slice():[], given:allGiven, fwd:given, c:c, s:s, p:p, total:(basal-1)+cs};
+  }
+  var L=forward('L'), R=forward('R');
+  if(!/^[CSPX]{60}$/.test(out)){ ok=false; why='bad string'; }
+  return {out:out, trig:trig, back:back, basal:basal, cred:basal-1, L:L, R:R, valid:ok, why:why};
+}
+var P3FIX=[
+ {k:"A", title:"Case A. No early error, cued items near the end", who:"Ms. Margaret Webb, aged 71",
+  out:"CCCCCCCCCCCCCCCCCCCCCCCCCCCCC"+"CCCCCCCCCSCCXPXXPXCXXXXXX"+"CCCCCC"},
+ {k:"B", title:"Case B. An error at item 33", who:"Mr. Edward Lyle, aged 78",
+  out:"CCCCCCCCCCCCCCCCCCCCCCCCCCSCC"+"CCCXCCCCXPXPXXCCXXXXXXXXX"+"CCCCCC"},
+ {k:"C", title:"Case C. An error on the first item", who:"Ms. Helen Pierce, aged 84",
+  out:"CCCCCCCCCCCCCCCCCCCCCCCCXCPCC"+"XCCCCCCCCSCXXXXXXCCCCCCCC"+"CCCCCC"},
+ {k:"D", title:"Case D. No stop under one reading", who:"Mr. James Fuller, aged 66",
+  out:"CCCCCCCCCCCCCCCCCCCCCCCCCCCCC"+"CCCCCCCCCCXCPXPXPXCSXXCXP"+"XXCXXX"}
+];
+var P3NAMES=["Ms. Margaret Webb","Ms. Helen Pierce","Mr. Edward Lyle","Mr. James Fuller","Ms. Alice Turner","Mr. Victor Hall","Ms. Grace Dunn","Mr. Leonard Price"];
+function rnd(n){ return Math.floor(Math.random()*n); }
+function pick(pC,pS,pP){ var r=Math.random(); if(r<pC) return 'C'; if(r<pC+pS) return 'S'; if(r<pC+pS+pP) return 'P'; return 'X'; }
+function genOut(){
+  var a=[], i;
+  for(i=1;i<=29;i++) a.push(pick(i<15?0.93:0.8,0.06,0.06));
+  var trig = Math.random()<0.4 ? null : 30+rnd(8);
+  for(i=30;i<=37;i++){ if(trig===null || i<trig) a.push('C'); else if(i===trig) a.push('X'); else a.push('C'); }
+  for(i=38;i<=60;i++){ var pc=Math.max(0.12,0.78-(i-38)*0.04); if(trig===37 && i===38){ a.push('C'); continue; } a.push(pick(pc,0.1,0.22)); }
+  return a.slice(0,60).join('');
+}
+function genCase(){
+  var want=Math.random()<0.65, best=null;
+  for(var t=0;t<4000;t++){
+    var s=simulate(genOut());
+    if(!s.valid) continue;
+    if(s.R.last<42) continue;
+    if(want && s.R.last===s.L.last) { best=best||s; continue; }
+    if(!want && s.R.last!==s.L.last) { best=best||s; continue; }
+    best=s; break;
+  }
+  var nm=P3NAMES[rnd(P3NAMES.length)];
+  return {k:"new", title:"Random case", who:nm+", aged "+(60+rnd(30)), out:best.out};
+}
+var p3=null, p3i=0, p3sol=null, p3active='p3-basal', p3tries=0, p3shown=false;
+var P3F=['p3-basal','p3-cred','p3-lastL','p3-totL','p3-lastR','p3-totR'];
+function load3(i){
+  p3i=i; p3=(i<P3FIX.length)?P3FIX[i]:genCase(); p3sol=simulate(p3.out); p3tries=0; p3shown=false;
+  var ch=el('chips3'); Array.prototype.forEach.call(ch.children,function(b,j){ b.classList.toggle('on',j===i); b.setAttribute('aria-pressed',j===i?'true':'false'); });
+  el('t3').textContent=p3.title;
+  el('s3').textContent=p3.who+", no aphasia and no reason to expect failure, so you started at item 30. The list shows each item's outcome in the order you gave it. Under the rigorous reading you may have stopped sooner. Mark the basal, the credited items, and each stop, then total C plus S under each reading.";
+  // order list
+  var h='', s=p3sol, o=function(it){return p3.out.charAt(it-1);};
+  var fwd=s.L.fwd;
+  if(s.trig!==null){
+    fwd.filter(function(it){return it<=s.trig;}).forEach(function(it){ h+='<span>'+it+' '+o(it)+'</span>'; });
+    h+='<span class="turn">back to 29</span>';
+    s.back.forEach(function(it){ h+='<span>'+it+' '+o(it)+'</span>'; });
+    h+='<span class="turn">forward from '+(s.trig+1)+'</span>';
+    fwd.filter(function(it){return it>s.trig;}).forEach(function(it){ h+='<span>'+it+' '+o(it)+'</span>'; });
+  } else fwd.forEach(function(it){ h+='<span>'+it+' '+o(it)+'</span>'; });
+  el('order3').innerHTML=h;
+  P3F.forEach(function(id){ el(id).value=''; el(id).className=''; });
+  el('p3-fb').className='fb hidden'; el('p3-fb').innerHTML='';
+  drawGrid(false); report();
+}
+function drawGrid(reveal){
+  var g=el('grid3'), s=p3sol, given={}, h='';
+  s.L.given.forEach(function(it){ given[it]=true; });
+  for(var i=1;i<=60;i++){
+    var cls=given[i]?'given':'notgiven', letter=given[i]?p3.out.charAt(i-1):'';
+    if(reveal){ if(i<s.basal) cls+=' cred'; else if(i>=s.basal && i<s.basal+8) cls+=' basal'; if(s.L.stopped && i===s.L.last) cls+=' stopL'; if(s.R.stopped && i===s.R.last) cls+=' stopR'; }
+    var lab='Item '+i+(letter?(', outcome '+letter):', not given');
+    h+='<button type="button" class="'+cls+'" data-item="'+i+'" aria-label="'+lab+'">'+i+'<b>'+letter+'</b></button>';
+  }
+  g.innerHTML=h;
+}
+el('grid3').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b) return; var f=el(p3active); f.value=b.getAttribute('data-item'); f.focus(); });
+P3F.forEach(function(id){ el(id).addEventListener('focus',function(){ p3active=id; }); });
+function runText(arr){ return arr.length? ('items '+arr[0]+' to '+arr[arr.length-1]) : ''; }
+function p3Explain(){
+  var s=p3sol, o=function(it){return p3.out.charAt(it-1);};
+  var ex={};
+  if(s.trig===null) ex['p3-basal']="No error came before item 38, so you never went back. Items 30 to 37, named without help, are the 8 consecutive correct items, so the basal starts at item 30.";
+  else ex['p3-basal']="The first error before item 38 was the X at item "+s.trig+", so you went back to item 29 and worked backward. Items "+s.basal+" to "+(s.basal+7)+" are the first 8 in a row named correctly without help. An S, P, or X breaks the run, since the basal needs names given without assistance.";
+  ex['p3-cred']= s.basal>1 ? ("Items below the basal are credited as correct without being shown. That is items 1 to "+(s.basal-1)+".") : "The basal reaches item 1, so nothing is credited.";
+  function stopText(r,name,failDef){
+    return r.stopped ? ("Under the "+name+" reading "+failDef+". "+runText(r.run).charAt(0).toUpperCase()+runText(r.run).slice(1)+" are 6 consecutive failures, so testing stops at item "+r.last+".")
+                     : ("Under the "+name+" reading "+failDef+". No run of 6 consecutive failures occurs, so every item through 60 is given.");
+  }
+  ex['p3-lastL']=stopText(s.L,'lenient','only an X is a failure');
+  ex['p3-lastR']=stopText(s.R,'rigorous','an item named only after the phonemic cue (P) is also a failure');
+  function totText(r){ return "Credited items count as correct. "+(s.basal-1)+" credited, plus "+r.c+" C and "+r.s+" S among the items given through item "+r.last+", is "+r.total+". The "+r.p+" P "+(r.p===1?"item never enters":"items never enter")+" the total, and items after the stop were not given."; }
+  ex['p3-totL']=totText(s.L); ex['p3-totR']=totText(s.R);
+  return ex;
+}
+function p3Answers(){ var s=p3sol; return {'p3-basal':s.basal,'p3-cred':s.basal-1,'p3-lastL':s.L.last,'p3-totL':s.L.total,'p3-lastR':s.R.last,'p3-totR':s.R.total}; }
+var P3LAB={'p3-basal':'Lowest basal item','p3-cred':'Highest credited item','p3-lastL':'Lenient last item','p3-totL':'Lenient total','p3-lastR':'Rigorous last item','p3-totR':'Rigorous total'};
+el('p3-check').addEventListener('click',function(){
+  var ans=p3Answers(), ex=p3Explain(), allOk=true, h='', firstCheck=(p3tries===0);
+  p3tries++;
+  P3F.forEach(function(id){
+    var v=el(id).value.trim(), good = v!=='' && /^\d+$/.test(v) && parseInt(v,10)===ans[id];
+    if(firstCheck && !p3shown) mark('p3-'+p3.k+'-'+p3.out+'-'+id, good);
+    el(id).className=good?'okf':'nof';
+    if(!good) allOk=false;
+    h+='<li class="'+(good?'ok':'no')+'"><strong>'+P3LAB[id]+(good?', right.':', not this one.')+'</strong> '+(good?esc(ex[id]):(v===''?'Enter a number.':'Check again. '+hint3(id)))+'</li>';
+  });
+  var fb=el('p3-fb'); fb.className=allOk?'fb ok':'fb';
+  fb.innerHTML=(allOk?'<strong>All six are right.</strong> Write on the form which reading you used, and use the one that matches the norms you compare with.':'<strong>Some entries need another look.</strong>')+'<ul>'+h+'</ul>';
+  if(allOk) drawGrid(true);
+  report();
+});
+function hint3(id){
+  var s=p3sol;
+  if(id==='p3-basal') return s.trig===null?"Did any error come before item 38?":"Count backward from item 29 and look for 8 C's in a row. S and P do not count toward the basal.";
+  if(id==='p3-cred') return "Items below the basal are credited without being shown.";
+  if(id==='p3-lastL') return "Under the lenient reading a P is not a failure, so a P breaks a run of X's.";
+  if(id==='p3-lastR') return "Under the rigorous reading a P counts as a failure. An S does not.";
+  return "Add the credited items to the C and S items given before the stop under this reading. P never counts.";
+}
+el('p3-show').addEventListener('click',function(){
+  var ans=p3Answers(), ex=p3Explain(), h='';
+  if(p3tries===0){ P3F.forEach(function(id){ mark('p3-'+p3.k+'-'+p3.out+'-'+id,false); }); }
+  p3shown=true;
+  P3F.forEach(function(id){ el(id).value=ans[id]; el(id).className='okf'; h+='<li class="ok"><strong>'+P3LAB[id]+', '+ans[id]+'.</strong> '+esc(ex[id])+'</li>'; });
+  var fb=el('p3-fb'); fb.className='fb ok'; fb.innerHTML='<strong>Solution.</strong><ul>'+h+'</ul>'; drawGrid(true); report();
+});
+el('p3-new').addEventListener('click',function(){ load3(P3FIX.length); });
+(function(){ var ch=el('chips3'); P3FIX.concat([{k:'new',title:'Random case'}]).forEach(function(c,i){ var b=document.createElement('button'); b.type='button'; b.textContent=i<P3FIX.length?('Case '+c.k):'Random case'; b.addEventListener('click',function(){load3(i);}); ch.appendChild(b); }); })();
+
+/* ---------- Part 4 ---------- */
+var P4FIX=[
+ {k:"A", who:"Ms. Grace Dunn, aged 68", out:"CCCSCCPCCCXCCCC"},
+ {k:"B", who:"Mr. Leonard Price, aged 82", out:"CCSCCCXXXXXXPCX"},
+ {k:"C", who:"Ms. Alice Turner, aged 75", out:"CPCCSSCCCPCXCCC"}
+];
+function solve4(out){ var r={c:0,s:0,p:0,x:0}; out.split('').forEach(function(x){ r[x.toLowerCase()]++; }); r.total=r.c+r.s; var f=0,m=0; out.split('').forEach(function(x){ if(x==='X'){f++; if(f>m)m=f;} else f=0; }); r.maxRun=m; return r; }
+function gen4(){ var s=''; var hard=Math.random()<0.3; for(var i=0;i<15;i++){ s+= hard && i>=6 && i<12 ? 'X' : pick(0.72,0.1,0.1); } return {k:"new", who:P3NAMES[rnd(P3NAMES.length)]+", aged "+(60+rnd(30)), out:s}; }
+var P4Q=[
+ ["Start with the first of the 15 items, give all 15 in item order, and stop only after the last. The short form has no start point, basal, or discontinue rule.",1,"The battery's 15-item form has no start point, basal, or discontinue rule. The normative studies gave every item of each 15-item form."],
+ ["Stop after 6 consecutive failures, as on the full form.",0,"The discontinue rule belongs to the full form. The short form has none, and its norms come from administrations that gave every item."],
+ ["Start partway through the list and work backward to a basal of 8.",0,"The start point and basal belong to the full form. Give all 15 items in item order."]
+];
+var p4=null, p4i=0, p4mc=null, p4tried=false;
+function load4(i){
+  p4i=i; p4=(i<P4FIX.length)?P4FIX[i]:gen4(); p4mc=null; p4tried=false;
+  Array.prototype.forEach.call(el('chips4').children,function(b,j){ b.classList.toggle('on',j===i); b.setAttribute('aria-pressed',j===i?'true':'false'); });
+  var sv=solve4(p4.out);
+  el('t4').textContent=(i<P4FIX.length?('Case '+p4.k):'Random case')+'. The battery\'s 15-item form';
+  el('s4').textContent=p4.who+". The outcomes below are listed by position on the 15-item form, after the full cueing sequence on each item."+(sv.maxRun>=6?" Notice the run of "+sv.maxRun+" failures in a row.":"");
+  var h=''; p4.out.split('').forEach(function(x,j){ h+='<div aria-label="Position '+(j+1)+', outcome '+x+'">'+(j+1)+'<b>'+x+'</b></div>'; });
+  el('sf4').innerHTML=h;
+  ['p4-tot','p4-c','p4-s','p4-p'].forEach(function(id){ el(id).value=''; el(id).className=''; });
+  var o=el('p4-opts'); o.innerHTML='';
+  shuffle(P4Q.map(function(_,k){return k;})).forEach(function(k){ var b=document.createElement('button'); b.type='button'; b.textContent=P4Q[k][0]; b.setAttribute('data-i',k); b.addEventListener('click',function(){ Array.prototype.forEach.call(o.children,function(x){x.classList.remove('right','wrong'); x.setAttribute('aria-pressed','false');}); b.classList.add('on'); b.setAttribute('aria-pressed','true'); p4mc=k; b.style.borderColor='#1e4d3a'; Array.prototype.forEach.call(o.children,function(x){ if(x!==b) x.style.borderColor=''; }); }); o.appendChild(b); });
+  el('p4-fb').className='fb hidden'; el('p4-fb').innerHTML=''; report();
+}
+el('p4-check').addEventListener('click',function(){
+  var sv=solve4(p4.out), ans={'p4-tot':sv.total,'p4-c':sv.c,'p4-s':sv.s,'p4-p':sv.p};
+  var lab={'p4-tot':'C plus S total','p4-c':'C count','p4-s':'S count','p4-p':'P count'};
+  var ex={'p4-tot':"The score compared with the short-form norms is C plus S, "+sv.c+" plus "+sv.s+", which is "+sv.total+". P never enters the total.",
+          'p4-c':"There are "+sv.c+" items named without a cue. Record the C count as well as the total.",
+          'p4-s':"There are "+sv.s+" items named after the stimulus cue.",
+          'p4-p':"There "+(sv.p===1?"is 1 item":"are "+sv.p+" items")+" named after the phonemic cue. Report it beside the total, since the pattern of cues is part of the result."};
+  var hint={'p4-tot':"Count items circled C or S. P and X do not count.",'p4-c':"Count only the C's.",'p4-s':"Count only the S's.",'p4-p':"Count only the P's."};
+  var all=true, h='', firstCheck=!p4tried;
+  ['p4-tot','p4-c','p4-s','p4-p'].forEach(function(id){
+    var v=el(id).value.trim(), good=v!=='' && /^\d+$/.test(v) && parseInt(v,10)===ans[id];
+    if(firstCheck) mark('p4-'+p4.k+'-'+p4.out+'-'+id, good);
+    if(!good) all=false; el(id).className=good?'okf':'nof';
+    h+='<li class="'+(good?'ok':'no')+'"><strong>'+lab[id]+(good?', right.':', not this one.')+'</strong> '+(good?ex[id]:(v===''?'Enter a number.':hint[id]))+'</li>';
+  });
+  var mcOk = p4mc!==null && P4Q[p4mc][1]===1;
+  if(firstCheck) mark('p4-'+p4.k+'-'+p4.out+'-mc', mcOk);
+  if(!mcOk) all=false;
+  Array.prototype.forEach.call(el('p4-opts').children,function(b){ var k=+b.getAttribute('data-i'); b.classList.remove('right','wrong'); if(k===p4mc) b.classList.add(mcOk?'right':'wrong'); });
+  h+='<li class="'+(mcOk?'ok':'no')+'"><strong>Start and stop'+(mcOk?', right.':', not this one.')+'</strong> '+(p4mc===null?'Choose an answer.':esc(P4Q[p4mc][2]))+(sv.maxRun>=6&&mcOk?' The run of '+sv.maxRun+' failures does not end the form.':'')+'</li>';
+  p4tried=true;
+  var fb=el('p4-fb'); fb.className=all?'fb ok':'fb';
+  fb.innerHTML=(all?'<strong>All right.</strong> Report the total out of 15 with the C, S, and P counts beside it.':'<strong>Some answers need another look.</strong>')+'<ul>'+h+'</ul>';
+  report();
+});
+el('p4-new').addEventListener('click',function(){ load4(P4FIX.length); });
+(function(){ var ch=el('chips4'); P4FIX.concat([{k:'new'}]).forEach(function(c,i){ var b=document.createElement('button'); b.type='button'; b.textContent=i<P4FIX.length?('Case '+c.k):'Random case'; b.addEventListener('click',function(){load4(i);}); ch.appendChild(b); }); })();
+
+/* ---------- parts and hashes ---------- */
+function setPart(p,opt){
+  part=p;
+  Array.prototype.forEach.call(el('tabs').children,function(b){ var on=+b.getAttribute('data-part')===p; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on?'true':'false'); });
+  el('secStep').classList.toggle('hidden',!(p===1||p===2));
+  el('sec3').classList.toggle('hidden',p!==3);
+  el('sec4').classList.toggle('hidden',p!==4);
+  if(p===1||p===2){ buildChips(); var n=opt&&opt.card?Math.min(Math.max(opt.card-1,0),cases().length-1):0; load(n); }
+  if(p===3){ var i3=0; if(opt&&opt['case']){ var c=opt['case'].toUpperCase(); i3= c==='NEW'?P3FIX.length:Math.max(0,P3FIX.map(function(x){return x.k;}).indexOf(c)); } load3(i3); }
+  if(p===4){ var i4=0; if(opt&&opt['case']){ var c4=opt['case'].toUpperCase(); i4= c4==='NEW'?P4FIX.length:Math.max(0,P4FIX.map(function(x){return x.k;}).indexOf(c4)); } load4(i4); }
+  report();
+}
+Array.prototype.forEach.call(el('tabs').children,function(b){ b.addEventListener('click',function(){ setPart(+b.getAttribute('data-part')); }); });
+function parseHash(){ var h=(location.hash||'').replace(/^#/,''), o={}; h.split('&').forEach(function(kv){ var a=kv.split('='); if(a[0]) o[a[0]]=a[1]||''; }); var p=parseInt(o.part,10); if(!(p>=1&&p<=4)) p=1; if(o.card) o.card=parseInt(o.card,10)||1; return {p:p,o:o}; }
+window.addEventListener('hashchange',function(){ var r=parseHash(); setPart(r.p,r.o); });
+window.addEventListener('load',report); window.addEventListener('resize',report);
+
+window.__tool={P1:P1, P2:P2, P3:{fixed:P3FIX, simulate:simulate, genCase:genCase, load:load3, current:function(){return p3;}, solution:function(){return p3sol;}},
+  P4:{fixed:P4FIX, solve:solve4, gen:gen4, load:load4, current:function(){return p4;}, options:P4Q},
+  setPart:setPart,
+  state:function(){ var k=Object.keys(first), n=0; k.forEach(function(x){ if(first[x]) n++; }); return {part:part, cur:cur, step:step, p3:p3?p3.k:null, p4:p4?p4.k:null, firstRight:n, firstTotal:k.length}; }};
+var r0=parseHash(); setPart(r0.p,r0.o);
+})();
+</script>
+</body>
+</html>

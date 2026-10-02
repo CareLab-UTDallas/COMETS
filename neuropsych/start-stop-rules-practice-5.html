@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<!--
+  Start, Reverse, and Discontinue, Current Editions (COMETS practice tool)
+  Deep links (location.hash):
+    #case=SI1     open a case by its key (keys listed in CASES below, e.g. SI1, MR2, RD1, SA2, MSA1)
+    #case=SI      a subtest code given as a case opens the first case for that subtest
+    #case=7       a number opens that case by position (1-based)
+    #sub=RD       open the first case for a subtest code
+  Subtest codes: SI VC IN MR BD FW SR RD SSP SA DQ LN CD SS NSQ MSP MSA
+  (MSP and MSA are the two memory battery cases.)
+  Nothing is stored. No network requests. No external scripts or fonts.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Start, Reverse, and Discontinue, Current Editions</title>
+<style>
+  :root{--bg:#ffffff; --card:#f7faf8; --ink:#17251d; --muted:#41544a; --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b;}
+  *{box-sizing:border-box;}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.55;}
+  .wrap{max-width:820px; margin:0 auto; padding:14px 14px 16px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:22px; margin:0 0 4px;}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
+  .warn{font-size:13px; color:#7a3d00; background:#fff3e6; border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px; margin:0 0 10px;}
+  .chips{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 10px;}
+  .chips button{font:inherit; font-size:13px; cursor:pointer; border:1px solid #cfe0d7; border-radius:20px; background:#eef4f1; color:var(--green); padding:4px 11px;}
+  .chips button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .chips button.done:not(.on){border-color:#9cc3ae; background:#dcebe3;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:0 0 10px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:18px; margin:0 0 6px;}
+  .setup{font-size:14px; color:var(--teach); margin:0 0 8px;}
+  table{border-collapse:collapse; width:100%; font-size:14px;}
+  th,td{border:1px solid #cfe0d7; padding:5px 8px; text-align:left; vertical-align:top; overflow-wrap:anywhere;}
+  th{background:#eef4f1; color:var(--green); font-weight:600;}
+  .rules th{width:120px;}
+  .rec{margin:8px 0 0;}
+  .rec td.new{background:#fff7ef;}
+  .q{font-weight:600; margin:0 0 8px;}
+  .opts{display:flex; flex-direction:column; gap:6px;}
+  .opts button{font:inherit; font-size:15px; text-align:left; cursor:pointer; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--ink); padding:8px 12px;}
+  .opts button:hover:not(:disabled){border-color:#9cc3ae;}
+  .opts button.right{background:#e3f0e9; border-color:var(--green);}
+  .opts button.wrong{background:#fbeee4; border-color:#e3b58f; color:#6b4a2f;}
+  .opts button:disabled{cursor:default;}
+  .fb{margin:10px 0 0; padding:8px 10px; border-radius:6px; font-size:14px; color:var(--teach); background:#fff7ef; border:1px solid #f0d9c2; border-left:4px solid var(--accent);}
+  .fb.ok{background:#f0f7f3; border-color:#cfe0d7; border-left-color:var(--green);}
+  .fb strong{color:#8a4600;}
+  .fb.ok strong{color:var(--green);}
+  .nav{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0 0;}
+  button.b{font:inherit; font-size:15px; cursor:pointer; border-radius:8px; padding:9px 16px;}
+  .primary{background:var(--green); color:#eef4f1; border:1px solid var(--green);}
+  .secondary{background:#eef4f1; color:var(--green); border:1px solid #cfe0d7;}
+  .status{font-size:13px; color:var(--muted);}
+  .hidden{display:none !important;}
+  .small{font-size:12px; color:var(--muted); margin:8px 0 0;}
+  button:focus-visible{outline:3px solid var(--accent); outline-offset:2px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Practice start, reverse, and discontinue decisions</h1>
+  <p class="lede">Each case names a subtest by what it asks of the examinee (the Canvas page gives the published names), gives its rules, and shows the item scores so far in the order you gave the items. Decide what happens next. The reasoning appears after every choice, so a wrong answer teaches as much as a right one. The last two cases come from the memory battery.</p>
+  <div class="warn"><strong>Nothing here is saved.</strong> The cases use rule facts only and contain no test items. Some cases draw new numbers each time you open them.</div>
+  <div class="chips" id="chips"></div>
+  <div class="card">
+    <h2 id="cTitle"></h2>
+    <p class="setup" id="cSetup"></p>
+    <table class="rules" id="rules"></table>
+    <table class="rec" id="rec"></table>
+  </div>
+  <div class="card">
+    <p class="q" id="q"></p>
+    <div class="opts" id="opts"></div>
+    <div class="fb hidden" id="fb" aria-live="polite"></div>
+    <div class="nav">
+      <button class="b primary hidden" id="next" type="button">Next step</button>
+      <span class="status" id="status" aria-live="polite"></span>
+    </div>
+  </div>
+  <p class="small">Rules are paraphrased from the sources cited on the Canvas page. Page numbers refer to the intelligence battery's administration and scoring manual, except in the two memory battery cases, where they refer to that battery's manual. Use the manual during a real administration.</p>
+</div>
+<script>
+var LOWS="Suspected intellectual disability or low cognitive ability, ";
+var R = {
+  SI: {name:"Verbal Abstraction", scores:"Each item is scored 0, 1, or 2, so a perfect score is 2.", start:"Sample item, then Item 3. Suspected giftedness, sample item, then Item 9. "+LOWS+"sample item, then Item 1.", reverse:"If either of the first two items given is not perfect, give the earlier items in reverse order until two consecutive items are perfect.", disc:"Stop after 3 scores of 0 in a row."},
+  VC: {name:"Word Definitions", scores:"Items 1 to 3 (pictures) are scored 0 or 1. Items 4 to 24 are scored 0, 1, or 2.", start:"Item 4. Suspected giftedness, Item 8. "+LOWS+"Item 1.", reverse:"If either of the first two items given is not perfect, give the earlier items in reverse order until two consecutive items are perfect.", disc:"Stop after 3 scores of 0 in a row."},
+  IN: {name:"General Knowledge", scores:"Each item is scored 0 or 1, so a perfect score is 1.", start:"Item 4. Suspected giftedness, Item 7. "+LOWS+"Item 1.", reverse:"If either of the first two items given is not perfect, give the earlier items in reverse order until two consecutive items are perfect.", disc:"Stop after 3 scores of 0 in a row."},
+  MR: {name:"Visual Pattern Reasoning", scores:"Each item is scored 0 or 1, so a perfect score is 1.", start:"Samples A and B, then Item 4. Suspected giftedness, Samples A and B, then Item 12. "+LOWS+"Samples A and B, then Item 1.", reverse:"If either of the first two items given is not perfect, give the earlier items in reverse order until two consecutive items are perfect.", disc:"Stop after 3 scores of 0 in a row."},
+  BD: {name:"Block Construction", scores:"Items 1 to 4 are scored 2 (Trial 1), 1 (Trial 2), or 0. Items 5 to 8 are scored 0 or 4. Items 9 to 14 are scored 0, or 4 to 7 with a time bonus.", start:"Item 4. "+LOWS+"Item 1. There is no later start for suspected giftedness.", reverse:"If either of the first two items given is not perfect, give the earlier items in reverse order until two consecutive items are perfect. Item 4 is perfect only when correct on Trial 1.", disc:"Stop after 2 scores of 0 in a row.", time:"Every item is timed."},
+  FW: {name:"Visual Balance", scores:"Items 1 to 16 are scored 0 or 1. Items 17 to 28 are scored 0 or 2.", start:"Sample B, then Item 3. Suspected giftedness, Sample B, then Item 15. "+LOWS+"Sample A, then Item 1.", reverse:"If either of the first two items given is not perfect, give the earlier items in reverse order until two consecutive items are perfect. Sample A is only for examinees who start at Item 1.", disc:"Stop after 3 scores of 0 in a row.", time:"Every item is timed."},
+  SR: {name:"Visual Set Logic", scores:"Items 1 to 22 are scored 0 or 1. Items 23 to 27 are scored 0, 1, or 2.", start:"Item 1. Suspected giftedness, Demonstrations A to C, then Item 5.", reverse:"Only for an examinee who started at the later start for suspected giftedness.", disc:"Stop after 3 imperfect scores in a row. Imperfect means 0 on Items 1 to 22, or 0 or 1 on Items 23 to 27."},
+  RD: {name:"Running Number Recall", scores:"1 point for each requested digit recalled in place, so the maximum grows with the item. Item 1 has a maximum of 1, Item 2 has a maximum of 2, Item 3 has a maximum of 3, Items 4 and 5 have a maximum of 4, and Item 6 has a maximum of 5.", start:"Demonstration B, then Item 3. "+LOWS+"Demonstration A, then Item 1.", reverse:"If either of the first two items given is not perfect, give the earlier items in reverse order until two consecutive items are perfect. Demonstration A is only for examinees who start at Item 1.", disc:"Stop after 2 imperfect scores in a row. The recalibration items given after Item 5 and after Item 8 are not scored and do not count.", time:"Read at two digits per second."},
+  SSP:{name:"Visual Sequence Span", scores:"Items 1 and 2 are scored 0 or 1. Items 3 to 23 are scored 2 (right symbols, right order), 1 (right symbols, wrong order), or 0.", start:"Sample, then Item 1, at all ages.", reverse:"None.", disc:"Stop after 3 imperfect scores in a row. Imperfect means 0 on Items 1 and 2, or 0 or 1 on Items 3 to 23.", time:"Each stimulus page is shown for 5 seconds. The response is not timed."},
+  SA: {name:"Grid Combination", scores:"Each item is scored 0 or 1. There is no partial credit.", start:"Ages 16 to 69, Demonstrations A and B, Samples A and B, then Item 6. Ages 70 to 90, Demonstrations A and B, Sample A, then Item 1. "+LOWS+"Demonstrations A and B, Sample A, then Item 1.", reverse:"Ages 16 to 69 only. If either of the first two items given is not perfect, give the earlier items in reverse order until two consecutive items are perfect.", disc:"Stop after 3 scores of 0 in a row.", time:"Each stimulus page is shown for 5 seconds."},
+  DQ: {name:"Number Ordering", scores:"Each item has two trials. On Items 1 to 8 each trial is scored 0 or 1. On Items 9 and 10 each trial is scored 0 or 2. The item score is the sum of its trials.", start:"Sample, then Item 1, at all ages.", reverse:"None.", disc:"Stop after both trials of one item score 0.", time:"Read at one digit per second."},
+  LN: {name:"Letter-Number Reordering", scores:"Each item has two trials. On Items 1 to 8 each trial is scored 0 or 1. On Items 9 and 10 each trial is scored 0 or 2. The item score is the sum of its trials.", start:"Demonstration A, Sample A, then Item 1, at all ages.", reverse:"None.", disc:"Stop after both trials of one item score 0.", time:"Read at one character per second."},
+  CD: {name:"Symbol Copying", scores:"1 point for each correct symbol drawn within the limit, including a spontaneous correction drawn next to or on top of a wrong symbol. Nothing is subtracted for wrong symbols. Skipped or unreached boxes receive no credit.", start:"Demonstration items, sample items, then the test items.", reverse:"None.", disc:"Stop at 120 seconds."},
+  SS: {name:"Symbol Scanning", scores:"Correct answers minus incorrect answers. A difference of 0 or less is entered as 0. Skipped or unreached items count in neither total.", start:"Demonstration items, sample items, then the test items.", reverse:"None.", disc:"Stop at 120 seconds."},
+  NSQ:{name:"Quantity Naming Speed", scores:"The total raw score is the sum of the two items' completion times in seconds. A lower score is a better performance.", start:"Sample, then Item 1.", reverse:"None.", disc:"Each item stops at 75 seconds."},
+  MSP:{name:"Visual Sequence Span (memory battery)", scores:"Items 1 and 2 are scored 0 or 1. Items 3 to 23 are scored 2, 1, or 0.", start:"Sample, then Item 1, at all ages.", reverse:"None. In this battery only Grid Combination has a reverse rule.", disc:"Stop after 3 imperfect scores in a row. Imperfect means 0 on Items 1 and 2, or 0 or 1 on Items 3 to 23."},
+  MSA:{name:"Grid Combination (memory battery)", scores:"Each item is scored 0 or 1.", start:"Ages 16 to 69, Demonstrations A and B, Samples A and B, then Item 6. Ages 70 to 90, Demonstrations A and B, Sample A, then Item 1.", reverse:"Ages 16 to 69 only. If either of the first two items given does not score 1, give the earlier items in reverse order until two consecutive items score 1.", disc:"Stop after 3 scores of 0 in a row."}
+};
+function ri(a,b){ return a+Math.floor(Math.random()*(b-a+1)); }
+// Record rows: [label, score]. Steps add rows with add:[...]. Steps with t:"total" or t:"credit" ask for a number, and every option begins with that number.
+var CASES = [
+ {k:"SI1", sub:"SI", title:"Verbal Abstraction, a clean start", setup:"Mr. Edward Lyle is 67. Nothing in the referral suggests unusually low or high ability.",
+  rec:[],
+  steps:[
+   {q:"Where do you start?", opts:[
+     ["The sample item, then Item 3.", 1, "This subtest has one start point for all ages, the sample item, then Item 3 (p. 75). Demonstration and sample items never count toward the total raw score (p. 36)."],
+     ["The sample item, then Item 4.", 0, "Item 4 is not the start point on the current edition. Start after the sample item at Item 3 (p. 75)."],
+     ["The sample item, then Item 9.", 0, "Item 9 is the later start for an examinee suspected of intellectual giftedness before testing begins. Nothing suggests that here (p. 75)."]]},
+   {q:"Items 3 and 4 each received 2 points. What happens next?", add:[["Item 3","2"],["Item 4","2"]], opts:[
+     ["Give Item 5, and give full credit for Items 1 and 2.", 1, "Perfect scores on the first two items given receive full credit for every unadministered item before the start point, and testing continues forward (pp. 36–37)."],
+     ["Give Item 2, to be sure the easier items are passed.", 0, "Reversal is needed only when one of the first two items given is not perfect. Both were perfect."],
+     ["Give Item 5. Items 1 and 2 score 0 because they were not given.", 0, "Unadministered items before the start point receive full credit once the first two items given are perfect (pp. 36–37)."]]},
+   {q:"How much do Items 1 and 2 add, and how do you mark them?", t:"credit", opts:[
+     ["4 points. Circle nothing for them, and write a slash and 4 in the score space of Item 2.", 1, "Each credited item receives its perfect score of 2. The slash and the credited total go in the score space of the last credited item, so credited items stay distinguishable from administered ones (pp. 36–37)."],
+     ["2 points, one for each item, written beside Item 2.", 0, "The perfect score on this subtest is 2, and credited items receive the perfect score."],
+     ["4 points, with a score of 2 circled for each item.", 0, "The total is right, but credited items are not circled. Write a slash and 4 in the score space of Item 2 (pp. 36–37)."]]}
+  ]},
+ {k:"MR1", sub:"MR", title:"Visual Pattern Reasoning, reversing to two in a row", setup:"Mr. Leonard Price is 74. You gave Samples A and B, then started at Item 4.",
+  rec:[["Item 4","0"]],
+  steps:[
+   {q:"Item 4 received 0. What do you give next?", opts:[
+     ["Item 3.", 1, "The start item is not perfect, so reversal begins at once with the item just below it (p. 37)."],
+     ["Item 5, then decide.", 0, "An imperfect score on either of the first two items given triggers the reverse rule. Once the start item is missed, reverse now."],
+     ["Item 1, then work forward.", 0, "Reversal moves backward one item at a time from the start point."]]},
+   {q:"Item 3 received 1 point. What next?", add:[["Item 3","1"]], opts:[
+     ["Item 2.", 1, "Item 3 is perfect, but Item 4 is not, so you do not yet have two consecutive perfect scores. Keep reversing."],
+     ["Credit Items 1 and 2 and give Item 5.", 0, "Credit requires two consecutive perfect scores. Items 3 and 4 are not both perfect."],
+     ["Item 5. One passed item ends the reversal.", 0, "The criterion is two consecutive perfect scores, not one."]]},
+   {q:"Item 2 received 1 point. What now?", add:[["Item 2","1"]], opts:[
+     ["Credit Item 1 with a slash and 1 in its score space, then give Item 5.", 1, "Items 2 and 3 are two consecutive perfect scores. Item 1 is credited without being given, and testing resumes at the first item not yet given. This is the manual's Figure 2.3 (p. 37)."],
+     ["Give Item 1 as well.", 0, "Items below two consecutive perfect scores are credited, not given."],
+     ["Credit Item 1, then give Item 4 again.", 0, "Item 4 keeps its 0. Resume with Item 5, the first item not yet given."]]}
+  ]},
+ {k:"VC1", sub:"VC", title:"Word Definitions, reversing into the picture items", setup:"Ms. Helen Pierce is 69. You started at Item 4.",
+  rec:[["Item 4","1"]],
+  steps:[
+   {q:"Item 4 received 1 point. What do you give next?", opts:[
+     ["Item 3.", 1, "Item 4 is scored 0, 1, or 2, so 1 point is not perfect. Reverse now (p. 111)."],
+     ["Item 5. The examinee received credit.", 0, "The reverse rule asks for perfect scores, and 1 is not perfect when the maximum is 2."],
+     ["Stop the subtest.", 0, "There is no score of 0 at all, so the discontinue rule is not close."]]},
+   {q:"Item 3, a picture item, received 1 point. What next?", add:[["Item 3 (picture)","1"]], opts:[
+     ["Item 2.", 1, "Picture items are scored 0 or 1, so Item 3 is perfect. Item 4 was not, so Items 3 and 4 are not two consecutive perfect scores. You need one more."],
+     ["Credit Items 1 and 2, then give Item 5.", 0, "Items 3 and 4 are not both perfect. Item 4 received 1 of a possible 2."],
+     ["Item 2, because 1 point is only half credit.", 0, "Right item, wrong reason. On a picture item scored 0 or 1, a score of 1 is perfect."]]},
+   {q:"Item 2 received 1 point. What now?", add:[["Item 2 (picture)","1"]], opts:[
+     ["Credit Item 1 in full, then give Item 5.", 1, "Items 2 and 3 are two consecutive perfect scores. Credit everything below them and resume with the first item not yet given (pp. 36–37)."],
+     ["Give Item 1.", 0, "The criterion is met. Items below two consecutive perfect scores are credited, not given."],
+     ["Credit Item 1, then give Item 4 again.", 0, "Item 4 keeps its 1 point. Resume at Item 5."]]}
+  ]},
+ {k:"SA1", sub:"SA", title:"Grid Combination, the closest two perfect scores govern", setup:"Mr. James Fuller is 64. The referral raises a question of low cognitive ability, so you plan to start low.",
+  rec:[],
+  steps:[
+   {q:"Where do you start?", opts:[
+     ["Demonstrations A and B, Sample A, then Item 1.", 1, "An examinee suspected of intellectual disability or low cognitive ability starts every subtest at Item 1, whatever the age. On this subtest that means Demonstrations A and B, Sample A, then Item 1 (pp. 36, 199)."],
+     ["Demonstrations A and B, Samples A and B, then Item 6.", 0, "That is the start for ages 16 to 69 when low ability is not suspected (p. 199)."],
+     ["Sample A, then Item 6, and reverse if needed.", 0, "The demonstrations always come first, and a low-ability start begins at Item 1 (p. 199)."]]},
+   {q:"Items 1 to 5 scored 1, 0, 1, 1, 1. Items 6, 7, and 8 each scored 0. What do you do?", add:[["Item 1","1"],["Item 2","0"],["Item 3","1"],["Item 4","1"],["Item 5","1"],["Item 6","0"],["Item 7","0"],["Item 8","0"]], opts:[
+     ["Stop the subtest.", 1, "Items 6, 7, and 8 are 3 scores of 0 in a row, the discontinue criterion (p. 199)."],
+     ["Give Item 9. Items 4 and 5 were perfect, so the run does not count.", 0, "Perfect scores below the run do not cancel it. Three zeros in a row end the subtest."],
+     ["Reverse from Item 5, because Items 6 and 7 were not perfect.", 0, "Items 1 to 5 have already been given. There is nothing to reverse to, and the discontinue criterion is met."]]},
+   {q:"What is the total raw score?", t:"total", opts:[
+     ["5. Items 1 to 3 receive full credit, including Item 2.", 1, "Items 4 and 5 are the two perfect scores closest to the age-appropriate start point, Item 6. Every item before them receives full credit, whatever was obtained, so the 0 on Item 2 is replaced by 1. This follows the principle shown in the manual's Figure 2.6 (p. 40)."],
+     ["4. Item 2 keeps its 0.", 0, "When an examinee aged 16 to 69 starts at Item 1, every item before the two perfect scores closest to the start point receives full credit, even a failed one (p. 40)."],
+     ["0. Items before the start point do not count.", 0, "Items before the start point count toward the total raw score, and here they receive full credit."]]}
+  ]},
+ {k:"MR2", sub:"MR", title:"Visual Pattern Reasoning, passing the later start point", setup:"Ms. Margaret Webb is 71. Nothing suggested giftedness before testing, so you started at Item 4 after the samples.",
+  rec:[["Items 4 to 9","1 each"],["Item 10","0"],["Item 11","0"],["Item 12","1"],["Item 13","1"]],
+  steps:[
+   {q:"Item 12 is the later start point used for suspected giftedness, and Items 12 and 13 were both perfect. How do Items 10 and 11 score?", opts:[
+     ["They stay at 0.", 1, "Full credit below two perfect scores applies to items before the start point the examinee actually began at. The later start point gives no credit to an examinee who was not suspected of giftedness beforehand, so the zeros on Items 10 and 11 stand (p. 41)."],
+     ["1 each, because Items 12 and 13 are perfect.", 0, "The examinee began at Item 4, not Item 12. Items 10 and 11 were administered and keep the scores obtained (p. 41)."],
+     ["1 each, but only if you readminister them first.", 0, "Readministration applies only to an item answered with I don't know immediately before the current item, and it does not turn the later start point into a credit rule (pp. 41, 47)."]]},
+   {q:"Items 14, 15, and 16 each received 0. What now?", add:[["Item 14","0"],["Item 15","0"],["Item 16","0"]], opts:[
+     ["Stop the subtest.", 1, "Three scores of 0 in a row meet the criterion (p. 99)."],
+     ["Give Item 17. Items 10 and 11 were also 0, so count again from there.", 0, "Items 12 and 13 broke that earlier run. The new run of Items 14 to 16 is complete on its own."],
+     ["Give Item 17, and stop after five zeros in total.", 0, "The criterion is consecutive zeros, not a running total."]]},
+   {q:"What is the total raw score?", t:"total", opts:[
+     ["11", 1, "Items 1 to 3 are credited because Items 4 and 5 were perfect, which adds 3. Items 4 to 9 add 6, Items 12 and 13 add 2, and the zeros add nothing."],
+     ["13", 0, "That total credits Items 10 and 11. Their zeros stand (p. 41)."],
+     ["8", 0, "That total leaves out the credit for Items 1 to 3, which were below two perfect scores at the start point (pp. 36–37)."]]}
+  ]},
+ {k:"MR3", sub:"MR", title:"Visual Pattern Reasoning, the criterion met during reversal", setup:"Mr. Victor Hall is 82. You gave the samples and started at Item 4.",
+  rec:[["Item 4","1"],["Item 5","0"]],
+  steps:[
+   {q:"What do you give next?", opts:[
+     ["Item 3.", 1, "Item 5 is not perfect, so reverse. Item 4 was perfect and counts toward the two in a row, so you start just below it."],
+     ["Item 6.", 0, "One of the first two items given is not perfect, so the reverse rule applies before you go forward."],
+     ["Stop. The examinee missed an item.", 0, "One score of 0 does not meet a criterion of 3 in a row."]]},
+   {q:"Item 3 received 0. What next?", add:[["Item 3","0"]], opts:[
+     ["Item 2.", 1, "Only one reversal item has scored 0 so far, and there is no pair of consecutive perfect scores. Keep reversing."],
+     ["Item 6. Reversal has failed.", 0, "Reversal continues until two consecutive perfect scores or the discontinue criterion, whichever comes first."],
+     ["Stop. Items 5 and 3 are two zeros in a row.", 0, "Even counted that way it is two, and the criterion is three."]]},
+   {q:"Items 2 and 1 each received 0. What is the total raw score?", t:"total", add:[["Item 2","0"],["Item 1","0"]], opts:[
+     ["0", 1, "Items 3, 2, and 1 are three consecutive zeros, so the subtest is discontinued during reversal. Zeros on reversal items count (p. 42). Items above the point where the criterion was met do not count, so the point on Item 4 is dropped. This is the manual's Figure 2.8 (p. 42)."],
+     ["1", 0, "That total includes Item 4. When the criterion is met during reversal, the earlier point on Item 4 is not counted (p. 42)."],
+     ["4", 0, "No items were credited. Credit requires two consecutive perfect scores, and there were none."]]}
+  ]},
+ {k:"IN1", sub:"IN", title:"General Knowledge, an item past the stopping point", setup:"You are checking a protocol after the session. The examiner started Ms. Grace Dunn, 66, at Item 4.",
+  rec:[["Items 4 to 12","1 each"],["Item 13","0"],["Item 14","0"],["Item 15","0"],["Item 16","1"]],
+  steps:[
+   {q:"How is Item 16 scored?", opts:[
+     ["0. The subtest should have stopped after Item 15.", 1, "Items 13, 14, and 15 met the criterion. Items given past the correct discontinue point receive no points, even when the response would ordinarily receive credit (p. 42)."],
+     ["1. The examinee answered correctly.", 0, "A correct answer past the discontinue point receives no credit (p. 42)."],
+     ["1, and the three zeros no longer count as a run.", 0, "The discontinue point is fixed by the items in the order given. A later item cannot reach back and undo it."]]},
+   {q:"What is the total raw score?", t:"total", opts:[
+     ["12", 1, "Items 4 and 5 were perfect, so Items 1 to 3 receive 3 points of credit. Items 4 to 12 add 9. Item 16 adds nothing."],
+     ["13", 0, "That total counts Item 16, which came after the discontinue point (p. 42)."],
+     ["9", 0, "That total leaves out the credit for Items 1 to 3 (pp. 36–37)."]]}
+  ]},
+ {k:"SI2", sub:"SI", title:"Verbal Abstraction, a planned later start", setup:"Before testing, the referral and history led you to suspect intellectual giftedness in Ms. Alice Turner, 61.",
+  rec:[],
+  steps:[
+   {q:"Where do you start?", opts:[
+     ["The sample item, then Item 9.", 1, "Many subtests have a later start point for an examinee suspected of intellectual giftedness before testing begins. Here it is the sample item, then Item 9 (pp. 36, 75)."],
+     ["Item 9, without the sample item.", 0, "The sample item comes first at every start point on this subtest (p. 75)."],
+     ["The sample item, then Item 3. The later start is chosen during testing.", 0, "The later start is decided before testing begins, from what you already suspect (p. 36)."]]},
+   {q:"Items 9 and 10 each received 2 points. How much do Items 1 to 8 add?", t:"credit", add:[["Item 9","2"],["Item 10","2"]], opts:[
+     ["16 points, written as a slash and 16 in the score space of Item 8.", 1, "The credit rules at the later start are the same as at the ordinary start. Each of the 8 items before it receives the perfect score of 2 (pp. 36–37)."],
+     ["8 points, one per item.", 0, "Credited items receive the perfect score, which is 2 on this subtest."],
+     ["0 points until the examinee also passes Items 3 and 4.", 0, "Perfect scores on the first two items given are enough. No earlier items are given."]]}
+  ]},
+ {k:"SI3", sub:"SI", title:"Verbal Abstraction, unsure near the end", setup:"You are in the later items with Mr. Edward Lyle. You cannot tell quickly whether the response to Item 13 scores 0 or 1.",
+  rec:[["Item 11","0"],["Item 12","0"],["Item 13","0 or 1?"]],
+  steps:[
+   {q:"What do you do?", opts:[
+     ["Give Item 14, and keep going until you are certain the criterion has been met.", 1, "Do not discontinue too early. When you cannot tell quickly how to score a response, keep going until you are certain the criterion has been met, and settle the scoring afterward (p. 42)."],
+     ["Stop now. Item 13 is probably a 0.", 0, "If Item 13 is later scored 1, you will have stopped too early and lost items the examinee might have passed (p. 42)."],
+     ["Score Item 13 as 1 so that you can keep going.", 0, "Scores come from the scoring criteria, not from what the discontinue rule needs. Keep going and score Item 13 carefully afterward."]]}
+  ]},
+ {k:"BD1", sub:"BD", title:"Block Construction, a low start and two in a row", setup:"Mr. Victor Hall is 82. The referral raises a question of low cognitive ability.",
+  rec:[],
+  steps:[
+   {q:"Where do you start?", opts:[
+     ["Item 1.", 1, "An examinee suspected of intellectual disability or low cognitive ability starts at Item 1 (p. 87)."],
+     ["Item 4, and reverse if needed.", 0, "Item 4 is the start for other examinees. A low-ability start is Item 1, whatever the age (pp. 36, 87)."],
+     ["Item 5.", 0, "Item 5 is not a start point on the current edition."]]},
+   {q:"Items 1 to 4 each received 2. Then Item 5 received 4, Item 6 received 0, Item 7 received 4, and Item 8 received 0. What next?", add:[["Items 1 to 4","2 each"],["Item 5","4"],["Item 6","0"],["Item 7","4"],["Item 8","0"]], opts:[
+     ["Item 9.", 1, "The zeros on Items 6 and 8 are not consecutive, because Item 7 scored 4. The criterion is 2 zeros in a row."],
+     ["Stop. There are two zeros.", 0, "The two zeros must be in a row. Item 7 breaks them up."],
+     ["Item 9, but only one more zero is allowed in total.", 0, "Right item, wrong reason. The rule counts consecutive zeros, not a running total."]]},
+   {q:"Item 9 received 0. What now?", add:[["Item 9","0"]], opts:[
+     ["Stop the subtest.", 1, "Items 8 and 9 are 2 scores of 0 in a row, the criterion on this subtest (p. 87)."],
+     ["Give Item 10. Most subtests need 3 zeros.", 0, "This subtest is an exception. Its criterion is 2 in a row (p. 87)."],
+     ["Give Item 10, and stop if it is also 0.", 0, "The criterion has already been met. Items past it receive no points (p. 42)."]]},
+   {q:"What is the total raw score?", t:"total", opts:[
+     ["16", 1, "Items 1 to 4 add 8, and Items 5 and 7 add 4 each. All the zeros add nothing."],
+     ["20", 0, "That total counts a 4 for Item 6 or Item 8, which both scored 0."],
+     ["8", 0, "Items 5 and 7 each scored 4 and count toward the total."]]}
+  ]},
+ {k:"FW1", sub:"FW", title:"Visual Balance, reversing to Item 1 without a pair", setup:"Ms. Grace Dunn is 66. You gave Sample B and started at Item 3.",
+  rec:[["Item 3","1"],["Item 4","0"]],
+  steps:[
+   {q:"What do you give next?", opts:[
+     ["Item 2.", 1, "Item 4 is not perfect, so reverse, beginning with the item before the start point. The perfect score on Item 3 counts toward the two in a row (p. 125)."],
+     ["Item 5. Item 3 was correct, so the start is satisfied.", 0, "The reverse rule looks at both of the first two items given. A miss on either one triggers it."],
+     ["Sample A, then Item 2.", 0, "Sample A is given only to examinees who start at Item 1 (p. 41)."]]},
+   {q:"Item 2 received 0. What next?", add:[["Item 2","0"]], opts:[
+     ["Item 1.", 1, "There is still no pair of consecutive perfect scores, and the discontinue rule is not met, so keep reversing."],
+     ["Sample A, then Item 1.", 0, "Sample A is only for examinees who start at Item 1. This examinee started at Item 3 (p. 41)."],
+     ["Item 5. Two zeros end the reversal.", 0, "Reversal continues until two consecutive perfect scores or the discontinue criterion of 3 zeros in a row."]]},
+   {q:"Item 1 received 1 point. What now?", add:[["Item 1","1"]], opts:[
+     ["Give Item 5. Do not give Sample A.", 1, "You reached Item 1 without two consecutive perfect scores, and the discontinue rule has not been met. Go on to the next item not yet given, and do not give Sample A (p. 41). The same rule applies to Demonstration A on Running Number Recall."],
+     ["Give Sample A, then Item 5.", 0, "Sample A is given only to examinees who start at Item 1 (p. 41)."],
+     ["Stop the subtest. Reversal failed.", 0, "The subtest stops only when the discontinue rule is met. Here there is no run of 3 zeros."]]}
+  ]},
+ {k:"RD1", sub:"RD", title:"Running Number Recall, two imperfect scores", setup:"Ms. Alice Turner is 61. You gave Demonstration B and started at Item 3.",
+  rec:[["Item 3","3 of 3"],["Item 4","4 of 4"]],
+  steps:[
+   {q:"What happens next?", opts:[
+     ["Give Item 5, and credit Items 1 and 2 with 3 points, written as a slash and 3 in the score space of Item 2.", 1, "Items 3 and 4 are the first two items given and both are perfect, so Items 1 and 2 receive full credit, 1 plus 2 (pp. 36–37)."],
+     ["Give Item 5, and credit Items 1 and 2 with 2 points.", 0, "Credited items receive their perfect scores. Item 1 has a maximum of 1 and Item 2 has a maximum of 2."],
+     ["Give Demonstration A, then Item 1.", 0, "Demonstration A is only for examinees who start at Item 1, and no reversal is needed here (p. 41)."]]},
+   {q:"Item 5 received 3 of 4. What next?", add:[["Item 5","3 of 4"]], opts:[
+     ["Give Recalibration Item A, then Item 6.", 1, "One imperfect score does not meet the criterion. The recalibration item comes after Item 5, and it is recorded but not scored (p. 134)."],
+     ["Stop. The criterion counts imperfect scores.", 0, "It does, but the criterion is 2 imperfect scores in a row, and this is the first."],
+     ["Give Item 6 and skip the recalibration item, since Item 5 was imperfect.", 0, "Recalibration Item A is given after Item 5 whatever the score (p. 134)."]]},
+   {q:"The examinee missed the recalibration item. Item 6 received 4 of 5. What now?", add:[["Recalibration Item A","not scored"],["Item 6","4 of 5"]], opts:[
+     ["Stop the subtest.", 1, "Items 5 and 6 are 2 imperfect scores in a row. An imperfect score is any score below the item's maximum, not only 0. The recalibration item is not scored and does not count, so it neither breaks nor adds to the run (pp. 42–43, 134)."],
+     ["Give Item 7. Neither score was 0.", 0, "This subtest stops on imperfect scores, not zeros. A score one point short of the maximum is imperfect (pp. 42–43)."],
+     ["Give Item 7. The recalibration item broke the run.", 0, "The recalibration item does not count toward the discontinue rule in either direction (p. 134)."]]},
+   {q:"What is the total raw score?", t:"total", opts:[
+     ["17", 1, "Credit for Items 1 and 2 adds 3. Items 3 to 6 add 3, 4, 3, and 4. The recalibration item adds nothing."],
+     ["14", 0, "That total leaves out the 3 points of credit for Items 1 and 2."],
+     ["7", 0, "Imperfect items still keep the points they scored. Only the run of imperfect scores ends the subtest."]]}
+  ]},
+ {k:"RD2", sub:"RD", title:"Running Number Recall, reaching Item 1 without a pair", setup:"Mr. Leonard Price is 74. You gave Demonstration B and started at Item 3.",
+  rec:[["Item 3","2 of 3"]],
+  steps:[
+   {q:"What do you give next?", opts:[
+     ["Item 2.", 1, "Item 3 is not perfect, so reversal begins at once (p. 133)."],
+     ["Item 4, then decide.", 0, "An imperfect score on either of the first two items given sends you back. Item 3 already failed that test."],
+     ["Demonstration A, then Item 1.", 0, "Demonstration A is only for examinees who start at Item 1 (p. 41)."]]},
+   {q:"Item 2 received 2 of 2. What next?", add:[["Item 2","2 of 2"]], opts:[
+     ["Item 1.", 1, "Item 2 is perfect, but Item 3 was not, so there is no pair of consecutive perfect scores yet."],
+     ["Item 4. A perfect score ends the reversal.", 0, "The reversal ends after two consecutive perfect scores, not one."],
+     ["Stop. Items 3 and 2 are two imperfect scores.", 0, "Item 2 is perfect, 2 of a possible 2."]]},
+   {q:"Item 1 received 0 of 1. What now?", add:[["Item 1","0 of 1"]], opts:[
+     ["Give Item 4. Do not give Demonstration A.", 1, "You reached Item 1 without two consecutive perfect scores. The discontinue rule has not been met, because the imperfect scores on Items 3 and 1 are separated by the perfect score on Item 2. Go on to the next item not yet given, and do not give Demonstration A (p. 41)."],
+     ["Give Demonstration A, then Item 4.", 0, "Demonstration A is given only to examinees who start at Item 1 (p. 41)."],
+     ["Stop the subtest.", 0, "Two imperfect scores in a row are needed, and Item 2 was perfect between them."]]}
+  ]},
+ {k:"SSP1", sub:"SSP", title:"Visual Sequence Span, what counts as imperfect", setup:"Ms. Helen Pierce is 69. You gave the sample and started at Item 1.",
+  rec:[["Item 1","1 of 1"],["Item 2","1 of 1"],["Item 3","2 of 2"],["Item 4","1 of 2"],["Item 5","2 of 2"],["Item 6","1 of 2"],["Item 7","1 of 2"]],
+  steps:[
+   {q:"Items 6 and 7 each scored 1 of 2. What next?", opts:[
+     ["Item 8.", 1, "A 1 on Items 3 to 23 is imperfect and counts toward the rule, but the criterion is 3 imperfect scores in a row, and this run has two (p. 163)."],
+     ["Stop. Items 4, 6, and 7 are three imperfect scores.", 0, "They are not consecutive. The 2 on Item 5 broke the run after Item 4."],
+     ["Item 8. A score of 1 is never imperfect.", 0, "Right item, wrong reason. On Items 3 to 23 the maximum is 2, so a 1 is imperfect."]]},
+   {q:"Item 8 scored 2, Item 9 scored 1, and Item 10 scored 0. What next?", add:[["Item 8","2 of 2"],["Item 9","1 of 2"],["Item 10","0 of 2"]], opts:[
+     ["Item 11.", 1, "The 2 on Item 8 ended the earlier run. Items 9 and 10 make a new run of two."],
+     ["Stop. Items 6, 7, 9, and 10 are imperfect.", 0, "The run must be unbroken. Item 8 was perfect."],
+     ["Stop. A score of 0 ends this subtest.", 0, "This subtest stops after 3 imperfect scores in a row, not after one 0 (pp. 42–43)."]]},
+   {q:"Item 11 scored 1 of 2. What now?", add:[["Item 11","1 of 2"]], opts:[
+     ["Stop the subtest.", 1, "Items 9, 10, and 11 are 3 imperfect scores in a row (p. 163)."],
+     ["Give Item 12. Only one of the three was 0.", 0, "The criterion counts imperfect scores, and 1 of 2 is imperfect."],
+     ["Give Item 12, since Item 11 scored a point.", 0, "Earning a point is not the test. Only a perfect score breaks the run."]]},
+   {q:"What is the total raw score?", t:"total", opts:[
+     ["13", 1, "The item scores add to 1 + 1 + 2 + 1 + 2 + 1 + 1 + 2 + 1 + 0 + 1. There is no start point above Item 1, so nothing is credited."],
+     ["9", 0, "That total counts only perfect items. Imperfect items keep their points."],
+     ["15", 0, "Recount the item scores. No item past Item 11 was given."]]}
+  ]},
+ {k:"SR1", sub:"SR", title:"Visual Set Logic, imperfect scores in the later items", setup:"Mr. James Fuller is 64. Nothing suggests giftedness.",
+  rec:[],
+  steps:[
+   {q:"Where do you start?", opts:[
+     ["Item 1.", 1, "Everyone starts at Item 1 except an examinee suspected of giftedness, who begins at Item 5 after the demonstrations (p. 195)."],
+     ["Demonstrations A to C, then Item 5.", 0, "That is the start only for an examinee suspected of giftedness (p. 195)."],
+     ["Item 5, and reverse if needed.", 0, "Reversal on this subtest applies only to the later start for suspected giftedness (p. 195)."]]},
+   {q:"Items 1 to 20 scored 16 points in all. Item 21 scored 1, Item 22 scored 0, and Item 23 scored 1 of 2. What next?", add:[["Items 1 to 20","16 in all"],["Item 21","1 of 1"],["Item 22","0 of 1"],["Item 23","1 of 2"]], opts:[
+     ["Item 24.", 1, "Items 22 and 23 are both imperfect, a 0 on an item scored 0 or 1 and a 1 on an item scored 0, 1, or 2. That is two in a row, and the criterion is three (p. 195)."],
+     ["Item 24. Item 23 scored a point, so the run starts over.", 0, "Right item, wrong reason. On Items 23 to 27 a 1 is imperfect and counts toward the rule (p. 195)."],
+     ["Stop the subtest.", 0, "Item 21 was perfect, so the run is only two long."]]},
+   {q:"Item 24 scored 1 of 2. What now?", add:[["Item 24","1 of 2"]], opts:[
+     ["Stop the subtest.", 1, "Items 22, 23, and 24 are 3 imperfect scores in a row (p. 195)."],
+     ["Give Item 25. Only one of the three was 0.", 0, "This subtest counts imperfect scores, not zeros (pp. 42–43)."],
+     ["Give Item 25 and stop after one more 0.", 0, "The criterion is already met."]]},
+   {q:"What is the total raw score?", t:"total", opts:[
+     ["19", 1, "16 for Items 1 to 20, then 1, 0, 1, and 1 for Items 21 to 24."],
+     ["17", 0, "Imperfect items keep their points. The 1s on Items 23 and 24 count."],
+     ["21", 0, "Items 23 and 24 scored 1 each, not 2."]]}
+  ]},
+ {k:"DQ1", sub:"DQ", title:"Number Ordering, zeros within one item", setup:"Ms. Margaret Webb is 71. You gave the sample, then Item 1.",
+  rec:[["Items 1 to 3, both trials","1 each"],["Item 4, Trial 1","1"],["Item 4, Trial 2","0"],["Item 5, Trial 1","0"]],
+  steps:[
+   {q:"Two scores of 0 in a row. What do you give next?", opts:[
+     ["Trial 2 of Item 5.", 1, "The criterion is a score of 0 on both trials of one item, not two zeros in a row across items (p. 43). Both trials of every item are given."],
+     ["Stop the subtest.", 0, "The two zeros fall on different items, Item 4 and Item 5, so they do not meet the rule (pp. 42–43)."],
+     ["Item 6.", 0, "Give both trials of every item you start."]]},
+   {q:"Trial 2 of Item 5 received 1. Both trials of Item 6 then received 0. What is the total raw score?", t:"total", add:[["Item 5, Trial 2","1"],["Item 6, Trial 1","0"],["Item 6, Trial 2","0"]], opts:[
+     ["8", 1, "Both trials of Item 6 scored 0, so the subtest stops there. Items 1 to 3 add 6, and Items 4 and 5 add 1 each. The sample item never counts (p. 36)."],
+     ["9", 0, "That total counts the sample item. Sample items never count toward the total raw score (p. 36)."],
+     ["6", 0, "Items 4 and 5 each scored 1 point on one trial, and those points count."]]}
+  ]},
+ {k:"LN1", sub:"LN", title:"Letter-Number Reordering, zeros across items", setup:"Mr. Edward Lyle is 67. You gave Demonstration A and Sample A, then Item 1.",
+  rec:[["Items 1 to 4, both trials","1 each"],["Item 5, Trial 1","1"],["Item 5, Trial 2","0"],["Item 6, Trial 1","0"]],
+  steps:[
+   {q:"Two scores of 0 in a row. What do you give next?", opts:[
+     ["Trial 2 of Item 6.", 1, "Two zeros that fall on different items do not meet the rule. Only both trials of one item scored 0 do (pp. 42–43, 209)."],
+     ["Stop the subtest.", 0, "The zeros are on Item 5 and Item 6. Item 5 also had a trial scored 1."],
+     ["Item 7.", 0, "Both trials of each item are given (p. 209)."]]},
+   {q:"Trial 2 of Item 6 received 1. Both trials of Item 7 received 1. Both trials of Item 8 received 0. What now?", add:[["Item 6, Trial 2","1"],["Item 7, Trial 1","1"],["Item 7, Trial 2","1"],["Item 8, Trial 1","0"],["Item 8, Trial 2","0"]], opts:[
+     ["Stop the subtest.", 1, "Both trials of Item 8 scored 0, which meets the criterion (p. 209)."],
+     ["Give Item 9. Items 9 and 10 have higher maximums.", 0, "Larger point values later do not change the rule. The criterion has been met."],
+     ["Give Item 9, since Item 7 was perfect.", 0, "An earlier perfect item does not cancel the criterion."]]},
+   {q:"What is the total raw score?", t:"total", opts:[
+     ["12", 1, "Items 1 to 4 add 8. Items 5 and 6 add 1 each, and Item 7 adds 2. The demonstration and sample items do not count (p. 210)."],
+     ["10", 0, "Items 5 and 6 each scored a point on one trial, and Item 7 scored 2."],
+     ["14", 0, "Item 8 scored 0 on both trials and adds nothing."]]}
+  ]},
+ {k:"SA2", sub:"SA", title:"Grid Combination at 78", setup:"Ms. Alice Turner is 78. Nothing suggests low cognitive ability.",
+  rec:[],
+  steps:[
+   {q:"Where do you start?", opts:[
+     ["Demonstrations A and B, Sample A, then Item 1.", 1, "This is the only subtest with start points that depend on age. At ages 70 to 90 the start is Demonstrations A and B, Sample A, then Item 1. Sample B is not given (pp. 36, 199)."],
+     ["Demonstrations A and B, Samples A and B, then Item 6.", 0, "That is the start for ages 16 to 69 (p. 199)."],
+     ["Demonstrations A and B, Samples A and B, then Item 1.", 0, "Sample B is given only at ages 16 to 69, before Item 6 (p. 199)."]]},
+   {q:"Item 1 received 1 and Item 2 received 0. What next?", add:[["Item 1","1"],["Item 2","0"]], opts:[
+     ["Item 3.", 1, "The reverse rule applies only at ages 16 to 69, and there is nothing below Item 1 anyway. One 0 is far from the criterion."],
+     ["Item 1 again, to confirm a pair of perfect scores.", 0, "Each grid is shown one time only (p. 200), and at these ages there is no reverse rule (p. 199)."],
+     ["Stop. A 0 this early means the task is too hard.", 0, "The subtest stops only after 3 scores of 0 in a row (p. 199)."]]},
+   {q:"Items 3 and 4 each received 0. What is the total raw score?", t:"total", add:[["Item 3","0"],["Item 4","0"]], opts:[
+     ["1", 1, "Items 2, 3, and 4 are 3 scores of 0 in a row, so the subtest stops. Only Item 1 scored a point."],
+     ["6", 0, "No credit is given here. At ages 70 to 90 the start is Item 1, so there are no unadministered items before it."],
+     ["0", 0, "Item 1 scored 1 point and counts."]]}
+  ]},
+ {k:"SA3", sub:"SA", title:"Grid Combination at 66", setup:"Mr. Victor Hall is 66 for this case. Nothing suggests low cognitive ability.",
+  rec:[],
+  steps:[
+   {q:"Where do you start?", opts:[
+     ["Demonstrations A and B, Samples A and B, then Item 6.", 1, "At ages 16 to 69 the start is Demonstrations A and B, Sample A, Sample B, then Item 6 (p. 199)."],
+     ["Demonstrations A and B, Sample A, then Item 1.", 0, "That is the start for ages 70 to 90, or for an examinee suspected of low ability (p. 199)."],
+     ["Sample B, then Item 6.", 0, "The demonstrations and Sample A come first at every age (p. 199)."]]},
+   {q:"Item 6 received 0. What do you give next?", add:[["Item 6","0"]], opts:[
+     ["Item 5.", 1, "At ages 16 to 69 an imperfect score on either of the first two items given starts the reversal at once (p. 199)."],
+     ["Item 7, then decide.", 0, "Item 6 already failed the reverse test. Reverse now."],
+     ["Item 1.", 0, "Reversal moves backward one item at a time."]]},
+   {q:"Items 5 and 4 each received 1. What now?", add:[["Item 5","1"],["Item 4","1"]], opts:[
+     ["Credit Items 1 to 3 with a slash and 3 in the score space of Item 3, then give Item 7.", 1, "Items 4 and 5 are two consecutive perfect scores. Every item below them is credited, and testing resumes at the first item not yet given (pp. 36–37)."],
+     ["Give Item 3.", 0, "The criterion is met, so Items 1 to 3 are credited, not given."],
+     ["Credit Items 1 to 3, then give Item 6 again.", 0, "Item 6 keeps its 0. Resume at Item 7."]]}
+  ]},
+ {k:"CD1", sub:"CD", title:"Symbol Copying, stopping at the limit", gen:function(){
+   var c=ri(40,70), w=ri(2,5);
+   return {params:{correct:c, wrong:w, corrections:1}, setup:"Mr. James Fuller is 64. You gave the demonstration and sample items, then said Go and started timing.",
+    rec:[["Boxes completed at 120 seconds",String(c+w+1)],["Match the key",String(c)],["Wrong symbol",String(w)],["Wrong symbol with the right one drawn on top, unprompted","1"]],
+    steps:[
+     {q:"At 120 seconds the examinee is partway through a row. What do you do?", opts:[
+       ["Say Stop, and record the completion time as 120 seconds.", 1, "The subtest ends at its 120-second limit. When the examinee has not finished every item, record 120 seconds (pp. 107–108)."],
+       ["Let the examinee finish the row, then record the actual time.", 0, "This subtest stops at the time limit, and only symbols completed within the limit count (p. 108)."],
+       ["Say Stop, and record the time when the last box was filled.", 0, "A completion time below 120 seconds is recorded only when every test item is finished (p. 108)."]]},
+     {q:"What is the total raw score?", t:"total", opts:[
+       [String(c+1), 1, "Count each correct symbol drawn within the limit, plus 1 for the spontaneous correction. Nothing is subtracted for wrong symbols (p. 108)."],
+       [String(c+1-w), 0, "Wrong symbols are not subtracted on this subtest (p. 108)."],
+       [String(c), 0, "A spontaneous correction drawn next to or on top of a wrong symbol receives the point (p. 108)."]]}
+    ]};
+  }},
+ {k:"SS1", sub:"SS", title:"Symbol Scanning, stopping at the limit", gen:function(){
+   var c=ri(20,35), w=ri(2,7), c2=ri(5,9), w2=c2+ri(2,5);
+   return {params:{correct:c, wrong:w, correct2:c2, wrong2:w2}, setup:"Ms. Grace Dunn is 66. At 120 seconds she is partway down a page. You said Stop and recorded 120 seconds.",
+    rec:[["Correct",String(c)],["Incorrect",String(w)],["Skipped","1"]],
+    steps:[
+     {q:"What is the total raw score?", t:"total", opts:[
+       [String(c-w), 1, "The total raw score is correct minus incorrect. The skipped item counts in neither total (pp. 143–144)."],
+       [String(c), 0, "Incorrect answers are subtracted on this subtest (p. 144)."],
+       [String(c-w-1), 0, "A skipped item was not attempted and counts in neither total (p. 143)."]]},
+     {q:"A different examinee has "+c2+" correct and "+w2+" incorrect at 120 seconds. What is the total raw score?", t:"total2", add:[["Second examinee, correct",String(c2)],["Second examinee, incorrect",String(w2)]], opts:[
+       ["0", 1, "When correct minus incorrect is 0 or less, enter 0 (p. 144). A 0 from wrong answers is a real score, not a missing one (p. 55)."],
+       [String(c2-w2), 0, "A negative difference is entered as 0 (p. 144)."],
+       [String(c2), 0, "Incorrect answers are subtracted, and a difference of 0 or less is entered as 0 (p. 144)."]]}
+    ]};
+  }},
+ {k:"NSQ1", sub:"NSQ", title:"Quantity Naming Speed, a limit on each item", gen:function(){
+   var t2=ri(14,30);
+   return {params:{t1:75, t2:t2}, setup:"Mr. Leonard Price is 74. He completed the sample item, and you started timing Item 1 after Go.",
+    rec:[["Item 1","not finished at 75 seconds"]],
+    steps:[
+     {q:"At 75 seconds Mr. Price has two rows left on Item 1. What do you do?", opts:[
+       ["Say Stop, record 75 seconds for Item 1, and give Item 2.", 1, "Each item has its own 75-second limit. An item not completed within the limit is recorded as 75 seconds, and the next item is still given (pp. 167–168)."],
+       ["Let him finish Item 1 and record the actual time.", 0, "Timing ends at the 75-second limit, and the time recorded is 75 seconds (p. 168)."],
+       ["Say Stop and end the subtest.", 0, "The limit applies to each item. Item 2 has its own 75 seconds (p. 167)."]]},
+     {q:"He finishes Item 2 in "+t2+" seconds. What is the total raw score?", t:"total", add:[["Item 2",t2+" seconds"]], opts:[
+       [String(75+t2), 1, "The total raw score is the sum of the two completion times in seconds, 75 plus "+t2+" (p. 168). A lower score is a better performance."],
+       [String(t2), 0, "Item 1 counts as 75 seconds. The total is the sum of both completion times (p. 168)."],
+       ["75", 0, "Both completion times are added (p. 168)."]]}
+    ]};
+  }},
+ {k:"MSP1", sub:"MSP", title:"Visual Sequence Span in the memory battery", setup:"Ms. Margaret Webb is 71. Page numbers in this case refer to the memory battery manual.",
+  rec:[["Items 1 and 2","1 of 1 each"],["Items 3 to 8","2 of 2 each"],["Item 9","2 of 2"],["Item 10","1 of 2"],["Item 11","1 of 2"],["Item 12","2 of 2"],["Item 13","1 of 2"]],
+  steps:[
+   {q:"What do you give next?", opts:[
+     ["Item 14.", 1, "Items 10 and 11 were two imperfect scores in a row, and the 2 on Item 12 broke the run. Item 13 starts a new run of one (p. 32)."],
+     ["Stop. Items 10, 11, and 13 are three imperfect scores.", 0, "They are not consecutive. Item 12 was perfect."],
+     ["Stop. The memory battery has no discontinue rule.", 0, "In this battery only this subtest and Grid Combination have discontinue rules (p. 32)."]]},
+   {q:"Item 14 scored 0 and Item 15 scored 1 of 2. What now?", add:[["Item 14","0 of 2"],["Item 15","1 of 2"]], opts:[
+     ["Stop the subtest.", 1, "Items 13, 14, and 15 are 3 imperfect scores in a row. A 1 on Items 3 to 23 is imperfect and counts (p. 32)."],
+     ["Give Item 16. Only one of the three was 0.", 0, "This subtest counts imperfect scores, not zeros (p. 32)."],
+     ["Give Item 16. Items 13 and 15 scored points.", 0, "Earning a point is not the test. Only a perfect score breaks the run."]]},
+   {q:"What is the total raw score?", t:"total", opts:[
+     ["22", 1, "Items 1 and 2 add 2, Items 3 to 8 add 12, and Items 9 to 15 add 2, 1, 1, 2, 1, 0, and 1."],
+     ["18", 0, "Imperfect items keep their points. Only the run of imperfect scores ends the subtest."],
+     ["14", 0, "That total stops at Item 8. Items 9 to 15 were given and count."]]}
+  ]},
+ {k:"MSA1", sub:"MSA", title:"Grid Combination in the memory battery", setup:"Mr. Edward Lyle is 67. Page numbers in this case refer to the memory battery manual. You gave Demonstrations A and B and Samples A and B, then started at Item 6.",
+  rec:[["Item 6","1"],["Item 7","0"]],
+  steps:[
+   {q:"What do you give next?", opts:[
+     ["Item 5.", 1, "Item 7 did not score 1, so reverse. Item 6 counts toward the two consecutive scores of 1 (p. 29)."],
+     ["Item 8. Item 6 was passed.", 0, "The reverse rule looks at both of the first two items given. A miss on either one triggers it (p. 26)."],
+     ["Item 4.", 0, "Reversal starts with the item just below the start point."]]},
+   {q:"Item 5 received 1. What now?", add:[["Item 5","1"]], opts:[
+     ["Credit Items 1 to 4, then give Item 8.", 1, "Items 5 and 6 are two consecutive scores of 1. Items 1 to 4 receive full credit, written as a slash and 4 in the score space of Item 4, and testing continues with Item 8 (pp. 26, 29)."],
+     ["Give Item 4.", 0, "The criterion is met, so Items 1 to 4 are credited, not given."],
+     ["Credit Items 1 to 4, then give Item 7 again.", 0, "Item 7 keeps its 0. Continue with Item 8."]]},
+   {q:"Item 8 received 1. Items 9, 10, and 11 each received 0. What is the total raw score?", t:"total", add:[["Item 8","1"],["Item 9","0"],["Item 10","0"],["Item 11","0"]], opts:[
+     ["7", 1, "Items 9, 10, and 11 are 3 scores of 0 in a row, so the subtest stops (p. 32). Credit for Items 1 to 4 adds 4, and Items 5, 6, and 8 add 1 each."],
+     ["3", 0, "That total leaves out the 4 points of credit for Items 1 to 4 (p. 26)."],
+     ["6", 0, "Item 8 scored 1 and counts. The zero on Item 7 is not part of the final run, because Item 8 broke it."]]}
+  ]}
+];
+var cur=0, step=0, firstTry={}, tried=false, inst=null;
+var el=function(id){return document.getElementById(id);};
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+CASES.forEach(function(c,i){ var b=document.createElement('button'); b.type='button'; b.textContent=(i+1)+'. '+R[c.sub].name; b.title=c.title; b.addEventListener('click',function(){load(i);}); el('chips').appendChild(b); });
+function rulesHtml(r){ var rows=[["Subtest",r.name],["Item scores",r.scores],["Start",r.start],["Reverse",r.reverse],["Discontinue",r.disc]]; if(r.time) rows.push(["Timing",r.time]); return rows.map(function(x){return '<tr><th scope="row">'+x[0]+'</th><td>'+esc(x[1])+'</td></tr>';}).join(''); }
+function recRows(){ var rows=inst.rec.map(function(r){return [r,false];}); for(var s=0;s<=step && s<inst.steps.length;s++){ (inst.steps[s].add||[]).forEach(function(r){rows.push([r, s===step]);}); } return rows; }
+function renderRec(){ var rows=recRows(); if(!rows.length){ el('rec').innerHTML='<tr><th scope="col">In the order given</th><th scope="col">Score</th></tr><tr><td colspan="2">No items given yet.</td></tr>'; return; } var h='<tr><th scope="col">In the order given</th><th scope="col">Score</th></tr>'; rows.forEach(function(x){ var cls=x[1]?' class="new"':''; h+='<tr><td'+cls+'>'+esc(x[0][0])+'</td><td'+cls+'>'+esc(x[0][1])+'</td></tr>'; }); el('rec').innerHTML=h; }
+function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function build(c){ if(c.gen){ var g=c.gen(); return {k:c.k, sub:c.sub, title:c.title, setup:g.setup, rec:g.rec, steps:g.steps, params:g.params}; } return {k:c.k, sub:c.sub, title:c.title, setup:c.setup, rec:c.rec, steps:c.steps, params:null}; }
+function load(i){ cur=i; step=0; inst=build(CASES[i]); render(); }
+function render(){
+  var s=inst.steps[step]; tried=false;
+  Array.prototype.forEach.call(el('chips').children,function(b,j){ b.classList.toggle('on',j===cur); b.classList.toggle('done',!!firstTry[CASES[j].k+'-done']); b.setAttribute('aria-pressed', j===cur ? 'true':'false'); });
+  el('cTitle').textContent=inst.title; el('cSetup').textContent=inst.setup; el('rules').innerHTML=rulesHtml(R[inst.sub]);
+  renderRec();
+  el('q').textContent='Step '+(step+1)+' of '+inst.steps.length+'. '+s.q;
+  var o=el('opts'); o.innerHTML='';
+  shuffle(s.opts.slice()).forEach(function(op){ var b=document.createElement('button'); b.type='button'; b.textContent=op[0]; b.addEventListener('click',function(){choose(b,op);}); o.appendChild(b); });
+  el('fb').className='fb hidden'; el('fb').innerHTML=''; el('next').classList.add('hidden'); el('status').textContent=''; report();
+}
+function tally(){ var n=0,t=0; Object.keys(firstTry).forEach(function(k){ if(!/-done$/.test(k)){ t++; if(firstTry[k]) n++; } }); return {right:n, total:t}; }
+function choose(b,op){
+  var key=inst.k+'-'+step;
+  if(!tried){ firstTry[key]=!!op[1]; tried=true; }
+  var fb=el('fb');
+  if(op[1]){
+    b.classList.add('right');
+    Array.prototype.forEach.call(el('opts').children,function(x){x.disabled=true;});
+    fb.className='fb ok'; fb.innerHTML='<strong>Right.</strong> '+esc(op[2]);
+    var last=(step===inst.steps.length-1);
+    if(last){ firstTry[inst.k+'-done']=true; }
+    el('next').textContent= last ? (cur<CASES.length-1 ? 'Next case' : 'Back to the first case') : 'Next step';
+    el('next').classList.remove('hidden');
+    if(last){ var t=tally(); el('status').textContent='Correct on the first try in '+t.right+' of '+t.total+' decisions so far.'; }
+    el('next').focus();
+  } else {
+    b.classList.add('wrong'); b.disabled=true;
+    fb.className='fb'; fb.innerHTML='<strong>Not this one.</strong> '+esc(op[2])+' Try again.';
+  }
+  report();
+}
+el('next').addEventListener('click',function(){ if(step<inst.steps.length-1){ step++; render(); } else { load(cur<CASES.length-1?cur+1:0); } });
+function report(){ try{ parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:document.documentElement.scrollHeight}),'*'); }catch(e){} }
+window.addEventListener('load',report); window.addEventListener('resize',report);
+function fromHash(){
+  var h=(location.hash||'').replace(/^#/,''), m={};
+  h.split('&').forEach(function(p){ var kv=p.split('='); if(kv[0]) m[decodeURIComponent(kv[0]).toLowerCase()]=decodeURIComponent(kv[1]||''); });
+  var want=(m['case']||m['sub']||'').toUpperCase(); if(!want) return -1;
+  if(m['case']){
+    if(/^\d+$/.test(want)){ var n=parseInt(want,10)-1; if(n>=0 && n<CASES.length) return n; }
+    for(var i=0;i<CASES.length;i++){ if(CASES[i].k===want) return i; }
+  }
+  for(var j=0;j<CASES.length;j++){ if(CASES[j].sub===want) return j; }
+  return -1;
+}
+window.addEventListener('hashchange',function(){ var i=fromHash(); if(i>=0) load(i); });
+window.__tool={cases:CASES, rules:R, load:load, state:function(){ var t=tally(); return {cur:cur, step:step, key:inst.k, sub:inst.sub, params:inst.params, steps:inst.steps.length, firstTryRight:t.right, firstTryTotal:t.total}; }, current:function(){ return inst; }};
+window.__rules=window.__tool;
+(function(){ var i=fromHash(); load(i>=0?i:0); })();
+</script>
+</body>
+</html>

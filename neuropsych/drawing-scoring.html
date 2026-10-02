@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Score a Clock Drawing</title>
+<style>
+  :root{--bg:#ffffff; --card:#f7faf8; --ink:#17251d; --muted:#41544a; --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b; --ok:#2f6b4f; --okbg:#e8f3ec; --no:#9a3412; --nobg:#fbeee6;}
+  *{box-sizing:border-box;}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.55;}
+  .wrap{max-width:820px; margin:0 auto; padding:14px 14px 16px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:22px; margin:0 0 4px;}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
+  .warn{font-size:13px; color:#7a3d00; background:#fff3e6; border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px; margin:0 0 10px;}
+  .tabs{display:flex; flex-wrap:wrap; gap:4px; margin:0 0 8px;}
+  .tabs button{font:inherit; font-size:14px; cursor:pointer; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--green); padding:5px 10px; min-width:40px;}
+  .tabs button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .tabs button.done:not(.on){border-color:#9cc3ae; background:#eef4f1;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px;}
+  .grid{display:grid; grid-template-columns:minmax(0,300px) minmax(0,1fr); gap:16px; align-items:start;}
+  @media (max-width:640px){ .grid{grid-template-columns:1fr;} }
+  .sheet{background:#fff; border:1px solid var(--line); border-radius:6px; padding:6px;}
+  .sheet svg{display:block; width:100%; height:auto;}
+  .eyebrow{font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:var(--accent); margin:0 0 2px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:18px; margin:0 0 4px;}
+  .note{font-size:13px; color:var(--muted); margin:0 0 10px;}
+  .row{margin:0 0 10px;}
+  .row .lab{font-size:14px; font-weight:600; color:var(--green); margin:0 0 4px;}
+  .pts{display:flex; flex-wrap:wrap; gap:6px;}
+  .pts button{font:inherit; font-size:15px; cursor:pointer; width:40px; height:36px; border:1px solid #cfe0d7; border-radius:8px; background:#fff; color:var(--green);}
+  .pts button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .pts button:focus-visible,.tabs button:focus-visible,button.b:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .errs{display:grid; grid-template-columns:1fr 1fr; gap:2px 12px; font-size:14px;}
+  @media (max-width:420px){ .errs{grid-template-columns:1fr;} }
+  .errs label{display:flex; gap:6px; align-items:flex-start; cursor:pointer;}
+  .errs input{margin-top:4px; accent-color:var(--green);}
+  .total{font-size:14px; color:var(--teach); margin:4px 0 0;}
+  .fb{margin:12px 0 0; border-radius:8px; border:1px solid var(--line); background:#fff; padding:10px 12px; font-size:14px; color:var(--teach);}
+  .fb h3{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:16px; margin:0 0 6px;}
+  .fb p{margin:0 0 6px;}
+  .fb p:last-child{margin:0;}
+  .tag{display:inline-block; font-size:12px; font-weight:600; border-radius:99px; padding:1px 8px; margin-right:6px;}
+  .tag.ok{background:var(--okbg); color:var(--ok);}
+  .tag.no{background:var(--nobg); color:var(--no);}
+  .nav{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0 0;}
+  button.b{font:inherit; font-size:15px; cursor:pointer; border-radius:8px; padding:9px 16px;}
+  .primary{background:var(--green); color:#eef4f1; border:1px solid var(--green);}
+  .secondary{background:#eef4f1; color:var(--green); border:1px solid #cfe0d7;}
+  button.b:disabled{opacity:.45; cursor:default;}
+  .status{font-size:13px; color:var(--muted);}
+  .tally{font-size:13px; color:var(--muted); margin:8px 0 0;}
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Score a clock drawing</h1>
+  <p class="lede">Each drawing below was made for this practice to show one or more of the errors taught on the Canvas page. Score clockface, numbers, and hands on the 10-point scale taught there, mark any qualitative errors, then check your scoring against the expert reasoning. Keep the criteria from the Canvas page open beside you.</p>
+  <div class="warn"><strong>Nothing here is saved.</strong> These are practice drawings, not patient records.</div>
+  <div class="tabs" id="tabs"></div>
+  <div class="card">
+    <div class="grid">
+      <div class="sheet" id="sheet" aria-label="Clock drawing"></div>
+      <div>
+        <p class="eyebrow" id="cond"></p>
+        <h2 id="title"></h2>
+        <p class="note" id="context"></p>
+        <div class="row"><p class="lab">Integrity of the clockface (0 to 2)</p><div class="pts" id="p-face"></div></div>
+        <div class="row"><p class="lab">Presence and sequencing of the numbers (0 to 4)</p><div class="pts" id="p-num"></div></div>
+        <div class="row"><p class="lab">Presence and placement of the hands (0 to 4)</p><div class="pts" id="p-hand"></div></div>
+        <div class="row"><p class="lab">Qualitative errors present</p><div class="errs" id="errs"></div></div>
+        <p class="total" id="total"></p>
+      </div>
+    </div>
+    <div class="fb hidden" id="fb"></div>
+  </div>
+  <div class="nav">
+    <button class="b secondary" id="back" type="button">Back</button>
+    <button class="b secondary" id="next" type="button">Next</button>
+    <button class="b primary" id="check" type="button">Check my scoring</button>
+    <button class="b secondary" id="reset" type="button">Start over</button>
+    <span class="status" id="status"></span>
+  </div>
+  <p class="tally" id="tally"></p>
+</div>
+<script>
+var ERRS=[["size","Size (too small or too large)"],["graphic","Graphic difficulties"],["stim","Stimulus-bound response"],["concept","Conceptual deficit"],["spatial","Spatial or planning deficit"],["persev","Perseveration"]];
+var ERRNAME={}; ERRS.forEach(function(e){ERRNAME[e[0]]=e[1];});
+var CASES=[
+ {title:"Drawing 1", cond:"Command", context:"A 68-year-old man worked steadily and did not hesitate.",
+  spec:{seed:3, face:"good", nums:"good", hands:"good"},
+  key:[2,4,4], errs:[],
+  why:["Face 2. A closed circle without gross distortion.","Numbers 4. All twelve are present, in order, and evenly placed.","Hands 4. The shorter hand points to the 11 and the longer hand to the 2, so the position and the size difference are both correct.","No qualitative errors."]},
+ {title:"Drawing 2", cond:"Command", context:"A 79-year-old woman read the instruction back to herself before drawing the hands.",
+  spec:{seed:7, face:"good", nums:"good", hands:"tenEleven"},
+  key:[2,4,2], errs:["stim"],
+  why:["Face 2 and numbers 4. Both are intact.","Hands 2. The hands point to the 10 and the 11. The criterion for 2 names this error directly, a major placement error that includes 10 to 11.","Record a stimulus-bound response. The examinee did not recode \"10 after\" as the 2 on the dial and was pulled toward the 10 in the instruction."]},
+ {title:"Drawing 3", cond:"Command", context:"A 72-year-old man placed the 1 through 9 first and then ran short of room.",
+  spec:{seed:11, face:"good", nums:"gapBefore12", hands:"good"},
+  key:[2,3,4], errs:["spatial"],
+  why:["Face 2. Intact.","Numbers 3. All twelve are present in the right order, but the spacing is uneven and the 10, 11, and 12 are crowded into the last part of the circle. That is an error in spatial arrangement without gross distortion, so 3 rather than 4 or 2.","Hands 4. They point to the 11 and the 2 with the size difference shown.","Record a spatial or planning deficit. The scoring system's authors describe a gap or crowding before the 12, 3, 6, or 9 as a planning error in the layout of numbers."]},
+ {title:"Drawing 4", cond:"Command", context:"An 81-year-old woman said, \"There, that's the time.\"",
+  spec:{seed:5, face:"good", nums:"good", hands:"equal"},
+  key:[2,4,3], errs:[],
+  why:["Face 2 and numbers 4. Both are intact.","Hands 3. The hands point to the correct numbers, but they are the same length. The criterion for 4 requires that the size difference is respected, and the criterion for 3 includes \"no representation of size difference.\"","No qualitative error is required here. Equal hands lower the score but are not one of the six error categories on their own."]},
+ {title:"Drawing 5", cond:"Command", context:"A 70-year-old man with a tremor in his dominant hand drew slowly.",
+  spec:{seed:19, face:"distorted", nums:"good", hands:"good"},
+  key:[1,4,4], errs:["graphic"],
+  why:["Face 1. The outline does not close and is visibly lumpy. That is an incomplete face with some distortion, so 1. A face scores 0 only when it is absent or totally inappropriate.","Numbers 4 and hands 4. Both are intact despite the shaky line.","Record graphic difficulties, mild. The lines are imprecise, but the drawing remains interpretable. Note the tremor as an observation. It is context, not a score adjustment."]},
+ {title:"Drawing 6", cond:"Command", context:"A 77-year-old woman worked quickly and did not check her work.",
+  spec:{seed:23, face:"good", nums:"missing89", hands:"good"},
+  key:[2,2,4], errs:[],
+  why:["Face 2. Intact.","Numbers 2. The 8 and the 9 are missing, and the remaining numbers sit where they belong without gross distortion. The criterion for 2 covers \"numbers missing or added but no gross distortions of the remaining numbers.\"","Hands 4. Correct position and size difference.","No required error category. Missing numbers could reflect inattention or a planning slip, and the qualitative categories do not name a single cause. Note what you observed."]},
+ {title:"Drawing 7", cond:"Command", context:"A 74-year-old man kept writing numbers until he reached the top of the circle again, then put down the pencil.",
+  spec:{seed:29, face:"good", nums:"beyond12", hands:"none"},
+  key:[2,2,0], errs:["persev","concept"],
+  why:["Face 2. Intact.","Numbers 2. The 1 through 12 are in place, and the 13, 14, and 15 are added numbers. The remaining numbers are not grossly distorted, which fits the criterion for 2.","Hands 0. No hands were drawn.","Record perseveration, because the numbers continue past 12, and a conceptual deficit, because the drawing omits the feature that shows the time."]},
+ {title:"Drawing 8", cond:"Command", context:"An 83-year-old woman wrote something beside the 11 and handed the sheet back.",
+  spec:{seed:31, face:"good", nums:"good", hands:"written"},
+  key:[2,4,0], errs:["stim","concept"],
+  why:["Face 2 and numbers 4. Both are intact.","Hands 0. There are no hands. Writing the time does not substitute for hands.","Record a stimulus-bound response and a conceptual deficit. The scoring system's authors classed a time written beside the 11 as a stimulus-bound response that is also a conceptual error, since it misrepresents how a clock shows time."]},
+ {title:"Drawing 9", cond:"Copy", context:"The same woman as Drawing 8, now copying the model clock.",
+  spec:{seed:37, face:"good", nums:"good", hands:"one"},
+  key:[2,4,1], errs:[],
+  why:["Face 2 and numbers 4. Both are intact in the copy.","Hands 1. Only one hand is drawn. The criterion for 1 is \"only one hand or poor representation of two hands.\"","Compare the two conditions. Her command drawing scored 6 and this copy scores 7, so the model helped only a little. Record the pair of scores and the change, not only the totals."]},
+ {title:"Drawing 10", cond:"Command", context:"A 76-year-old man drew the hands, paused, and drew another.",
+  spec:{seed:41, face:"good", nums:"good", hands:"three"},
+  key:[2,4,0], errs:["persev"],
+  why:["Face 2 and numbers 4. Both are intact.","Hands 0. Three hands are drawn. The criterion for 0 includes \"perseveration on hands.\"","Record perseveration, the failure to stop tracing hands once two are in place."]},
+ {title:"Drawing 11", cond:"Command", context:"A 69-year-old woman drew the circle first and wrote every number around its outside edge.",
+  spec:{seed:43, face:"good", nums:"outside", hands:"good"},
+  key:[2,2,4], errs:["spatial"],
+  why:["Face 2. Intact.","Numbers 2. All twelve are present and in order, but they are written outside the circle. The criterion for 2 names \"numbers outside the clock\" as a gross distortion in spatial layout.","Hands 4. They point toward the 11 and the 2 with the size difference shown.","Record a spatial or planning deficit. Numbers written outside the face are one of the spatial errors in the scoring system's list."]}
+];
+
+function rng(seed){ var a=seed>>>0; return function(){ a|=0; a=a+0x6D2B79F5|0; var t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+var CX=160, CY=160, R=100, INK="#2a2a2a", FONT="'Segoe Print','Bradley Hand','Comic Sans MS',cursive";
+function pt(deg,r){ var a=deg*Math.PI/180; return [CX+r*Math.sin(a), CY-r*Math.cos(a)]; }
+function facePath(rand,kind){
+  var ph=rand()*6.28, ph2=rand()*6.28; var n=kind==="distorted"?40:90, start=kind==="distorted"?18:0, end=kind==="distorted"?330:362, d="";
+  for(var i=0;i<=n;i++){ var deg=start+(end-start)*i/n; var wob=kind==="distorted"?(Math.sin(deg/9)*6+ (rand()-.5)*7):(Math.sin(deg*Math.PI/90+ph)*1.6+Math.sin(deg*Math.PI/36+ph2)*0.7+(rand()-.5)*0.5); var r=R+wob+(kind==="distorted"?deg/40:0); var p=pt(deg,r); d+=(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1); }
+  return '<path d="'+d+'" fill="none" stroke="'+INK+'" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>';
+}
+function num(rand,n,deg,r,size){ var p=pt(deg,r); var rot=((rand()-.5)*12).toFixed(1); return '<text x="'+(p[0]+(rand()-.5)*3).toFixed(1)+'" y="'+(p[1]+(rand()-.5)*3+6).toFixed(1)+'" font-size="'+(size||18)+'" font-family="'+FONT+'" fill="'+INK+'" text-anchor="middle" transform="rotate('+rot+' '+p[0].toFixed(1)+' '+p[1].toFixed(1)+')">'+n+'</text>'; }
+function hand(rand,deg,len,w){ var p=pt(deg+(rand()-.5)*3,len); var m=pt(deg+4,len*.55); return '<path d="M'+CX+' '+CY+' Q'+(m[0]+(rand()-.5)*3).toFixed(1)+' '+(m[1]+(rand()-.5)*3).toFixed(1)+' '+p[0].toFixed(1)+' '+p[1].toFixed(1)+'" fill="none" stroke="'+INK+'" stroke-width="'+(w||2.4)+'" stroke-linecap="round"/>'; }
+function draw(spec){
+  var rand=rng(spec.seed), s='<svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Practice clock drawing"><rect width="320" height="320" fill="#ffffff"/>';
+  s+=facePath(rand,spec.face);
+  var i, rr=R*0.8;
+  if(spec.nums==="good"){ for(i=1;i<=12;i++) s+=num(rand,i,i*30,rr); }
+  else if(spec.nums==="missing89"){ for(i=1;i<=12;i++){ if(i!==8&&i!==9) s+=num(rand,i,i*30,rr); } }
+  else if(spec.nums==="gapBefore12"){ for(i=1;i<=9;i++) s+=num(rand,i,i*33,rr); s+=num(rand,10,313,rr,16)+num(rand,11,334,rr,16)+num(rand,12,354,rr,16); }
+  else if(spec.nums==="beyond12"){ for(i=1;i<=12;i++) s+=num(rand,i,i*30,rr); s+=num(rand,13,18,R*0.56,15)+num(rand,14,46,R*0.56,15)+num(rand,15,74,R*0.56,15); }
+  else if(spec.nums==="outside"){ for(i=1;i<=12;i++) s+=num(rand,i,i*30,R*1.2); }
+  var h=spec.hands;
+  if(h==="good"){ s+=hand(rand,330,R*0.45,3)+hand(rand,60,R*0.68,2.2); }
+  else if(h==="tenEleven"){ s+=hand(rand,330,R*0.45,3)+hand(rand,300,R*0.68,2.2); }
+  else if(h==="equal"){ s+=hand(rand,330,R*0.62,2.4)+hand(rand,60,R*0.62,2.4); }
+  else if(h==="one"){ s+=hand(rand,60,R*0.68,2.4); }
+  else if(h==="three"){ s+=hand(rand,330,R*0.45,3)+hand(rand,60,R*0.68,2.2)+hand(rand,150,R*0.55,2.2); }
+  else if(h==="written"){ var p=pt(318,R*1.22); s+='<text x="'+p[0].toFixed(1)+'" y="'+p[1].toFixed(1)+'" font-size="17" font-family="'+FONT+'" fill="'+INK+'" text-anchor="middle" transform="rotate(-8 '+p[0].toFixed(1)+' '+p[1].toFixed(1)+')">11:10</text>'; }
+  if(h!=="none"&&h!=="written") s+='<circle cx="'+CX+'" cy="'+CY+'" r="2.4" fill="'+INK+'"/>';
+  return s+'</svg>';
+}
+
+var cur=0, st=CASES.map(function(){return {pts:[null,null,null], errs:{}, checked:false};});
+var el=function(id){return document.getElementById(id);};
+var MAX=[2,4,4], PID=["p-face","p-num","p-hand"];
+CASES.forEach(function(c,k){ var b=document.createElement('button'); b.type='button'; b.textContent=String(k+1); b.setAttribute('aria-label','Drawing '+(k+1)); b.addEventListener('click',function(){go(k);}); el('tabs').appendChild(b); });
+PID.forEach(function(id,j){ for(var v=0;v<=MAX[j];v++){ (function(v){ var b=document.createElement('button'); b.type='button'; b.textContent=String(v); b.addEventListener('click',function(){ st[cur].pts[j]=v; st[cur].checked=false; paint(); }); el(id).appendChild(b); })(v); } });
+ERRS.forEach(function(e){ var l=document.createElement('label'); var i=document.createElement('input'); i.type='checkbox'; i.id='e-'+e[0]; i.addEventListener('change',function(){ st[cur].errs[e[0]]=i.checked; st[cur].checked=false; paint(); }); l.appendChild(i); l.appendChild(document.createTextNode(e[1])); el('errs').appendChild(l); });
+
+function go(k){ cur=Math.max(0,Math.min(CASES.length-1,k)); var c=CASES[cur]; el('sheet').innerHTML=draw(c.spec); el('cond').textContent=c.cond+' condition'; el('title').textContent=c.title; el('context').textContent=c.context; el('status').textContent=''; paint(); }
+function sum(a){ return a.reduce(function(x,y){return x+(y||0);},0); }
+function paint(){
+  var s=st[cur], c=CASES[cur];
+  PID.forEach(function(id,j){ Array.prototype.forEach.call(el(id).children,function(b,v){ b.classList.toggle('on',s.pts[j]===v); b.setAttribute('aria-pressed',s.pts[j]===v?'true':'false'); }); });
+  ERRS.forEach(function(e){ el('e-'+e[0]).checked=!!s.errs[e[0]]; });
+  var filled=s.pts.every(function(v){return v!==null;});
+  el('total').textContent=filled?('Your total: '+sum(s.pts)+' of 10'):'Score all three subscales to see your total.';
+  Array.prototype.forEach.call(el('tabs').children,function(b,j){ b.classList.toggle('on',j===cur); b.classList.toggle('done',st[j].checked); });
+  el('back').disabled=(cur===0); el('next').disabled=(cur===CASES.length-1);
+  var fb=el('fb');
+  if(!s.checked){ fb.classList.add('hidden'); fb.innerHTML=''; }
+  else {
+    var names=["Clockface","Numbers","Hands"], h='<h3>Expert scoring, '+sum(c.key)+' of 10</h3>';
+    names.forEach(function(n,j){ var ok=s.pts[j]===c.key[j]; h+='<p><span class="tag '+(ok?'ok':'no')+'">'+(ok?'Match':'You gave '+s.pts[j])+'</span>'+n+' '+c.key[j]+'</p>'; });
+    var want=c.errs, got=ERRS.map(function(e){return e[0];}).filter(function(k){return s.errs[k];});
+    var miss=want.filter(function(k){return got.indexOf(k)<0;}), extra=got.filter(function(k){return want.indexOf(k)<0;});
+    h+='<p><span class="tag '+((miss.length||extra.length)?'no':'ok')+'">'+((miss.length||extra.length)?'Check':'Match')+'</span>Qualitative errors, '+(want.length?want.map(function(k){return ERRNAME[k];}).join(', '):'none required')+'</p>';
+    if(miss.length) h+='<p>Not marked by you: '+miss.map(function(k){return ERRNAME[k];}).join(', ')+'.</p>';
+    if(extra.length) h+='<p>Marked by you, not by the expert: '+extra.map(function(k){return ERRNAME[k];}).join(', ')+'.</p>';
+    c.why.forEach(function(w){ h+='<p>'+w+'</p>'; });
+    fb.innerHTML=h; fb.classList.remove('hidden');
+  }
+  var done=st.filter(function(x){return x.checked;}).length, match=0, tot=0;
+  st.forEach(function(x,j){ if(x.checked){ x.pts.forEach(function(v,i){ tot++; if(v===CASES[j].key[i]) match++; }); } });
+  el('tally').textContent='Checked '+done+' of '+CASES.length+' drawings. Subscale scores matching the expert: '+match+' of '+tot+'.';
+  report();
+}
+el('back').addEventListener('click',function(){go(cur-1);});
+el('next').addEventListener('click',function(){go(cur+1);});
+el('check').addEventListener('click',function(){
+  var s=st[cur];
+  if(!s.pts.every(function(v){return v!==null;})){ el('status').textContent='Score all three subscales first.'; return; }
+  s.checked=true; el('status').textContent=''; paint();
+});
+el('reset').addEventListener('click',function(){ st=CASES.map(function(){return {pts:[null,null,null], errs:{}, checked:false};}); go(0); el('status').textContent='Cleared. Start again from Drawing 1.'; });
+function report(){ try{ parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:document.documentElement.scrollHeight}),'*'); }catch(e){} }
+window.addEventListener('load',report); window.addEventListener('resize',report);
+go(0);
+</script>
+</body>
+</html>

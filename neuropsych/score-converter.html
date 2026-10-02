@@ -56,7 +56,7 @@
 <main class="wrap">
   <header style="display:grid;gap:8px">
     <h1>Score converter</h1>
-    <p class="lede">Place a raw or derived score on the normal curve, read it in every common metric, and apply the AACN label that belongs to its distribution. The example loaded below is the Trails B case from the Scores, Norms, and Reporting page.</p>
+    <p class="lede">Place a raw or derived score on the normal curve, read it in every common metric, and apply the AACN label that belongs to its distribution. The example loaded below is the timed part B case (connect-the-circles task) from the Scores, Norms, and Reporting page.</p>
     <div class="warnbox"><strong>Nothing here is saved or sent.</strong> Use it with a norm table open beside you.</div>
   </header>
 
@@ -64,7 +64,7 @@
     <h2 id="h-dist">1. How is this test distributed in its norm sample?</h2>
     <div class="seg" role="radiogroup" aria-label="Distribution">
       <label><input type="radio" name="dist" id="dist-normal" value="normal" checked> Approximately normal</label>
-      <label><input type="radio" name="dist" id="dist-skew" value="skew"> Highly skewed (for example BNT-15, clock, figure copy, Bells, orientation)</label>
+      <label><input type="radio" name="dist" id="dist-skew" value="skew"> Highly skewed (for example a 15-item naming test, clock drawing, figure copy, cancellation, orientation)</label>
     </div>
     <p class="small" id="dist-help">Normally distributed tests are reported as T scores with AACN standard-score labels.</p>
   </section>
@@ -99,7 +99,7 @@
     </div>
 
     <div class="btnrow">
-      <button type="button" id="ex-trails">Load Trails B example</button>
+      <button type="button" id="ex-timed">Load part B timed example</button>
       <button type="button" id="ex-scaled">Load scaled score 7</button>
       <button type="button" id="ex-t36">Load T 36</button>
     </div>
@@ -175,7 +175,7 @@
 
   <footer>
     <p>Source for all labels. Guilmette, T. J., Sweet, J. J., Hebben, N., Koltai, D., Mahone, E. M., Spiegler, B. J., Stucky, K., Westerveld, M., &amp; Conference Participants. (2020). American Academy of Clinical Neuropsychology consensus conference statement on uniform labeling of performance test scores. <em>The Clinical Neuropsychologist, 34</em>(3), 437&ndash;453. https://doi.org/10.1080/13854046.2020.1722244</p>
-    <p>Example norms. Tombaugh, T. N. (2004). Trail Making Test A and B: Normative data stratified by age and education. <em>Archives of Clinical Neuropsychology, 19</em>, 203&ndash;214. https://doi.org/10.1016/S0887-6177(03)00039-8. Ages 70 to 74, more than 12 years of education, Trails B mean 86.27 s, SD 24.07 s.</p>
+    <p>Example norms. The published part B norms cited on the Scores, Norms, and Reporting page, ages 70 to 74, more than 12 years of education, mean 86.27 s, SD 24.07 s.</p>
     <p>Labels describe scores, not people, and a label is never a diagnosis.</p>
   </footer>
 </main>
@@ -240,7 +240,7 @@
       var t=$('dtype').value,v=num('dval');
       if(!isFinite(v)){showError('Enter a value for the selected metric.');return;}
       if(t==='pct'){if(v<=0||v>=100){showError('A percentile for conversion must be greater than 0 and less than 100.');return;}z=invPhi(v/100);}
-      else if(t==='z')z=v;else if(t==='ss')z=(v-100)/15;else if(t==='sc'){if(v<1||v>19){showError('Wechsler scaled scores run from 1 to 19.');return;}z=(v-10)/3;}
+      else if(t==='z')z=v;else if(t==='ss')z=(v-100)/15;else if(t==='sc'){if(v<1||v>19){showError('Scaled scores run from 1 to 19.');return;}z=(v-10)/3;}
       else z=(v-50)/10;
       src=t;
     }
@@ -257,12 +257,12 @@
     if(near)notes.appendChild(note('This score is within 2 points of a label boundary. AACN asks clinicians to consider the confidence interval near cut points. Report the interval and avoid treating adjacent scores as categorically different.','accent'));
     if(raw&&$('lower').checked)notes.appendChild(note('The direction box is checked, so a raw score above the mean produced a negative z. Uncheck it for tests where higher raw scores are better.'));
     if(src==='sc')notes.appendChild(note('Each scaled-score point equals 5 standard-score points, so scaled 7 and standard score 85 describe the same position.'));
-    if(raw&&$('mean').value==='86.27'&&$('sd').value==='24.07')notes.appendChild(note('Tombaugh (2004) reports a skewness of .97 for this cell and publishes percentile tables. This example isolates the effect of the reference group. On the Trail Making page the percentile comes from his table.'));
+    if(raw&&$('mean').value==='86.27'&&$('sd').value==='24.07')notes.appendChild(note('The source norms report a skewness of .97 for this cell and publish percentile tables. This example isolates the effect of the reference group. On the Canvas page for this task the percentile comes from the published table.'));
     notes.appendChild(note('The percentile shown is the normal-curve value for z. Where the norm source prints its own percentile table, report the table value.'));
   }
 
   function setRadio(id){$(id).checked=true;}
-  $('ex-trails').addEventListener('click',function(){setRadio('dist-normal');setRadio('mode-raw');$('raw').value='130';$('mean').value='86.27';$('sd').value='24.07';$('lower').checked=true;update();});
+  $('ex-timed').addEventListener('click',function(){setRadio('dist-normal');setRadio('mode-raw');$('raw').value='130';$('mean').value='86.27';$('sd').value='24.07';$('lower').checked=true;update();});
   $('ex-scaled').addEventListener('click',function(){setRadio('dist-normal');setRadio('mode-der');$('dtype').value='sc';$('dval').value='7';update();});
   $('ex-t36').addEventListener('click',function(){setRadio('dist-normal');setRadio('mode-der');$('dtype').value='t';$('dval').value='36';update();});
   document.querySelectorAll('input,select').forEach(function(el){el.addEventListener('input',update);el.addEventListener('change',update);});

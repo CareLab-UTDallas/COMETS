@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Run and Record a Timed Pegboard Trial</title>
+<!--
+  Deep links (location.hash, joined with &):
+    #part=run            Open the timed-trial simulation (default).
+    #part=worst          Open the worst-hand scoring cases.
+    #hand=right          Simulated trial uses the right hand (row direction left to right).
+    #hand=left           Simulated trial uses the left hand (row direction right to left).
+    #trial=A ... #trial=E  Open one trial scenario in the simulation (timings stay randomized).
+    #case=1 ... #case=8    Open one worst-hand case.
+  Example: #part=run&hand=left&trial=D
+-->
+<style>
+  :root{--bg:#ffffff; --card:#f7faf8; --ink:#17251d; --muted:#41544a; --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b;}
+  *{box-sizing:border-box;}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.55;}
+  .wrap{max-width:820px; margin:0 auto; padding:14px 14px 16px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:22px; margin:0 0 4px;}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
+  .warn{font-size:13px; color:#7a3d00; background:#fff3e6; border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px; margin:0 0 10px;}
+  .chips{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 10px;}
+  .chips button{font:inherit; font-size:13px; cursor:pointer; border:1px solid #cfe0d7; border-radius:20px; background:#eef4f1; color:var(--green); padding:4px 11px;}
+  .chips button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .chips button.done:not(.on){border-color:#9cc3ae; background:#dcebe3;}
+  .chips .lab{font-size:13px; color:var(--muted); align-self:center; margin-right:2px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:0 0 10px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:18px; margin:0 0 6px;}
+  .setup{font-size:14px; color:var(--teach); margin:0 0 8px;}
+  table{border-collapse:collapse; width:100%; font-size:14px;}
+  th,td{border:1px solid #cfe0d7; padding:5px 8px; text-align:left; vertical-align:top;}
+  th{background:#eef4f1; color:var(--green); font-weight:600;}
+  .q{font-weight:600; margin:0 0 8px;}
+  .opts{display:flex; flex-direction:column; gap:6px;}
+  .opts button{font:inherit; font-size:15px; text-align:left; cursor:pointer; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--ink); padding:8px 12px;}
+  .opts button:hover:not(:disabled){border-color:#9cc3ae;}
+  .opts button.right{background:#e3f0e9; border-color:var(--green);}
+  .opts button.wrong{background:#fbeee4; border-color:#e3b58f; color:#6b4a2f;}
+  .opts button:disabled{cursor:default;}
+  .fb{margin:10px 0 0; padding:8px 10px; border-radius:6px; font-size:14px; color:var(--teach); background:#fff7ef; border:1px solid #f0d9c2; border-left:4px solid var(--accent);}
+  .fb.ok{background:#f0f7f3; border-color:#cfe0d7; border-left-color:var(--green);}
+  .fb strong{color:#8a4600;}
+  .fb.ok strong{color:var(--green);}
+  .fb ul{margin:4px 0 0; padding-left:20px;}
+  .nav{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0 0;}
+  button.b{font:inherit; font-size:15px; cursor:pointer; border-radius:8px; padding:9px 16px;}
+  button.b:disabled{opacity:.45; cursor:default;}
+  .primary{background:var(--green); color:#eef4f1; border:1px solid var(--green);}
+  .secondary{background:#eef4f1; color:var(--green); border:1px solid #cfe0d7;}
+  .status{font-size:13px; color:var(--muted);}
+  .hidden{display:none !important;}
+  .small{font-size:12px; color:var(--muted); margin:8px 0 0;}
+  button:focus-visible, input:focus-visible{outline:3px solid var(--accent); outline-offset:2px;}
+  .sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
+  /* simulation layout */
+  .sim{display:grid; grid-template-columns:1fr; gap:10px;}
+  .sim .ctl{order:1;} .sim .panel{order:2;} .sim .boardbox{order:3;}
+  @media (min-width:700px){
+    .sim{grid-template-columns:340px 1fr; align-items:start;}
+    .sim .boardbox{grid-column:1; grid-row:1 / span 2; order:0;}
+    .sim .ctl{grid-column:2; grid-row:1; order:0;}
+    .sim .panel{grid-column:2; grid-row:2; order:0;}
+  }
+  .boardbox{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:8px;}
+  .boardbox svg{display:block; width:100%; max-width:340px; height:auto; margin:0 auto;}
+  .act{font-size:13px; color:var(--teach); text-align:center; margin:4px 0 0; min-height:20px;}
+  .ctl{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 12px;}
+  .sw{display:flex; flex-wrap:wrap; align-items:center; gap:8px;}
+  .digits{font-family:ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace; font-size:28px; font-weight:600; color:var(--green); background:#fff; border:1px solid var(--line); border-radius:8px; padding:2px 10px; min-width:118px; text-align:center;}
+  .cue{margin:8px 0 0; font-size:15px; padding:6px 10px; border-radius:6px; background:#fff; border:1px solid var(--line); color:var(--muted); min-height:38px;}
+  .cue.ready{color:var(--ink); border-color:#9cc3ae;}
+  .cue.begin{background:var(--green); color:#fff; border-color:var(--green); font-weight:700;}
+  .speed{margin:8px 0 0;}
+  .speed .chips{margin:0;}
+  .who{font-size:14px; color:var(--teach); margin:0 0 8px;}
+  .recform{display:grid; grid-template-columns:1fr; gap:8px; margin:6px 0 0;}
+  .recform label{font-size:14px; display:flex; flex-wrap:wrap; align-items:center; gap:8px;}
+  .recform input[type=number]{font:inherit; width:96px; padding:5px 8px; border:1px solid #b9cec3; border-radius:6px;}
+  .recform .chk{font-size:14px;}
+  .steps{font-size:14px; color:var(--teach); margin:0; padding-left:20px;}
+  .tcell{font-weight:600;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Run and record a timed pegboard trial</h1>
+  <p class="lede">Run one hand's timed trial on a simulated keyed-peg board, then turn two hands' T scores into the worst hand score. You run the stopwatch and decide what to do whenever something goes wrong. Each choice gives the reason.</p>
+  <div class="warn"><strong>Nothing here is saved.</strong> The examinees, times, and scores are invented. The board is an original drawing, not a picture of the product.</div>
+  <div class="chips" id="partChips" role="group" aria-label="Part">
+    <button type="button" data-part="run">Run the trial</button>
+    <button type="button" data-part="worst">Score and choose the worst hand</button>
+  </div>
+
+  <!-- PART 1 -->
+  <section id="partRun">
+    <div class="chips" id="handChips" role="group" aria-label="Hand tested">
+      <span class="lab">Hand tested</span>
+      <button type="button" data-hand="right">Right hand</button>
+      <button type="button" data-hand="left">Left hand</button>
+    </div>
+    <div class="chips" id="trialChips" role="group" aria-label="Trial"><span class="lab">Trial</span></div>
+    <div class="sim">
+      <div class="boardbox">
+        <svg id="board" viewBox="0 0 340 470" role="img" aria-labelledby="boardDesc">
+          <title id="boardDesc">Top-down view of the peg tray above a five by five board of keyhole slots</title>
+          <g id="gStatic"></g>
+          <g id="gDyn"></g>
+        </svg>
+        <p class="act" id="act"></p>
+        <p class="sr" id="boardSr" aria-live="polite"></p>
+      </div>
+      <div class="ctl">
+        <div class="sw">
+          <span class="digits" id="digits" aria-label="Stopwatch reading">0:00.0</span>
+          <button type="button" class="b primary" id="swStart" disabled>Start</button>
+          <button type="button" class="b secondary" id="swStop" disabled>Stop</button>
+        </div>
+        <div class="cue" id="cue" aria-live="assertive">The cue to begin will appear here.</div>
+        <div class="speed"><div class="chips" id="speedChips" role="group" aria-label="Clock speed"><span class="lab">Clock speed</span><button type="button" data-speed="1">1x</button><button type="button" data-speed="4">4x</button></div></div>
+      </div>
+      <div class="card panel" id="panel">
+        <p class="who" id="who"></p>
+        <div id="decide">
+          <p class="q" id="q"></p>
+          <div class="opts" id="opts"></div>
+        </div>
+        <div id="record" class="hidden">
+          <p class="q">Record the trial on the form.</p>
+          <div class="recform">
+            <label>Seconds from the cue to the last hole filled <input type="number" id="rSec" min="0" max="999" step="1" inputmode="numeric"></label>
+            <label>Pegs dropped <input type="number" id="rDrop" min="0" max="25" step="1" inputmode="numeric"></label>
+            <label>Pegs placed <input type="number" id="rPlaced" min="0" max="25" step="1" inputmode="numeric"> <span class="status">leave blank unless the rule calls for it</span></label>
+            <span class="chk">Notes</span>
+            <label>Reminded ‘Only one peg at a time’ (two pegs picked up, trial not stopped), times <input type="number" id="rRemind" min="0" max="25" step="1" inputmode="numeric"></label>
+            <label class="chk"><input type="checkbox" id="rPrompt"> Prompt to the correct starting side</label>
+          </div>
+          <div class="nav"><button type="button" class="b primary" id="rCheck">Check the record</button></div>
+        </div>
+        <div class="fb hidden" id="fb" aria-live="polite"></div>
+        <div class="nav">
+          <button type="button" class="b primary hidden" id="cont">Continue</button>
+          <button type="button" class="b secondary hidden" id="newTrial">New trial</button>
+          <span class="status" id="status"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PART 2 -->
+  <section id="partWorst" class="hidden">
+    <div class="card">
+      <h2>From seconds to T score</h2>
+      <ol class="steps">
+        <li>Read each hand's scaled score from its time in seconds. The writing hand is read in the dominant-hand column and the other hand in the nondominant-hand column. A faster time gives a higher scaled score.</li>
+        <li>Choose Appendix D or Appendix E by the examinee's race. Then, on that appendix's page for the examinee's sex, years of education, and age, read the T score in the same row as the scaled score, in that hand's column.</li>
+      </ol>
+      <p class="small">Read both steps from the tables on the Canvas page. The cases below give T scores as if already read.</p>
+    </div>
+    <div class="chips" id="caseChips" role="group" aria-label="Case"></div>
+    <div class="card">
+      <h2 id="wTitle"></h2>
+      <p class="setup" id="wSetup"></p>
+      <table id="wTable"></table>
+    </div>
+    <div class="card">
+      <p class="q" id="wq"></p>
+      <div class="opts" id="wopts"></div>
+      <div class="fb hidden" id="wfb" aria-live="polite"></div>
+      <div class="nav">
+        <button type="button" class="b primary hidden" id="wnext">Next step</button>
+        <span class="status" id="wstatus"></span>
+      </div>
+    </div>
+  </section>
+  <p class="status" id="acc"></p>
+  <p class="small">Rules are paraphrased from the sources cited on the Canvas page. Use the manual during a real administration.</p>
+</div>
+<script>
+(function(){
+var el=function(id){return document.getElementById(id);};
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function rnd(a,b){ return a+Math.random()*(b-a); }
+function ri(a,b){ return Math.floor(rnd(a,b+1)); }
+function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+function report(){ try{ parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:document.documentElement.scrollHeight}),'*'); }catch(e){} }
+
+/* ---------- session accuracy ---------- */
+var firstTry={};
+function mark(key,ok){ if(!(key in firstTry)) firstTry[key]=!!ok; showAcc(); }
+function showAcc(){ var n=0,t=0; Object.keys(firstTry).forEach(function(k){ t++; if(firstTry[k]) n++; }); el('acc').textContent= t ? 'Correct on the first try in '+n+' of '+t+' decisions this session.' : ''; }
+
+/* ---------- people ---------- */
+var PEOPLE=[
+ {full:'Ms. Margaret Webb', short:'Ms. Webb', she:'she', her:'her', She:'She'},
+ {full:'Ms. Helen Pierce', short:'Ms. Pierce', she:'she', her:'her', She:'She'},
+ {full:'Mr. Edward Lyle', short:'Mr. Lyle', she:'he', her:'his', She:'He', obj:'him'},
+ {full:'Mr. James Fuller', short:'Mr. Fuller', she:'he', her:'his', She:'He', obj:'him'},
+ {full:'Ms. Alice Turner', short:'Ms. Turner', she:'she', her:'her', She:'She'},
+ {full:'Mr. Victor Hall', short:'Mr. Hall', she:'he', her:'his', She:'He', obj:'him'},
+ {full:'Ms. Grace Dunn', short:'Ms. Dunn', she:'she', her:'her', She:'She'},
+ {full:'Mr. Leonard Price', short:'Mr. Price', she:'he', her:'his', She:'He', obj:'him'}
+];
+function objOf(p){ return p.obj||'her'; }
+
+/* =====================================================================
+   PART 1. Timed trial simulation
+   ===================================================================== */
+// Trial templates. Event "at" = index in the row order of the hole the examinee is about to fill.
+var TPL={
+ A:{label:'Trial A', make:function(){ return {slow:false, ev:[{type:'drop',at:ri(6,11)},{type:'wrongSide',at:pick([15,20])}]}; }},
+ B:{label:'Trial B', make:function(){ return {slow:false, ev:[{type:'twoPegs',at:ri(2,4)},{type:'dropReach',at:ri(8,18)}]}; }},
+ C:{label:'Trial C', make:function(){ return {slow:false, ev:[{type:'wrongSide',at:pick([5,10])},{type:'dropReach',at:ri(12,16)},{type:'drop',at:ri(18,23)}]}; }},
+ D:{label:'Trial D', make:function(){ return {slow:true, ev:[{type:'drop',at:ri(5,8)},{type:'fiveMin',at:-1}]}; }},
+ E:{label:'Trial E', make:function(){ return {slow:false, ev:[{type:'twoPegs',at:ri(2,4)},{type:'wrongSide',at:pick([10,15])},{type:'drop',at:ri(17,22)}]}; }}
+};
+var TKEYS=['A','B','C','D','E'];
+
+// Board geometry (original drawing)
+var ANG=(function(){ var a=[], s=7; for(var i=0;i<25;i++){ s=(s*73+19)%101; a.push((s%8)*45); } return a; })();
+var TRAYPOS=(function(){ var a=[], s=11; for(var i=0;i<25;i++){ s=(s*61+29)%97; var col=i%9, row=Math.floor(i/9); a.push([60+col*27+(s%9)-4, 30+row*17+((s*3)%7)-3]); } return a; })();
+function holeXY(i){ var r=Math.floor(i/5), c=i%5; return [50+c*60, 132+r*60]; }
+function holeOf(k,hand){ var r=Math.floor(k/5), j=k%5; return r*5+(hand==='right'? j : 4-j); }
+function restXY(hand){ return hand==='right'? [262,428] : [78,428]; }
+
+var S=null, speed=4, hashHand='right', curTrial='A', rafLast=0, decided=false;
+
+function newTrial(key){
+  if(key) curTrial=key;
+  var tp=TPL[curTrial].make();
+  var p=pick(PEOPLE);
+  var writer=pick(['right','left']);
+  S={ key:curTrial, slow:tp.slow, events:tp.ev.map(function(e){return {type:e.type, at:e.at, fired:false};}),
+      person:p, hand:hashHand, writer:writer, firstOfPair:(writer===hashHand),
+      holes:[], tray:25, floor:0, nextIdx:0, drops:0, prompts:0, reminders:0, removedCount:0, placeLog:[],
+      phase:'pre', pre:[], preIdx:0, simT:0, swStart:null, swPressReal:null, reading:null, stopped5:false,
+      cue:null, cueT:0, readyAt:0, beginAt:0, firstTouch:rnd(0.55,0.85),
+      perPeg: tp.slow ? function(){return rnd(13.6,15.4);} : (function(m){return function(){return m*rnd(0.8,1.2);};})(rnd(2.4,3.3)),
+      act:null, hand2:{x:0,y:0,hold:0,ang:0}, ex:null, fall:null, pending:null, startJudged:[], recordDone:false, checks:0, demoK:0 };
+  for(var i=0;i<25;i++) S.holes.push('empty');
+  var r=restXY(S.hand); S.hand2.x=r[0]; S.hand2.y=r[1];
+  buildPre();
+  drawStatic(); setPhaseUI(); render(); renderChips();
+}
+
+/* ---------- pre-trial decisions ---------- */
+function sideWord(h){ return h==='right'?'right':'left'; }
+function other(h){ return h==='right'?'left':'right'; }
+function buildPre(){
+  var p=S.person, W=S.writer, H=S.hand, O=other(W);
+  S.pre=[];
+  S.pre.push({k:'dom', q:p.short+' tells you '+p.she+' writes with '+p.her+' '+W+' hand. When you set the board down, '+p.she+' reached toward it with '+p.her+' '+O+' hand. Which hand do you test first?', opts:[
+    ['The '+W+' hand, the writing hand.',1,'The battery defines the dominant hand as the writing hand, and the dominant hand is tested first. Circle it on the form before the first trial, since it also decides which norm column each time is read against.'],
+    ['The '+O+' hand, the hand '+p.she+' reached with.',0,'Deciding dominance by the hand the examinee reaches with is one of the examiner errors that change the score. Each time would then be read against the wrong column.'],
+    ['Ask which hand '+p.she+' prefers and start with that one.',0,'Preference can be answered differently on different days. The battery uses the writing hand, one fact the examinee reports the same way every time.']]});
+  if(W!==H){
+    S.pre.push({k:'second', q:p.short+'’s '+W+'-hand trial is finished. Before the '+H+'-hand trial, what do you do?', opts:[
+      ['Clear the board, return every peg to the tray, give the instruction with the hand and the direction reversed, and demonstrate one full row again.',1,'The second hand gets the same instruction with the hand and direction reversed, a full demonstration row, and an empty board.'],
+      ['Skip the demonstration, since '+p.she+' has already seen one.',0,'The procedure demonstrates one full row again for the second hand.'],
+      ['Let '+objOf(p)+' practice one row with the '+H+' hand first.',0,'No practice trial is given for either hand. Letting the examinee practice a row is an examiner error that changes the score.']]});
+  }
+  var dirOK = H==='right' ? 'At the left side, working to the right, in every row.' : 'At the right side, working to the left, in every row.';
+  var dirNo = H==='right' ? 'At the right side, working to the left, in every row.' : 'At the left side, working to the right, in every row.';
+  S.pre.push({k:'dir', q:'Where does the demonstration row for the '+H+' hand begin, and which way does each row run?', opts:[
+    [dirOK,1, H==='right' ? 'The right hand works from left to right, and each row begins again at the left side.' : 'The left hand works from right to left, and each row begins again at the right side.'],
+    [dirNo,0, H==='right' ? 'That is the direction for the left hand. The right hand works from left to right.' : 'That is the direction for the right hand. The left hand works from right to left.'],
+    ['One way in the first row, then back the other way in the next row.',0,'Rows do not alternate. Every row starts again at the same side.']]});
+  S.pre.push({k:'demo', demo:true, q:'Your demonstration row is in the board. What comes next?', opts:[
+    ['Take the demonstration pegs out and return them to the tray, then give the cue to begin.',1,'The examinee fills every row from an empty board. With the demonstration pegs left in, the examinee fills fewer holes and the time no longer matches the procedure behind the norms.'],
+    ['Give the cue to begin. The examinee starts on the second row.',0,'Leaving the demonstration pegs in the board means the examinee fills fewer holes, one of the examiner errors that change the score.'],
+    ['Have '+objOf(p)+' fill the second row for practice, then clear the board.',0,'No practice trial is given. A practice row is an examiner error that changes the score.']]});
+}
+
+/* ---------- in-trial decisions ---------- */
+function eventDef(type){
+  var p=S.person, sh=p.short, H=S.hand;
+  var reuse = S.removedCount===0 ? 'the first one' : 'the second one';
+  if(type==='drop') return {q:'A peg slips from '+sh+'’s fingers and falls to the floor. What do you do?', opts:[
+    ['Leave the dropped peg where it fell. Take out a correctly placed peg, '+reuse+', for '+objOf(p)+' to use again, and tally the drop on the form now.',1,'The examiner does not retrieve a dropped peg or offer a new one. One correctly placed peg, usually the first or second, is taken out and used again, and the drop is tallied at once. The hole the reused peg came from stays empty, and time ends when the last hole of the last row is filled.'],
+    ['Pick the peg up from the floor and hand it back.',0,'The examiner does not retrieve a dropped peg.'],
+    ['Hand '+objOf(p)+' a new peg from the tray.',0,'Handing over a new peg from the tray after a drop is one of the examiner errors that change the score. Reuse a peg already placed.'],
+    ['Stop the trial and begin again.',0,'A drop is not a rule violation. It is handled inside the trial and tallied while the stopwatch keeps running.']]};
+  if(type==='dropReach') return {q:'A peg falls from '+sh+'’s fingers to the floor, and '+p.she+' reaches toward the tray for another. What do you do?', opts:[
+    ['Stop the reach. Take out a correctly placed peg, '+reuse+', for '+objOf(p)+' to use again. Leave the dropped peg and tally the drop now.',1,'A fresh peg from the tray is a different procedure from the one the norms assume. Reuse a placed peg, usually the first or second, leave the dropped one where it fell, and tally the drop. The hole the reused peg came from stays empty.'],
+    ['Let '+objOf(p)+' take the peg from the tray. '+p.She+' fetched it without your help.',0,'Letting the examinee take a fresh peg from the tray is a different procedure from the one the norms assume, whoever fetches it.'],
+    ['Pick up the dropped peg and hand it back.',0,'The examiner does not retrieve a dropped peg.'],
+    ['Stop the trial and begin again.',0,'A drop is handled inside the trial and tallied while the stopwatch keeps running.']]};
+  if(type==='twoPegs') return {q:sh+' comes up from the tray with two pegs pinched together. What do you do?', opts:[
+    ['Keep the stopwatch running and say at once “Only one peg at a time.” Have '+objOf(p)+' put the extra peg back in the tray, and note the reminder on the form.',1,'The program’s rule is that two pegs do not stop the trial. Keep timing, interrupt at once with the battery’s reminder, and have the examinee return the extra peg to the tray. The extra peg is not a drop and is not tallied. The reminder goes on the form.'],
+    ['Stop the trial and begin it again. Note the restart on the form.',0,'The program’s rule does not stop or restart the trial for two pegs. Keep the stopwatch running, give the reminder, and have the extra peg returned to the tray.'],
+    ['Take one peg from '+p.her+' fingers and let '+objOf(p)+' go on.',0,'Taking the peg yourself skips the reminder. Say “Only one peg at a time” and have the examinee put the extra peg back in the tray.'],
+    ['Let '+objOf(p)+' go on and note it on the form.',0,'Two pegs in the fingers break a rule the examinee was told. Interrupt at once with “Only one peg at a time” and have the extra peg returned before the examinee goes on.'],
+    ['Keep timing, take the extra peg, and tally it as a drop.',0,'The extra peg did not fall. It goes back to the tray and is not tallied as a drop. Note the reminder instead.']]};
+  if(type==='wrongSide'){
+    var good=H==='right'?'left':'right', bad=other(good);
+    return {q:sh+' finishes a row and carries the next peg toward the '+bad+' end of the next row. What do you do?', opts:[
+      ['Point to the '+good+' end of the row and say “Put the next one here.”',1,'Starting a row at the wrong side is handled with this prompt while the trial goes on. Note the prompt on the form.'],
+      ['Stop the trial and begin again.',0,'The procedure gives a specific prompt for a wrong starting side, and the trial goes on with the stopwatch running.'],
+      ['Say nothing. Any order fills the board.',0,'The examinee was told to fill the rows in the given direction, and the norms assume that direction. Prompt the correct starting point.'],
+      ['Repeat the whole instruction and demonstrate the row again.',0,'The procedure calls for pointing to the correct starting point with a short prompt, not a second instruction.']]};
+  }
+  if(type==='fiveMin') return {q:'The stopwatch reaches 5:00. '+sh+' is still working. What do you do?', opts:[
+    ['Stop '+objOf(p)+' now. Enter 300 s and count the pegs placed.',1,'The battery stops the trial at 5 minutes, enters the time as 300 s, and counts the pegs in the board.'],
+    ['Let '+objOf(p)+' finish and record the full time.',0,'Letting a trial run past 5 minutes is one of the examiner errors that change the score.'],
+    ['Stop '+objOf(p)+' and leave the seconds blank, since the trial was not finished.',0,'A stopped trial still has a time. It is entered as 300 s, with the pegs placed beside it.'],
+    ['Stop '+objOf(p)+' and record the stopwatch reading to the tenth of a second.',0,'The time for a stopped trial is entered as 300 s, with the pegs placed beside it.']]};
+}
+
+/* ---------- static SVG ---------- */
+function keyhole(x,y,a,cls){
+  return '<g transform="translate('+x+' '+y+') rotate('+a+')" class="'+(cls||'')+'"><circle r="11" fill="#2f3a35"/><rect x="7" y="-3.5" width="9" height="7" rx="1.5" fill="#2f3a35"/></g>';
+}
+function drawStatic(){
+  var h='';
+  h+='<rect x="0" y="0" width="340" height="470" fill="#f7faf8"/>';
+  h+='<rect x="34" y="12" width="272" height="70" rx="16" fill="#c9d3cd" stroke="#8fa499"/>';
+  h+='<text x="40" y="96" font-size="11" fill="#41544a">Peg tray</text>';
+  h+='<rect x="16" y="102" width="308" height="300" rx="12" fill="#a8b8ae" stroke="#5f7568" stroke-width="1.5"/>';
+  for(var i=0;i<25;i++){ var p=holeXY(i); h+=keyhole(p[0],p[1],ANG[i]); }
+  h+='<rect x="16" y="436" width="308" height="30" rx="6" fill="#ece6dc" stroke="#cbbfa9"/>';
+  h+='<text x="170" y="430" font-size="11" text-anchor="middle" fill="#41544a">Examinee sits here</text>';
+  h+='<text x="282" y="456" font-size="11" fill="#6b5a3f">Floor</text>';
+  el('gStatic').innerHTML=h;
+}
+function pegSvg(x,y,a,cls,ghost){
+  var f=ghost?'none':'#d7dde0', st=ghost?'#e8eef0':'#56636b';
+  return '<g class="'+cls+'" transform="translate('+x.toFixed(1)+' '+y.toFixed(1)+') rotate('+a.toFixed(0)+')"><circle r="8" fill="'+f+'" stroke="'+st+'" stroke-width="1.6"'+(ghost?' stroke-dasharray="3 2"':'')+'/>'+(ghost?'':'<rect x="5" y="-2.2" width="5.5" height="4.4" rx="1" fill="#9aa6ad" stroke="#56636b" stroke-width="1"/>')+'</g>';
+}
+function render(){
+  if(!S) return;
+  var h='', i;
+  for(i=0;i<S.tray;i++){ var t=TRAYPOS[i]; h+=pegSvg(t[0],t[1],(i*53)%360,'peg-tray'); }
+  for(i=0;i<25;i++){ var p=holeXY(i);
+    if(S.holes[i]==='peg'||S.holes[i]==='demo') h+=pegSvg(p[0],p[1],ANG[i], S.holes[i]==='peg'?'peg-in':'peg-demo');
+    else if(S.holes[i]==='removed') h+=pegSvg(p[0],p[1],0,'peg-gone',true);
+  }
+  for(i=0;i<S.floor;i++) h+=pegSvg(40+i*22,451,i*70,'peg-floor');
+  if(S.fall) h+=pegSvg(S.fall.x,S.fall.y,S.fall.a,'peg-falling');
+  if(S.ex){ h+='<g transform="translate('+S.ex.x.toFixed(1)+' '+S.ex.y.toFixed(1)+')"><path d="M0 0 L-9 -16 L9 -16 Z" fill="#b35900" stroke="#7a3d00"/></g>';
+    if(S.ex.hold) h+=pegSvg(S.ex.x,S.ex.y-22,0,'peg-ex');
+    if(S.ex.say){ var bx=Math.min(Math.max(S.ex.x-78,4),180); h+='<g><rect x="'+bx+'" y="'+(S.ex.y-58)+'" width="156" height="24" rx="6" fill="#fff" stroke="#b35900"/><text x="'+(bx+78)+'" y="'+(S.ex.y-41)+'" font-size="12" text-anchor="middle" fill="#17251d">'+S.ex.say+'</text></g>'; }
+  }
+  var hd=S.hand2;
+  if(S.phase!=='pre' || S.preIdx>=0){
+    h+='<g transform="translate('+hd.x.toFixed(1)+' '+hd.y.toFixed(1)+')"><ellipse rx="15" ry="12" fill="rgba(30,77,58,0.18)" stroke="#1e4d3a" stroke-width="1.5"/></g>';
+    if(hd.hold>=1) h+=pegSvg(hd.x,hd.y,hd.ang,'peg-hand');
+    if(hd.hold>=2) h+=pegSvg(hd.x+9,hd.y+5,hd.ang+40,'peg-hand');
+  }
+  el('gDyn').innerHTML=h;
+  var r=S.swStart===null && S.swPressReal===null ? 0 : readingNow();
+  el('digits').textContent=fmt(r);
+}
+function fmt(s){ s=Math.max(0,s); var m=Math.floor(s/60), r=s-m*60; return m+':'+(r<10?'0':'')+r.toFixed(1); }
+function readingNow(){
+  if(S.reading!==null) return S.reading;
+  if(S.phase==='cue' && S.swPressReal!==null) return (performance.now()-S.swPressReal)/1000;
+  if(S.swStart===null) return 0;
+  return S.simT-S.swStart;
+}
+function boardCount(){ return S.holes.filter(function(x){return x==='peg';}).length; }
+function srBoard(){ el('boardSr').textContent='Board has '+boardCount()+' pegs placed. '+S.floor+' on the floor.'; }
+
+/* ---------- actions ---------- */
+function lerp(a,b,t){ return a+(b-a)*t; }
+function pathAt(pts,fr,t){ // pts list of [x,y], fr cumulative fractions (same length), t 0..1
+  for(var i=1;i<pts.length;i++){ if(t<=fr[i]){ var u=(t-fr[i-1])/Math.max(1e-6,fr[i]-fr[i-1]); u=u<0?0:u>1?1:u; u=u*u*(3-2*u); return [lerp(pts[i-1][0],pts[i][0],u), lerp(pts[i-1][1],pts[i][1],u)]; } }
+  return pts[pts.length-1].slice();
+}
+function trayPt(){ var t=TRAYPOS[Math.max(0,S.tray-1)]; return [t[0],t[1]]; }
+function startAction(a){ a.t0=S.simT; S.act=a; }
+function placeAction(k, fromHandoff){
+  var hole=holeOf(k,S.hand), hp=holeXY(hole), cur=[S.hand2.x,S.hand2.y], d=S.perPeg(), tp=trayPt(), a0=(k*97)%360;
+  if(fromHandoff){ return {kind:'place', k:k, hole:hole, dur:d*0.55, pts:[cur,hp,hp], fr:[0,0.55,1], hold:[0,1], tray:false, a0:a0}; }
+  var trayLeg = (k===0 && S.nextIdx===0 && S.simT<0.01) ? S.firstTouch : d*0.32;
+  return {kind:'place', k:k, hole:hole, dur:trayLeg+d*0.68, pts:[cur,tp,hp,hp], fr:[0,trayLeg/(trayLeg+d*0.68),(trayLeg+d*0.38)/(trayLeg+d*0.68),1], hold:[1,2], tray:true, a0:a0};
+}
+function nextAction(){
+  var k=S.nextIdx;
+  for(var i=0;i<S.events.length;i++){ var e=S.events[i]; if(!e.fired && e.at===k){ e.fired=true; startEventAction(e.type,k); return; } }
+  startAction(placeAction(k, S.handoff)); S.handoff=false;
+}
+function startEventAction(type,k){
+  var hole=holeOf(k,S.hand), hp=holeXY(hole), cur=[S.hand2.x,S.hand2.y], tp=trayPt();
+  var mid=[lerp(tp[0],hp[0],0.6), lerp(tp[1],hp[1],0.6)];
+  if(type==='drop'||type==='dropReach'){
+    var pts=[cur,tp,mid], fr=[0,0.4,0.75];
+    if(type==='dropReach'){ pts.push([lerp(mid[0],tp[0],0.6), lerp(mid[1],tp[1],0.6)]); fr=[0,0.3,0.6,1]; } else { pts.push(mid); fr.push(1); }
+    startAction({kind:'drop', ev:type, k:k, dur:type==='dropReach'?2.6:2.0, pts:pts, fr:fr, hold:[1,2], dropAt:fr[2], tray:true});
+  } else if(type==='twoPegs'){
+    startAction({kind:'two', ev:type, k:k, dur:1.4, pts:[cur,tp,[tp[0],tp[1]+60]], fr:[0,0.55,1], hold:[1,2], two:true, tray:true});
+  } else if(type==='wrongSide'){
+    var r=Math.floor(k/5), wrongHole=r*5+(S.hand==='right'?4:0), wp=holeXY(wrongHole);
+    startAction({kind:'wrong', ev:type, k:k, dur:1.8, pts:[cur,tp,[wp[0],wp[1]-6]], fr:[0,0.45,1], hold:[1,2], tray:true});
+  }
+}
+function stepAction(){
+  var a=S.act; if(!a) { nextAction(); a=S.act; if(!a) return; }
+  var t=(S.simT-a.t0)/a.dur; if(t>1) t=1;
+  var p=pathAt(a.pts,a.fr,t); S.hand2.x=p[0]; S.hand2.y=p[1];
+  var seg=0; for(var i=1;i<a.fr.length;i++){ if(t>a.fr[i]) seg=i; }
+  if(a.kind==='place'){
+    if(a.tray && seg>=1 && !a.took){ a.took=true; S.tray--; }
+    S.hand2.hold = (a.tray ? seg>=1 : true) && t<1 ? 1 : 0;
+    var turnStart=a.fr[a.fr.length-2]; S.hand2.ang = t<turnStart ? a.a0 : lerp(a.a0, ANG[a.hole]+360*Math.round((a.a0-ANG[a.hole])/360), (t-turnStart)/(1-turnStart));
+  } else if(a.kind==='drop'){
+    if(seg>=1 && !a.took){ a.took=true; S.tray--; }
+    S.hand2.hold = (seg>=1 && t<a.dropAt) ? 1 : 0;
+    if(t>=a.dropAt){ var u=Math.min(1,(t-a.dropAt)/(1-a.dropAt)*1.6); if(!a.fx){ a.fx=[S.hand2.x,S.hand2.y]; } S.fall={x:lerp(a.fx[0],40+S.floor*22,u), y:lerp(a.fx[1],451,u)-Math.sin(u*Math.PI)*20, a:u*300}; }
+  } else if(a.kind==='two'){
+    if(seg>=1 && !a.took){ a.took=true; S.tray-=2; }
+    S.hand2.hold = seg>=1 ? 2 : 0; S.hand2.ang=(a.k*40)%360;
+  } else if(a.kind==='wrong'){
+    if(seg>=1 && !a.took){ a.took=true; S.tray--; }
+    S.hand2.hold = seg>=1 ? 1 : 0;
+  } else if(a.kind==='fix'){
+    S.hand2.hold=1;
+  }
+  if(t>=1){
+    S.act=null;
+    if(a.kind==='place'){
+      S.holes[a.hole]='peg'; S.placeLog.push(a.hole); S.nextIdx++; S.hand2.hold=0; srBoard(); el('act').textContent=actText(); setCue();
+      if(S.nextIdx>=25){ S.phase='stopwait'; setPhaseUI(); return; }
+    } else if(a.kind==='drop'||a.kind==='two'||a.kind==='wrong'){
+      if(a.kind==='drop'){ S.fall=null; S.floor++; srBoard(); }
+      openEvent(a.ev);
+    }
+  }
+}
+
+/* ---------- main loop ---------- */
+function tick(now){
+  var dt=Math.min(0.1,(now-(rafLast||now))/1000); rafLast=now;
+  if(S){
+    if(S.phase==='demoAnim') stepDemo(dt);
+    else if(S.phase==='demoOut') stepDemoOut(dt);
+    else if(S.phase==='cue') stepCue(now);
+    else if(S.phase==='run') stepRun(dt);
+    else if(S.phase==='fixing') stepFix(dt);
+    render();
+  }
+  requestAnimationFrame(tick);
+}
+function stepDemo(dt){
+  S.demoT+=dt*Math.max(1,Math.min(speed,8));
+  var per=0.9, k=Math.floor(S.demoT/per), f=(S.demoT-k*per)/per;
+  if(k>=5){ S.holes[holeOf(S.demoK,S.hand)]='demo'; S.ex=null; S.phase='pre'; setPhaseUI(); return; }
+  var hole=holeOf(k,S.hand), hp=holeXY(hole), tp=TRAYPOS[S.tray-1>=0?S.tray-1:0];
+  if(S.demoK===k && f>0.05 && !S.demoTook){ S.demoTook=true; S.tray--; }
+  if(S.demoK!==k){ S.holes[holeOf(S.demoK,S.hand)]='demo'; S.demoK=k; S.demoTook=false; }
+  var p=pathAt([[170,6],tp,hp],[0,0.4,1],f); S.ex={x:p[0], y:p[1]+16, hold:f>0.4};
+}
+function stepDemoOut(dt){
+  S.demoT+=dt*Math.max(1,Math.min(speed,8)); var per=0.35, k=Math.floor(S.demoT/per);
+  for(var j=0;j<5 && j<=k;j++){ var h=holeOf(j,S.hand); if(S.holes[h]==='demo'){ S.holes[h]='empty'; S.tray++; } }
+  if(k<5){ var hp=holeXY(holeOf(Math.min(k,4),S.hand)); S.ex={x:hp[0],y:hp[1]+16,hold:true}; }
+  else { S.ex=null; beginCue(); }
+}
+function beginCue(){
+  S.phase='cue'; S.cue='wait'; S.cueT=performance.now(); S.readyAt=S.cueT+900; S.beginAt=S.readyAt+rnd(1300,2400);
+  S.swStart=null; S.swPressReal=null; S.reading=null; S.simT=0; S.act=null;
+  var r=restXY(S.hand); S.hand2.x=r[0]; S.hand2.y=r[1]; S.hand2.hold=0;
+  setPhaseUI();
+}
+function stepCue(now){
+  if(S.cue==='wait' && now>=S.readyAt){ S.cue='ready'; setPhaseUI(); }
+  if(S.cue==='ready' && now>=S.beginAt){
+    S.cue='begin'; S.beginReal=now;
+    if(S.swPressReal!==null){ S.swStart=-(now-S.swPressReal)/1000; judgeStart(); }
+    S.phase='run'; setCue(); setPhaseUI();
+  }
+}
+function stepRun(dt){
+  var sp = S.swStart===null ? 1 : speed;
+  var adv=dt*sp;
+  if(S.swStart===null && S.simT+adv>=4){ S.simT=4; stepAction(); S.phase='nostart'; setPhaseUI(); return; }
+  if(S.slow && S.swStart!==null && S.simT+adv-S.swStart>=300){
+    S.simT=S.swStart+300; S.act=null; S.fall=null; S.hand2.hold=0;
+    var e=S.events.filter(function(x){return x.type==='fiveMin';})[0]; e.fired=true; openEvent('fiveMin'); return;
+  }
+  S.simT+=adv; stepAction();
+}
+function stepFix(dt){
+  var f=S.fix, adv=dt*Math.max(1,Math.min(speed,8)); f.t+=adv; S.simT+=adv; var u=Math.min(1,f.t/f.dur);
+  if(f.kind==='remove'){
+    var hp=holeXY(f.hole), rp=[S.hand2.x,S.hand2.y];
+    if(u<0.5){ var p=pathAt([[300,20],hp],[0,1],u*2); S.ex={x:p[0],y:p[1]+16,hold:false}; }
+    else { if(S.holes[f.hole]==='peg'){ S.holes[f.hole]='removed'; srBoard(); } var p2=pathAt([hp,rp],[0,1],(u-0.5)*2); S.ex={x:p2[0],y:p2[1]+16,hold:u<0.98}; }
+    if(u>=1){ S.ex=null; S.hand2.hold=1; S.handoff=true; S.phase='run'; setPhaseUI(); }
+  } else if(f.kind==='prompt'){
+    var cp=holeXY(f.hole); S.ex={x:cp[0],y:cp[1]+30,hold:false,say:'Put the next one here.'};
+    if(u>=1){ S.ex=null; S.phase='run'; setPhaseUI(); }
+  } else if(f.kind==='remind'){
+    S.ex={x:S.hand2.x,y:S.hand2.y-20,hold:false,say:'Only one peg at a time.'};
+    if(u>=0.6 && S.hand2.hold>1){ S.hand2.hold=1; S.tray++; }
+    if(u>=1){ S.ex=null; S.hand2.hold=1; S.handoff=true; S.phase='run'; setPhaseUI(); }
+  }
+}
+
+/* ---------- stopwatch ---------- */
+el('swStart').addEventListener('click',function(){
+  if(!S) return;
+  if(S.phase==='cue' && S.cue!=='wait' && S.swPressReal===null){ S.swPressReal=performance.now(); setPhaseUI(); return; }
+  if((S.phase==='run'||S.phase==='nostart') && S.swStart===null){ S.swStart=S.simT; judgeStart(); S.phase='run'; setPhaseUI(); }
+});
+el('swStop').addEventListener('click',function(){
+  if(!S || S.phase!=='stopwait') return;
+  S.reading=S.simT-S.swStart; S.phase='record'; setPhaseUI();
+});
+function judgeStart(){
+  var off=S.swStart, key=S.key+'-start-'+Math.random().toString(36).slice(2,6);
+  var ok=Math.abs(off)<=0.4, msg;
+  var d=Math.abs(off).toFixed(2);
+  if(ok) msg='<strong>On the cue.</strong> You started the stopwatch '+d+' s '+(off<0?'before':'after')+' the word Begin. Timing begins when you cue the examinee to begin, not when a peg is touched.';
+  else if(off>0 && off>=S.firstTouch-0.15) msg='<strong>Late by '+d+' s.</strong> That is about when the examinee first touched a peg ('+S.firstTouch.toFixed(2)+' s after Begin). Starting at the first touch leaves the time short by the examinee’s reaction time, an examiner error that changes the score.';
+  else if(off>0) msg='<strong>Late by '+d+' s.</strong> Start the stopwatch as you say Begin. The time you missed is missing from the score.';
+  else msg='<strong>Early by '+d+' s.</strong> The stopwatch ran before the cue to begin, which adds time the examinee was not working.';
+  S.startJudged.push({off:off, ok:ok}); mark(key,ok);
+  S.startMsg={ok:ok,msg:msg};
+}
+
+/* ---------- decision panel ---------- */
+function setCue(){
+  var c=el('cue');
+  if(S.phase==='pre'||S.phase==='demoAnim'||S.phase==='demoOut'){ c.className='cue'; c.textContent='The cue to begin will appear here.'; return; }
+  if(S.cue==='wait'){ c.className='cue'; c.textContent='Hold the stopwatch. Start it when you say Begin.'; }
+  else if(S.cue==='ready'){ c.className='cue ready'; c.textContent='You say “Ready?”'; }
+  else if(S.cue==='begin' && (S.phase==='run'||S.phase==='nostart') && S.nextIdx<1){ c.className='cue begin'; c.textContent='You say “Begin.”'; }
+  else { c.className='cue'; c.textContent= S.phase==='record' ? 'Trial over.' : 'Trial under way.'; }
+}
+function actText(){
+  var p=S.person;
+  switch(S.phase){
+    case 'pre': return S.preIdx<S.pre.length && S.pre[S.preIdx].demo ? 'Demonstration row in the board.' : 'Board empty, all 25 pegs in the tray.';
+    case 'demoAnim': return 'You demonstrate one full row.';
+    case 'demoOut': return 'You take the demonstration pegs out.';
+    case 'cue': return p.short+' waits for your cue.';
+    case 'run': return S.nextIdx<25 ? p.short+' is filling row '+(Math.floor(S.nextIdx/5)+1)+'.' : '';
+    case 'nostart': return 'Paused. The stopwatch is not running.';
+    case 'event': return 'Paused while you decide. The clock is frozen.';
+    case 'fixing': return S.fix.kind==='remove' ? 'You take out a placed peg for reuse. The stopwatch keeps running.' : S.fix.kind==='remind' ? 'You say “Only one peg at a time.” The extra peg goes back in the tray. The stopwatch keeps running.' : 'You point to the correct starting hole.';
+    case 'stopwait': return p.short+' fills the last hole of the last row.';
+    case 'record': return S.stopped5 ? 'Trial stopped at 5 minutes.' : 'Trial complete.';
+  }
+  return '';
+}
+function whoText(){
+  var p=S.person;
+  return p.full+' writes with '+p.her+' '+S.writer+' hand. This is '+p.her+' '+S.hand+'-hand trial, the '+(S.firstOfPair?'first (dominant hand)':'second (nondominant hand)')+'.';
+}
+function showOpts(qText,opts,key,onRight){
+  decided=false; if(S) S.curOpts=opts;
+  el('decide').classList.remove('hidden'); el('record').classList.add('hidden');
+  el('q').textContent=qText;
+  var o=el('opts'); o.innerHTML='';
+  shuffle(opts.slice()).forEach(function(op){ var b=document.createElement('button'); b.type='button'; b.textContent=op[0];
+    b.addEventListener('click',function(){
+      var fb=el('fb');
+      if(op[1]){ mark(key,!decided); decided=true; b.classList.add('right'); Array.prototype.forEach.call(o.children,function(x){x.disabled=true;});
+        fb.className='fb ok'; fb.innerHTML='<strong>Right.</strong> '+esc(op[2]); el('cont').classList.remove('hidden'); el('cont').onclick=onRight; el('cont').focus({preventScroll:true}); }
+      else { mark(key,false); decided=true; b.classList.add('wrong'); b.disabled=true; fb.className='fb'; fb.innerHTML='<strong>Not this one.</strong> '+esc(op[2])+' Try again.'; }
+      report();
+    }); o.appendChild(b); });
+  el('fb').className='fb hidden'; el('cont').classList.add('hidden');
+}
+function clearDecide(){ el('q').textContent=''; el('opts').innerHTML=''; el('cont').classList.add('hidden'); }
+function setPhaseUI(){
+  el('who').textContent=whoText();
+  el('act').textContent=actText();
+  setCue();
+  el('swStart').disabled = !((S.phase==='cue' && S.cue!=='wait' && S.swPressReal===null) || ((S.phase==='run'||S.phase==='nostart') && S.swStart===null));
+  el('swStop').disabled = S.phase!=='stopwait';
+  el('newTrial').classList.toggle('hidden', S.phase!=='record');
+  var fb=el('fb');
+  if(S.phase==='pre'){
+    var st=S.pre[S.preIdx];
+    showOpts('Before the trial. '+st.q, st.opts, S.key+'-pre-'+st.k+'-'+S.trialNo, function(){ advancePre(); });
+  } else if(S.phase==='demoAnim'||S.phase==='demoOut'){
+    clearDecide(); fb.className='fb hidden';
+  } else if(S.phase==='cue'){
+    clearDecide(); el('q').textContent='Start the stopwatch on the word Begin.';
+    fb.className='fb hidden';
+  } else if(S.phase==='run'){
+    clearDecide(); el('q').textContent= S.swStart===null ? 'Start the stopwatch.' : 'Watch the examinee. The trial pauses when something needs your decision.';
+    if(S.startMsg){ fb.className='fb'+(S.startMsg.ok?' ok':''); fb.innerHTML=S.startMsg.msg; } else fb.className='fb hidden';
+  } else if(S.phase==='nostart'){
+    clearDecide(); el('q').textContent='Start the stopwatch.';
+    fb.className='fb'; fb.innerHTML='<strong>The stopwatch is not running.</strong> '+esc(S.person.short)+' began working 4 s ago. Timing begins with the cue to begin, so press Start now and see how late it was.';
+  } else if(S.phase==='stopwait'){
+    clearDecide(); el('q').textContent='The last hole of the last row is filled. Stop the stopwatch.'; fb.className='fb hidden';
+  } else if(S.phase==='record'){
+    clearDecide(); el('decide').classList.add('hidden'); el('record').classList.remove('hidden');
+    ['rSec','rDrop','rPlaced','rRemind'].forEach(function(id){ el(id).value=''; }); el('rPrompt').checked=false;
+    fb.className='fb hidden'; el('rCheck').disabled=false;
+  }
+  report();
+}
+function advancePre(){
+  var st=S.pre[S.preIdx];
+  if(st.demo){ S.phase='demoOut'; S.demoT=0; setPhaseUI(); return; }
+  S.preIdx++;
+  if(S.pre[S.preIdx].demo){ S.phase='demoAnim'; S.demoT=0; S.demoK=0; S.demoTook=false; setPhaseUI(); return; }
+  setPhaseUI();
+}
+function openEvent(type){
+  S.phase='event'; S.pending=type; S.act=null;
+  var d=eventDef(type);
+  el('act').textContent=actText(); setCue(); el('swStart').disabled=true; el('swStop').disabled=true;
+  showOpts(d.q, d.opts, S.key+'-ev-'+type+'-'+S.events.filter(function(e){return e.fired;}).length+'-'+S.trialNo, function(){ resolveEvent(type); });
+  report();
+}
+function resolveEvent(type){
+  S.pending=null; el('fb').className='fb hidden';
+  if(type==='drop'||type==='dropReach'){
+    S.drops++;
+    var target = S.holes[holeOf(0,S.hand)]==='peg' ? holeOf(0,S.hand) : holeOf(1,S.hand);
+    S.removedCount++; S.fix={kind:'remove', hole:target, t:0, dur:2.0}; S.hand2.hold=0; S.phase='fixing';
+  } else if(type==='twoPegs'){
+    S.reminders++; S.fix={kind:'remind', t:0, dur:1.8}; S.phase='fixing';
+  } else if(type==='wrongSide'){
+    S.prompts++; var k=S.nextIdx, hole=holeOf(k,S.hand);
+    S.fix={kind:'prompt', hole:hole, t:0, dur:1.6}; S.phase='fixing';
+    var hp=holeXY(hole); S.act=null; S.queueFix=true;
+    // examinee then carries the held peg to the correct hole and inserts it
+    S.handoff=true; S.hand2.hold=1;
+  } else if(type==='fiveMin'){
+    S.stopped5=true; S.reading=300; S.phase='record';
+  }
+  setPhaseUI();
+}
+
+/* ---------- record check ---------- */
+function expected(){
+  var drops=S.events.filter(function(e){return e.fired&&(e.type==='drop'||e.type==='dropReach');}).length;
+  return { stopped:S.stopped5, reading:S.reading, secOK: S.stopped5 ? [300] : uniq([Math.floor(S.reading), Math.round(S.reading)]),
+           drops:drops, placed: S.stopped5 ? boardCount() : null, reminders: S.reminders, prompt: S.prompts>0 };
+}
+function uniq(a){ return a.filter(function(x,i){return a.indexOf(x)===i;}); }
+el('rCheck').addEventListener('click',function(){
+  var E=expected(), errs=[], fb=el('fb');
+  var sec=el('rSec').value.trim(), dr=el('rDrop').value.trim(), pl=el('rPlaced').value.trim();
+  var trueT = S.stopped5 ? null : S.reading + S.swStart;
+  if(sec===''||E.secOK.indexOf(Number(sec))<0){
+    if(S.stopped5) errs.push('Seconds should be 300. A trial stopped at 5 minutes is entered as 300 s.');
+    else errs.push('Seconds should be '+E.secOK.join(' or ')+', the whole seconds on your stopwatch ('+fmt(E.reading)+').');
+  }
+  if(dr===''||Number(dr)!==E.drops) errs.push('Pegs dropped should be '+E.drops+'. Every peg that leaves the fingers and falls is tallied, and the count is recorded even though it is never converted to a score.');
+  if(S.stopped5){ if(pl===''||Number(pl)!==E.placed) errs.push('Pegs placed should be '+E.placed+', the pegs in the board when the trial stopped. A peg taken out for reuse is not in the board.'); }
+  else if(pl!=='') errs.push('Leave pegs placed blank. It is recorded only when the trial reaches 5 minutes.');
+  var rm=el('rRemind').value.trim(), rmN = rm==='' ? 0 : Number(rm);
+  if(rmN!==E.reminders) errs.push(E.reminders ? 'One-peg reminders should be '+E.reminders+'. Each time the examinee picked up two pegs you said “Only one peg at a time” without stopping the trial, and each reminder is counted on the form.' : 'No one-peg reminder was given in this trial. Leave that line blank or enter 0.');
+  if(el('rPrompt').checked!==E.prompt) errs.push(E.prompt ? 'Note the prompt. Prompts to the correct starting side belong in the notes.' : 'No starting-side prompt was given in this trial.');
+  S.checks++; mark(S.key+'-record-'+S.trialNo, errs.length===0 && S.checks===1);
+  var extra='';
+  if(!S.stopped5){ var diff=trueT-E.reading; extra=(E.drops ? ' Time ended when the last hole of the last row was filled. The hole the reused peg came from stayed empty.' : '')+' Timed exactly from Begin, the trial took '+trueT.toFixed(1)+' s.'+(Math.abs(diff)>0.4 ? ' Your stopwatch was '+(diff>0?'short':'long')+' by '+Math.abs(diff).toFixed(1)+' s because of when you pressed Start.' : ''); }
+  if(errs.length===0){ fb.className='fb ok'; fb.innerHTML='<strong>Right.</strong> The record matches the trial.'+esc(extra); el('rCheck').disabled=true; S.recordDone=true; }
+  else { fb.className='fb'; fb.innerHTML='<strong>Not yet.</strong><ul>'+errs.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>'; }
+  report();
+});
+el('newTrial').addEventListener('click',function(){ var i=TKEYS.indexOf(curTrial); S.trialNo=0; newTrial(TKEYS[(i+1)%TKEYS.length]); });
+
+var trialCounter=0;
+var _newTrial=newTrial;
+newTrial=function(k){ _newTrial(k); S.trialNo=++trialCounter; setPhaseUI(); };
+
+/* ---------- chips ---------- */
+TKEYS.forEach(function(k){ var b=document.createElement('button'); b.type='button'; b.textContent=TPL[k].label; b.dataset.trial=k; b.addEventListener('click',function(){ newTrial(k); }); el('trialChips').appendChild(b); });
+Array.prototype.forEach.call(el('handChips').querySelectorAll('button'),function(b){ b.addEventListener('click',function(){ hashHand=b.dataset.hand; newTrial(curTrial); }); });
+Array.prototype.forEach.call(el('speedChips').querySelectorAll('button'),function(b){ b.addEventListener('click',function(){ speed=Number(b.dataset.speed); renderChips(); }); });
+function renderChips(){
+  Array.prototype.forEach.call(el('trialChips').querySelectorAll('button'),function(b){ b.classList.toggle('on',b.dataset.trial===curTrial); b.setAttribute('aria-pressed',b.dataset.trial===curTrial); });
+  Array.prototype.forEach.call(el('handChips').querySelectorAll('button'),function(b){ b.classList.toggle('on',b.dataset.hand===hashHand); b.setAttribute('aria-pressed',b.dataset.hand===hashHand); });
+  Array.prototype.forEach.call(el('speedChips').querySelectorAll('button'),function(b){ var on=Number(b.dataset.speed)===speed; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); });
+}
+
+/* =====================================================================
+   PART 2. Worst hand
+   ===================================================================== */
+// rT, lT invented T scores (25 to 65). invalid = hand that cannot give a valid score because of peripheral injury.
+var WC=[
+ {k:'w1', p:0, writes:'right', rT:52, lT:44, invalid:null, notes:{right:'None', left:'None'}, title:'Two valid scores',
+  setup:'Ms. Margaret Webb completed both trials with no drops and no concerns about either hand.',
+  pre:[{q:'How do you get each hand’s T score from its time?', opts:[
+    ['Read the scaled score from the seconds first, then choose Appendix D or E by her race and read the T score in the same row on the page for her sex, education, and age.',1,'The book converts in two steps and gives the order. Scaled score first, then the demographically adjusted T score in the same row of the page for her race, sex, education, and age.'],
+    ['Read the T score directly from the seconds on her demographic page.',0,'The demographic page is entered by scaled score, not by seconds. The scaled score comes first.'],
+    ['Read the T score first, then the scaled score from it.',0,'The order runs the other way. The scaled score is read from the raw time before any demographic adjustment.']]}]},
+ {k:'w2', p:2, writes:'left', rT:38, lT:47, invalid:null, notes:{right:'None', left:'None'}, title:'A left-handed writer',
+  setup:'Mr. Edward Lyle completed both trials. He reported no problems with either hand.',
+  pre:[{q:'Mr. Lyle writes with his left hand. In which column was his left-hand time read?', opts:[
+    ['The dominant-hand column, because the left hand is his writing hand.',1,'The writing hand is the dominant hand, and its time is read in the dominant-hand column.'],
+    ['The nondominant-hand column, because most people write with the right hand.',0,'Columns follow this examinee’s writing hand, not what is typical.'],
+    ['Either column. Both give the same values.',0,'The two hands have separate columns because the same time means something different for each hand.']]}]},
+ {k:'w3', p:1, writes:'right', rT:41, lT:41, invalid:null, notes:{right:'None', left:'None'}, title:'Equal T scores',
+  setup:'Ms. Helen Pierce completed both trials. Both hands gave the same T score.', pre:[]},
+ {k:'w4', p:3, writes:'left', rT:46, lT:46, invalid:null, notes:{right:'None', left:'None'}, title:'Equal T scores, left-handed writer',
+  setup:'Mr. James Fuller completed both trials. Both hands gave the same T score.', pre:[]},
+ {k:'w5', p:4, writes:'right', rT:48, lT:27, invalid:'left', notes:{right:'None', left:'Wrist fracture six weeks ago, still in a removable splint'}, title:'A recent wrist fracture',
+  setup:'Ms. Alice Turner fractured her left wrist six weeks ago. Both trials were given. You and your supervisor judge that the left-hand time cannot give a valid score because of the injury.', post:true},
+ {k:'w6', p:5, writes:'right', rT:31, lT:55, invalid:'right', notes:{right:'Recent injury to the index finger, still bandaged', left:'None'}, title:'An injured writing hand',
+  setup:'Mr. Victor Hall injured his right index finger last week. Both trials were given. You and your supervisor judge that the right-hand time cannot give a valid score because of the injury.'},
+ {k:'w7', p:6, writes:'left', rT:36, lT:33, invalid:null, notes:{right:'Morning stiffness in the knuckles', left:'Morning stiffness in the knuckles'}, title:'Stiff knuckles in both hands',
+  setup:'Ms. Grace Dunn reports stiff, aching knuckles in both hands every morning. Both trials were completed, and both scores are valid.', arth:true},
+ {k:'w8', p:7, writes:'right', rT:63, lT:58, invalid:null, notes:{right:'None', left:'None'}, title:'Two high scores',
+  setup:'Mr. Leonard Price completed both trials with no concerns about either hand.'}
+];
+function worstOf(c){
+  if(c.invalid) { var v=other(c.invalid); return {hand:v, T:c[v[0]+'T'], why:'injury'}; }
+  if(c.rT<c.lT) return {hand:'right', T:c.rT, why:'lower'};
+  if(c.lT<c.rT) return {hand:'left', T:c.lT, why:'lower'};
+  return {hand:c.writes, T:c.rT, why:'tie'};
+}
+function Hcap(h){ return h==='right'?'Right':'Left'; }
+function buildSteps(c){
+  var P=PEOPLE[c.p], w=worstOf(c), nd=other(c.writes), steps=(c.pre||[]).slice();
+  var hOpts=[];
+  if(w.why==='lower'){
+    var lo=w.hand, hi=other(lo);
+    hOpts.push([Hcap(lo)+'. Its T score is lower.',1,'The worst hand is the hand with the lower T score. '+c[lo[0]+'T']+' is lower than '+c[hi[0]+'T']+'.',lo]);
+    hOpts.push([Hcap(c.writes)+'. It is the dominant hand.', lo===c.writes?0:0, lo===c.writes ? 'Right hand, wrong reason. Dominance decides only when the two T scores are equal. Here the '+lo+' hand is worst because its T score is lower.' : 'Dominance decides the worst hand only when the two T scores are equal. Here they differ.', c.writes]);
+    hOpts.push([Hcap(nd)+'. It is the nondominant hand.',0, lo===nd ? 'Right hand, wrong reason. The worst hand is set by the lower T score, not by which hand is nondominant.' : 'Being nondominant does not make a hand the worst hand. The lower T score does.', nd]);
+  } else if(w.why==='tie'){
+    hOpts.push([Hcap(c.writes)+', the dominant hand, because the two T scores are equal.',1,'When the two T scores are equal, the dominant hand is recorded as the worst hand. The dominant hand is the writing hand, here the '+c.writes+'.',c.writes]);
+    hOpts.push([Hcap(nd)+', the nondominant hand, because it usually performs worse.',0,'The tie rule goes the other way. The dominant hand is recorded when the T scores are equal.',nd]);
+    hOpts.push(['Neither. With equal scores no worst hand is named.',0,'A tie has its own rule. The dominant hand is recorded as the worst hand.',null]);
+    if(c.writes==='left') hOpts.push(['Right, because the right hand is the dominant hand in the norms.',0,'The dominant hand is this examinee’s writing hand, the left.','right']);
+  } else {
+    var bad=c.invalid, good=other(bad);
+    hOpts.push([Hcap(good)+'. The '+bad+' hand cannot give a valid score, so the valid hand’s score is the worst hand score.',1,'If one hand cannot give a valid score because of a peripheral injury, the valid hand’s score is used as the worst hand score, even when it is the higher of the two numbers.',good]);
+    hOpts.push([Hcap(bad)+'. Its T score is lower.',0,'The lower-score rule assumes both scores are valid. A peripheral injury that prevents a valid score sends the worst hand to the valid hand.',bad]);
+    hOpts.push(['Neither. A worst hand needs two valid scores.',0,'The book’s rule for this case uses the valid hand’s score as the worst hand score.',null]);
+  }
+  steps.push({q:'Which hand is the worst hand?', kind:'hand', opts:hOpts});
+  var tO=[[String(w.T),1,'The worst hand T score is the '+w.hand+' hand’s T score, '+w.T+'.',w.T]];
+  var otherT=c[other(w.hand)[0]+'T'];
+  if(otherT!==w.T) tO.push([String(otherT),0, c.invalid ? 'That is the '+c.invalid+' hand’s T score, which is not valid.' : 'That is the '+other(w.hand)+' hand’s T score, the higher one.', otherT]);
+  var avg=Math.round((c.rT+c.lT)/2); if(avg!==w.T && avg!==otherT) tO.push([String(avg),0,'The worst hand score is one hand’s T score, not the average of the two.',avg]);
+  if(c.invalid) tO.push(['No worst hand T score is recorded.',0,'The valid hand’s score is used as the worst hand score.',null]);
+  if(w.why==='tie') tO.push(['No worst hand T score is recorded.',0,'The tie rule names the dominant hand, and its T score is the worst hand score.',null]);
+  steps.push({q:'What worst hand T score do you record?', kind:'T', opts:tO});
+  if(c.post) steps.push({q:'Where does the fracture go?', opts:[
+    ['In the notes on the form and in the report.',1,'An injury to either hand belongs in the notes and in the report, beside the times it affects.'],
+    ['Nowhere. The worst hand rule already accounts for it.',0,'The rule settles which score is used. A reader still needs to know why one hand gave no valid score.'],
+    ['Only in a conversation with the supervisor.',0,'Raise it in supervision, but it also belongs in the notes and the report.']]});
+  if(c.arth) steps.push({q:'What do you do with her report of stiff knuckles?', opts:[
+    ['Record it in the notes and the report, and weigh it before interpreting either time.',1,'Arthritis in the fingers can lengthen the time. It belongs in the notes and the report, and the hands are asked about before the times are interpreted.'],
+    ['Leave it out, since both scores are valid.',0,'Valid scores still need the context. Arthritis belongs in the notes and the report.'],
+    ['Treat both scores as invalid and report no T scores.',0,'Both trials were completed and judged valid. The stiffness is recorded and weighed, not used to discard the scores.']]});
+  return steps;
+}
+WC.forEach(function(c){ c.steps=buildSteps(c); });
+var wcur=0, wstep=0, wtried=false, wdone={};
+WC.forEach(function(c,i){ var b=document.createElement('button'); b.type='button'; b.textContent=(i+1)+'. '+PEOPLE[c.p].short; b.title=c.title; b.addEventListener('click',function(){ wload(i); }); el('caseChips').appendChild(b); });
+function wload(i){ wcur=i; wstep=0; wrender(); }
+function wrender(){
+  var c=WC[wcur], P=PEOPLE[c.p], s=c.steps[wstep]; wtried=false;
+  Array.prototype.forEach.call(el('caseChips').children,function(b,j){ b.classList.toggle('on',j===wcur); b.classList.toggle('done',!!wdone[j]); b.setAttribute('aria-pressed',j===wcur); });
+  el('wTitle').textContent=c.title; el('wSetup').textContent=c.setup;
+  function row(h){ var lab=Hcap(h)+(h===c.writes?' (writing hand, dominant)':' (nondominant)'); return '<tr><td>'+lab+'</td><td class="tcell">'+c[h[0]+'T']+'</td><td>'+esc(c.notes[h])+'</td></tr>'; }
+  el('wTable').innerHTML='<tr><th scope="col">Hand</th><th scope="col">T score</th><th scope="col">Notes</th></tr>'+row('right')+row('left');
+  el('wq').textContent='Step '+(wstep+1)+' of '+c.steps.length+'. '+s.q;
+  var o=el('wopts'); o.innerHTML='';
+  shuffle(s.opts.slice()).forEach(function(op){ var b=document.createElement('button'); b.type='button'; b.textContent=op[0]; b.addEventListener('click',function(){ wchoose(b,op); }); o.appendChild(b); });
+  el('wfb').className='fb hidden'; el('wnext').classList.add('hidden'); el('wstatus').textContent=''; report();
+}
+function wchoose(b,op){
+  var c=WC[wcur], key=c.k+'-'+wstep, fb=el('wfb');
+  if(!wtried){ mark(key,!!op[1]); wtried=true; }
+  if(op[1]){
+    b.classList.add('right'); Array.prototype.forEach.call(el('wopts').children,function(x){x.disabled=true;});
+    fb.className='fb ok'; fb.innerHTML='<strong>Right.</strong> '+esc(op[2]);
+    var last=wstep===c.steps.length-1; if(last) wdone[wcur]=true;
+    el('wnext').textContent= last ? (wcur<WC.length-1?'Next case':'Back to the first case') : 'Next step';
+    el('wnext').classList.remove('hidden');
+  } else { b.classList.add('wrong'); b.disabled=true; fb.className='fb'; fb.innerHTML='<strong>Not this one.</strong> '+esc(op[2])+' Try again.'; }
+  report();
+}
+el('wnext').addEventListener('click',function(){ var c=WC[wcur]; if(wstep<c.steps.length-1){ wstep++; wrender(); } else wload(wcur<WC.length-1?wcur+1:0); });
+
+/* ---------- parts and hash ---------- */
+var part='run';
+function setPart(p){
+  part=p; el('partRun').classList.toggle('hidden',p!=='run'); el('partWorst').classList.toggle('hidden',p!=='worst');
+  Array.prototype.forEach.call(el('partChips').querySelectorAll('button'),function(b){ var on=b.dataset.part===p; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); });
+  report();
+}
+Array.prototype.forEach.call(el('partChips').querySelectorAll('button'),function(b){ b.addEventListener('click',function(){ setPart(b.dataset.part); }); });
+function readHash(){
+  var h={}; location.hash.replace(/^#/,'').split('&').forEach(function(kv){ var m=kv.split('='); if(m[0]) h[m[0].toLowerCase()]=(m[1]||'').toLowerCase(); });
+  if(h.hand==='left'||h.hand==='right') hashHand=h.hand;
+  var t=(h.trial||'').toUpperCase(); if(TPL[t]) curTrial=t;
+  newTrial(curTrial);
+  var c=parseInt(h['case'],10); wload(c>=1&&c<=WC.length ? c-1 : 0);
+  setPart(h.part==='worst'?'worst':'run');
+}
+window.addEventListener('hashchange',readHash);
+window.addEventListener('load',report); window.addEventListener('resize',report);
+
+window.__tool={ templates:TPL, worstCases:WC, people:PEOPLE, worstOf:worstOf, holeOf:holeOf,
+  setSpeed:function(n){ speed=n; renderChips(); },
+  state:function(){ return S ? { part:part, phase:S.phase, cue:S.cue, key:S.key, hand:S.hand, writer:S.writer, pre:S.pre.map(function(x){return x.k;}), preIdx:S.preIdx,
+    pending:S.pending, events:S.events.map(function(e){return {type:e.type,at:e.at,fired:e.fired};}), drops:S.drops, prompts:S.prompts, reminders:S.reminders,
+    boardCount:boardCount(), nextIdx:S.nextIdx, placeLog:S.placeLog.slice(), swStart:S.swStart, reading:S.reading, simT:S.simT, firstTouch:S.firstTouch, stopped5:S.stopped5,
+    starts:S.startJudged.slice(), curOpts:S.curOpts||null, recordDone:S.recordDone, expected: S.phase==='record'?expected():null,
+    wcur:wcur, wstep:wstep, firstTry:JSON.parse(JSON.stringify(firstTry)) } : null; } };
+readHash();
+requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>

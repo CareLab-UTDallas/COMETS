@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Score a 10-Item Hearing Screen</title>
+<!--
+  Deep links (location.hash)
+    #mode=score              Score a randomized respondent (default)
+    #mode=errors             Spot the error on a colleague's form
+    #mode=errors&case=KEY    KEY is odd, some1, aidband, replace, or tscore
+    #mode=admin              Administration decisions
+    #mode=admin&case=KEY     KEY is a1 to a9
+  All respondents, responses, and colleagues' forms are invented. No item wording appears here.
+-->
+<style>
+  :root{--bg:#ffffff; --card:#f7faf8; --ink:#17251d; --muted:#41544a; --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b;}
+  *{box-sizing:border-box;}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.55;}
+  .wrap{max-width:820px; margin:0 auto; padding:14px 14px 16px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:22px; margin:0 0 4px;}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
+  .warn{font-size:13px; color:#7a3d00; background:#fff3e6; border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px; margin:0 0 10px;}
+  .chips{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 10px;}
+  .chips button{font:inherit; font-size:13px; cursor:pointer; border:1px solid #cfe0d7; border-radius:20px; background:#eef4f1; color:var(--green); padding:4px 11px;}
+  .chips button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .chips button.done:not(.on){border-color:#9cc3ae; background:#dcebe3;}
+  .modes button{font-size:14px; padding:6px 13px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:0 0 10px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:18px; margin:0 0 6px;}
+  h3{font-size:14px; color:var(--green); margin:10px 0 4px;}
+  .setup{font-size:14px; color:var(--teach); margin:0 0 8px;}
+  table{border-collapse:collapse; width:100%; font-size:14px;}
+  th,td{border:1px solid #cfe0d7; padding:5px 8px; text-align:left; vertical-align:top;}
+  th{background:#eef4f1; color:var(--green); font-weight:600;}
+  .rules th{width:150px;}
+  .rec{margin:8px 0 0;}
+  .rec td.hi{background:#fff7ef;}
+  .q{font-weight:600; margin:0 0 8px;}
+  .opts{display:flex; flex-direction:column; gap:6px;}
+  .opts button{font:inherit; font-size:15px; text-align:left; cursor:pointer; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--ink); padding:8px 12px;}
+  .opts button:hover:not(:disabled){border-color:#9cc3ae;}
+  .opts button.right{background:#e3f0e9; border-color:var(--green);}
+  .opts button.wrong{background:#fbeee4; border-color:#e3b58f; color:#6b4a2f;}
+  .opts button:disabled{cursor:default;}
+  .numrow{display:flex; flex-wrap:wrap; gap:8px; align-items:center;}
+  .numrow label{font-size:15px;}
+  .numrow input{font:inherit; font-size:16px; width:6em; padding:7px 9px; border:1px solid #9cb5a8; border-radius:8px; background:#fff; color:var(--ink);}
+  .fb{margin:10px 0 0; padding:8px 10px; border-radius:6px; font-size:14px; color:var(--teach); background:#fff7ef; border:1px solid #f0d9c2; border-left:4px solid var(--accent);}
+  .fb.ok{background:#f0f7f3; border-color:#cfe0d7; border-left-color:var(--green);}
+  .fb strong{color:#8a4600;}
+  .fb.ok strong{color:var(--green);}
+  .nav{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0 0;}
+  button.b{font:inherit; font-size:15px; cursor:pointer; border-radius:8px; padding:9px 16px;}
+  .primary{background:var(--green); color:#eef4f1; border:1px solid var(--green);}
+  .secondary{background:#eef4f1; color:var(--green); border:1px solid #cfe0d7;}
+  .status{font-size:13px; color:var(--muted);}
+  .hidden{display:none !important;}
+  .small{font-size:12px; color:var(--muted); margin:8px 0 0;}
+  button:focus-visible, input:focus-visible{outline:3px solid var(--accent); outline-offset:2px;}
+  .line{font-family:Georgia,serif; background:#fff; border:1px solid var(--line); border-radius:6px; padding:6px 9px; margin:6px 0 0; font-size:14px;}
+  td, th, .opts button, .line{overflow-wrap:anywhere;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Score a 10-item hearing screen</h1>
+  <p class="lede">Score invented respondents on the 10-item screen of perceived hearing disability, spot errors on a colleague's form, and make administration decisions. Items appear only by number and scale, with E for emotional and S for social or situational. The Canvas page holds the item wording.</p>
+  <div class="warn"><strong>Nothing here is saved.</strong> Every respondent and every answer is invented. Practice as often as you like.</div>
+  <div class="chips modes" id="modes" role="group" aria-label="Practice mode"></div>
+  <div class="chips" id="chips" role="group" aria-label="Cases"></div>
+  <div class="card">
+    <h2 id="cTitle"></h2>
+    <p class="setup" id="cSetup"></p>
+    <table class="rules" id="info"></table>
+    <table class="rec" id="rec"></table>
+    <div id="coll"></div>
+  </div>
+  <div class="card">
+    <p class="q" id="q"></p>
+    <div class="opts" id="opts"></div>
+    <div class="numrow hidden" id="numrow">
+      <label for="num" id="numLabel"></label>
+      <input id="num" type="number" inputmode="numeric" min="0" max="40" step="1">
+      <button class="b secondary" id="check" type="button">Check</button>
+    </div>
+    <div class="fb hidden" id="fb" aria-live="polite"></div>
+    <div class="nav">
+      <button class="b primary hidden" id="next" type="button">Next step</button>
+      <span class="status" id="status" aria-live="polite"></span>
+    </div>
+  </div>
+  <table class="rules" aria-label="Scoring rules">
+    <tr><th scope="row">Points</th><td>Yes 4, sometimes 2, no 0.</td></tr>
+    <tr><th scope="row">E items</th><td>1, 2, 4, 7, 9. Emotional subtotal 0 to 20.</td></tr>
+    <tr><th scope="row">S items</th><td>3, 5, 6, 8, 10. Social subtotal 0 to 20.</td></tr>
+    <tr><th scope="row">Total</th><td>E plus S, 0 to 40, always even.</td></tr>
+    <tr><th scope="row">Positive screen</th><td>Total above 8, the cut used by this track.</td></tr>
+  </table>
+  <p class="small">Rules are paraphrased from the sources cited on the Canvas page. Use the manual during a real administration.</p>
+</div>
+<script>
+(function(){
+var SCALE=['E','E','S','E','S','S','E','S','E','S'];
+var PTS={yes:4, sometimes:2, no:0};
+var SETS={
+  mccabe:{key:'mccabe', name:'McCabe (2019)', src:'the bands in McCabe (2019)', bands:[[0,8,'No perceived disability'],[10,24,'Mild-to-moderate perceived disability'],[26,40,'Significant perceived disability']]},
+  oberg:{key:'oberg', name:'Öberg (2016), the Swedish set', src:'the Swedish bands in Öberg (2016)', bands:[[0,10,'Little or no limitation'],[12,24,'Mild-to-moderate'],[26,40,'Significant limitation']]}
+};
+var PEOPLE=[['Ms.','Margaret','Webb'],['Ms.','Helen','Pierce'],['Mr.','Edward','Lyle'],['Mr.','James','Fuller'],['Ms.','Alice','Turner'],['Mr.','Victor','Hall'],['Ms.','Grace','Dunn'],['Mr.','Leonard','Price']];
+var AIDTXT={
+  wear:'Owns hearing aids, wears them daily, and wore them during testing.',
+  none:'Does not own hearing aids.',
+  never:'Owns hearing aids, does not wear them in daily life, and did not wear them during testing.'
+};
+
+function rnd(n){return Math.floor(Math.random()*n);}
+function pick(a){return a[rnd(a.length)];}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=rnd(i+1),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+function score(resp,pts){pts=pts||PTS; var e=0,s=0; resp.forEach(function(r,i){ if(SCALE[i]==='E') e+=pts[r]; else s+=pts[r]; }); return {e:e,s:s,t:e+s};}
+function bandOf(setKey,t){var b=SETS[setKey].bands; for(var i=0;i<b.length;i++){ if(t>=b[i][0]&&t<=b[i][1]) return b[i]; } return null;}
+function bandPhrase(setKey,t){var b=bandOf(setKey,t); return b[2].toLowerCase()+' band ('+b[0]+' to '+b[1]+') of '+SETS[setKey].src;}
+function person(){var p=pick(PEOPLE); return {title:p[0], first:p[1], last:p[2], age:60+rnd(30), full:p[0]+' '+p[1]+' '+p[2], short:p[0]+' '+p[2]};}
+
+function randResp(){var py=Math.random()*0.6, ps=Math.random()*0.5; var r=[]; for(var i=0;i<10;i++){var x=Math.random(); r.push(x<py?'yes':(x<py+ps?'sometimes':'no'));} return r;}
+function respWithTotal(target){ for(var k=0;k<20000;k++){ var r=randResp(); if(score(r).t===target) return r; } return null; }
+function respWhere(fn){ for(var k=0;k<20000;k++){ var r=randResp(); if(fn(r)) return r; } return null; }
+function aidedFrom(resp){
+  for(var k=0;k<200;k++){
+    var a=resp.map(function(x){ var u=Math.random();
+      if(u<0.55){ return x==='yes'?'sometimes':'no'; }
+      if(u<0.62){ return x==='no'?'sometimes':(x==='sometimes'?'yes':'yes'); }
+      return x; });
+    if(Math.random()<0.85 ? score(a).t<score(resp).t : true) return a;
+  }
+  return resp.slice();
+}
+function breakdown(resp, which){ var parts=[]; resp.forEach(function(r,i){ if(which==='T'||SCALE[i]===which) parts.push('Item '+(i+1)+' '+r+' '+PTS[r]); }); return parts.join(', '); }
+function itemsOf(resp,val){ var o=[]; resp.forEach(function(r,i){ if(r===val) o.push(i+1); }); return o; }
+
+// ---------- results lines ----------
+function aidedSentence(c){ return 'Aided pass (battery wording, not banded) '+c.as.t+'/40 (emotional '+c.as.e+', social '+c.as.s+').'; }
+function lineCorrect(c){ var L='Unaided total '+c.us.t+'/40 (emotional '+c.us.e+', social '+c.us.s+'), '+bandPhrase(c.set,c.us.t)+'.'; if(c.aid==='wear') L+=' '+aidedSentence(c); return L+' '+AIDTXT[c.aid]; }
+function lineVariants(c){
+  var head='Unaided total '+c.us.t+'/40 (emotional '+c.us.e+', social '+c.us.s+')';
+  var aidS=c.aid==='wear'?' '+aidedSentence(c):'';
+  var tail=' '+AIDTXT[c.aid];
+  var tv=30+rnd(16);
+  var out=[[lineCorrect(c),1,'This line gives the unaided total out of 40, both subtotals, the band with its range, and the band set it came from.'+(c.aid==='wear'?' The aided total is named as the aided pass and carries no band.':'')+' It ends with the three hearing-aid facts.']];
+  var wrong=[
+    [head+', T score '+tv+', '+bandPhrase(c.set,c.us.t)+'.'+aidS+tail,0,'The screen has cutoff bands and no percentile or T-score norms. Report the raw total against the named band set and do not convert it.'],
+    [head+', low average.'+aidS+tail,0,'Low average is an AACN label. AACN labels apply to performance tests, and this is a self-report scale of perceived disability. Use the band from a named band set.'],
+    [head+', '+bandOf(c.set,c.us.t)[2].toLowerCase()+' band.'+aidS+tail,0,'The band source and range are missing. Published band sets disagree, and a total of 10 falls in a referral band of McCabe (2019) but in the little-or-no-limitation band of the Swedish set. Every report names the band set it used.']
+  ];
+  if(c.aid==='wear'){
+    wrong.push([head+', '+bandPhrase(c.set,c.us.t)+'. Aided pass '+c.as.t+'/40 (emotional '+c.as.e+', social '+c.as.s+'), '+bandPhrase(c.set,c.as.t)+'.'+tail,0,'The aided total has been placed in a band. The aided pass is a battery variable recorded separately and never banded.']);
+    shuffle(wrong); wrong=wrong.slice(0,3);
+  }
+  return out.concat(wrong);
+}
+
+// ---------- numeric diagnosis ----------
+function numDiag(kind,c,v){
+  var alt1=score(kind==='aT'?c.aresp:c.resp,{yes:4,sometimes:1,no:0});
+  var target={uE:c.us.e,uS:c.us.s,uT:c.us.t,aT:c.as?c.as.t:null,eT:c.us.t}[kind];
+  if(v%2!==0) return 'An odd number cannot be right. Every answer scores 0, 2, or 4, so every subtotal and total is even. An odd result means an addition error.';
+  if(v<0||v>((kind==='uE'||kind==='uS')?20:40)) return (kind==='uE'||kind==='uS')?'Each subtotal ranges from 0 to 20, five items at up to 4 points each.':'The total ranges from 0 to 40.';
+  if(kind==='uE'&&v===c.us.s) return 'That is the social subtotal. The emotional subtotal adds Items 1, 2, 4, 7, and 9.';
+  if(kind==='uS'&&v===c.us.e) return 'That is the emotional subtotal. The social subtotal adds Items 3, 5, 6, 8, and 10.';
+  if(kind==='uE'&&v===alt1.e || kind==='uS'&&v===alt1.s || (kind==='uT'||kind==='eT')&&v===alt1.t || kind==='aT'&&v===alt1.t) return 'That matches counting each sometimes as 1. Sometimes scores 2 points.';
+  if((kind==='uT'||kind==='eT')&&c.as&&v===c.as.t) return 'That is the aided total. The unaided total comes from the first pass and is the one that is banded.';
+  if(kind==='aT'&&v===c.us.t) return 'That is the unaided total. Add the answers in the aided columns.';
+  return 'Recount with yes 4, sometimes 2, no 0.';
+}
+
+// ---------- score mode ----------
+function makeScore(opts){
+  opts=opts||{};
+  var p=person();
+  var aid=opts.aid||(function(){var u=Math.random(); return u<0.55?'wear':(u<0.82?'none':'never');})();
+  var set=opts.set||pick(['mccabe','oberg']);
+  var target=opts.target!=null?opts.target:(Math.random()<0.45?pick([8,10,12,24,26]):null);
+  var resp=target!=null?respWithTotal(target):randResp();
+  var c={k:'score', kind:'score', p:p, aid:aid, set:set, resp:resp, us:score(resp)};
+  if(aid==='wear'){ c.aresp=opts.aresp||aidedFrom(resp); c.as=score(c.aresp); }
+  c.title=p.full+', age '+p.age;
+  c.setup='The unaided pass is complete'+(aid==='wear'?', and because '+p.short+' wears hearing aids in daily life, so is the aided pass.':'.')+' Score the form and report it against the band set named below.';
+  c.info=[['Owns hearing aids',aid==='none'?'No':'Yes'],['Wears them in daily life',aid==='wear'?'Yes':'No'],['In place during testing',aid==='wear'?'Yes':'No'],['Band set for this report',SETS[set].name]];
+  var st=[];
+  st.push({id:'uE',type:'num',q:'Enter the emotional (E) subtotal for the unaided pass.',label:'Emotional subtotal',ans:c.us.e,why:breakdown(resp,'E')+'. Sum '+c.us.e+'.',hi:'E'});
+  st.push({id:'uS',type:'num',q:'Enter the social (S) subtotal for the unaided pass.',label:'Social subtotal',ans:c.us.s,why:breakdown(resp,'S')+'. Sum '+c.us.s+'.',hi:'S'});
+  st.push({id:'uT',type:'num',q:'Enter the unaided total.',label:'Unaided total',ans:c.us.t,why:'Emotional '+c.us.e+' plus social '+c.us.s+' is '+c.us.t+', an even number as every total must be.'});
+  var b=bandOf(set,c.us.t);
+  var extra='';
+  if(c.us.t===10&&set==='oberg') extra=' The same total falls in a referral band of McCabe (2019), which is why the report names its band set.';
+  if(c.us.t===10&&set==='mccabe') extra=' The same total falls in the little-or-no-limitation band of the Swedish set, which is why the report names its band set.';
+  st.push({id:'band',type:'choice',q:'Which band of '+SETS[set].name+' does the unaided total of '+c.us.t+' fall in?',opts:SETS[set].bands.map(function(x){
+    var ok=x===b; return [x[2]+' ('+x[0]+' to '+x[1]+')',ok?1:0, ok?('A total of '+c.us.t+' falls within '+x[0]+' to '+x[1]+' in '+SETS[set].name+'.'+extra):('A total of '+c.us.t+' is outside '+x[0]+' to '+x[1]+'. In '+SETS[set].name+' it falls in '+b[2].toLowerCase()+' ('+b[0]+' to '+b[1]+').'+extra)]; })});
+  var pos=c.us.t>8;
+  var mc=(c.us.t===10)?' McCabe (2019) recommends referral above 10 in its text, but the pooled validation studies used above 8, and the track follows them.':'';
+  st.push({id:'screen',type:'choice',q:'Under the track convention, is this a positive or a negative screen?',opts:[
+    ['Positive screen. The total is above 8.',pos?1:0,pos?('A total of '+c.us.t+' is above 8. Because every total is even, above 8 means 10 or more.'+mc):('A total of '+c.us.t+' is not above 8, so the screen is negative.')],
+    ['Negative screen. The total is 8 or below.',pos?0:1,pos?('A total of '+c.us.t+' is above 8, so the screen is positive.'+mc):('A total of '+c.us.t+' is 8 or below. A negative screen does not show normal hearing, since the screen missed a substantial share of audiometric losses in validation.')],
+    ['It depends on which band set the report uses.',0,'The cut of above 8 is the track convention whatever band set is named. The band set is reported alongside it so a reader can map the total onto another set.']]});
+  if(aid==='wear'){
+    st.push({id:'aT',type:'num',q:'Enter the aided total from the second pass.',label:'Aided total',ans:c.as.t,why:breakdown(c.aresp,'T')+'. Emotional '+c.as.e+' plus social '+c.as.s+' is '+c.as.t+'.'+(c.as.t>=c.us.t?' The aided total is not always lower than the unaided total, and you record it as given.':''),aided:true});
+    st.push({id:'aBand',type:'choice',q:'Does the aided total of '+c.as.t+' get a band?',opts:[
+      ['No. The aided total is recorded separately and is not placed in a band.',1,'The aided pass uses battery wording that is not part of the published instrument. Its total is a battery variable, recorded on its own and never banded.'],
+      ['Yes. Use the same band set as the unaided total.',0,'The bands were published for the unaided screen. The aided total is a battery variable that is not placed in a band.'],
+      ['Yes, and when it is lower it replaces the unaided total in the report.',0,'The aided total never replaces the unaided total, and it is not banded.']]});
+  } else {
+    var whyNo=aid==='none'?'The aided pass is given only to examinees who wear hearing aids in daily life, and '+p.short+' does not own aids.':'Owning aids is not enough. The aided pass is given only to examinees who wear them in daily life, and '+p.short+' does not.';
+    st.push({id:'aGiven',type:'choice',q:'Is an aided pass given to '+p.short+'?',opts:[
+      ['No. '+whyNo,1,whyNo+' The unaided pass, given to everyone, is the whole screen here.'],
+      ['Yes. Every examinee answers both passes.',0,'Everyone answers the unaided pass. Only examinees who wear aids in daily life answer the aided pass. '+whyNo],
+      ['Yes, because the unaided total is '+(pos?'a positive':'a negative')+' screen.',0,'The screen result does not decide who gets the aided pass. '+whyNo]]});
+  }
+  st.push({id:'line',type:'choice',q:'Pick the correctly worded results line.',opts:lineVariants(c)});
+  c.steps=st;
+  return c;
+}
+
+// ---------- errors mode ----------
+var ERRKEYS=[['odd','Odd total'],['some1','Sometimes as 1'],['aidband','Aided total banded'],['replace','Aided replaces unaided'],['tscore','T score and label']];
+function makeErr(key){
+  var p=person(), c={k:key, kind:'err', p:p, set:'mccabe'}, st=[];
+  c.title=p.full+', age '+p.age+'. A colleague’s form';
+  c.setup='You are checking a colleague’s scoring before the report goes to supervision. The responses are as the examinee gave them. Find the error.';
+  if(key==='odd'){
+    c.aid=pick(['none','never']); c.resp=respWhere(function(r){var t=score(r).t; return t>=4&&t<=32;}); c.us=score(c.resp);
+    c.ct=c.us.t+pick([-1,1]);
+    c.coll=[['Emotional subtotal',c.us.e],['Social subtotal',c.us.s],['Unaided total',c.ct]];
+    st.push({id:'what',type:'choice',q:'What is wrong with this form?',opts:[
+      ['The total is odd. Every answer scores 0, 2, or 4, so every total is even, and an odd total means an addition error.',1,'An even number of points per answer can never sum to '+c.ct+'. The subtotals here are right, so the slip is in the addition.'],
+      ['Nothing. The total falls within 0 to 40.',0,'Being in range is not enough. Every answer scores an even number, so '+c.ct+' cannot be a correct total.'],
+      ['Item 3 belongs in the emotional subtotal.',0,'Item 3 is an S item. The E items are 1, 2, 4, 7, and 9, and the subtotals on this form are right.'],
+      ['The total should be the emotional subtotal doubled.',0,'The total is the emotional subtotal plus the social subtotal.']]});
+    st.push({id:'fix',type:'num',q:'Enter the correct unaided total.',label:'Unaided total',ans:c.us.t,why:'Emotional '+c.us.e+' plus social '+c.us.s+' is '+c.us.t+'.',nk:'eT'});
+  }
+  if(key==='some1'){
+    c.aid=pick(['none','never']);
+    c.resp=respWhere(function(r){var n=itemsOf(r,'sometimes').length; return n>=2&&n%2===0&&score(r).t>=6;}); c.us=score(c.resp);
+    c.cs=score(c.resp,{yes:4,sometimes:1,no:0});
+    c.coll=[['Emotional subtotal',c.cs.e],['Social subtotal',c.cs.s],['Unaided total',c.cs.t]];
+    var ns=itemsOf(c.resp,'sometimes').length;
+    st.push({id:'what',type:'choice',q:'What is wrong with this form?',opts:[
+      ['Each sometimes was scored 1 point. Sometimes scores 2.',1,'The form is short by exactly '+ns+' points, one for each of the '+ns+' sometimes answers (Items '+itemsOf(c.resp,'sometimes').join(', ')+').'],
+      ['The total is odd.',0,'The total of '+c.cs.t+' is even, so the odd-total check does not catch this error. With an even number of sometimes answers the shortfall is even too. Check the points for each answer.'],
+      ['Each yes was scored 2 points.',0,'The yes answers were counted at 4 each, which is right. The shortfall equals the number of sometimes answers.'],
+      ['Nothing. The subtotals add to the total.',0,'The addition is consistent, but the points are not. Each sometimes was counted as 1 instead of 2.']]});
+    st.push({id:'fix',type:'num',q:'Enter the correct unaided total.',label:'Unaided total',ans:c.us.t,why:breakdown(c.resp,'T')+'. Total '+c.us.t+'.',nk:'eT'});
+  }
+  if(key==='aidband'||key==='replace'){
+    c.aid='wear';
+    if(key==='replace'){
+      for(var k=0;k<500;k++){ c.resp=respWhere(function(r){var t=score(r).t; return t>=12&&t<=22;}); c.aresp=aidedFrom(c.resp); if(score(c.aresp).t<=8) break; }
+      if(score(c.aresp).t>8){ c.aresp=c.resp.map(function(x){return x==='yes'?'sometimes':'no';}); while(score(c.aresp).t>8){ var i=c.aresp.indexOf('sometimes'); c.aresp[i]='no'; } }
+    } else { c.resp=respWhere(function(r){var t=score(r).t; return t>=10&&t<=30;}); c.aresp=aidedFrom(c.resp); }
+    c.us=score(c.resp); c.as=score(c.aresp);
+  }
+  if(key==='aidband'){
+    c.cline='Unaided total '+c.us.t+'/40 (emotional '+c.us.e+', social '+c.us.s+'), '+bandPhrase('mccabe',c.us.t)+'. Aided pass '+c.as.t+'/40 (emotional '+c.as.e+', social '+c.as.s+'), '+bandPhrase('mccabe',c.as.t)+'. '+AIDTXT.wear;
+    c.coll=[['Emotional subtotal',c.us.e],['Social subtotal',c.us.s],['Unaided total',c.us.t],['Aided total',c.as.t]];
+    st.push({id:'what',type:'choice',q:'The numbers are right. What is wrong with the results line?',opts:[
+      ['The aided total is given a band. It is recorded separately and is not placed in a band.',1,'The aided pass uses battery wording outside the published instrument. Its total is a battery variable and carries no band.'],
+      ['The unaided total should not have a band.',0,'The unaided total is reported against a named band set. That part of the line is right.'],
+      ['The band source is missing.',0,'The line names McCabe (2019) as its band set. The error is the band attached to the aided total.'],
+      ['The aided subtotals should be left out.',0,'The model results line on the Canvas page gives the aided subtotals beside the aided total. The error is the band.']]});
+    st.push({id:'fix',type:'choice',q:'Which wording should replace the aided sentence?',opts:[
+      [aidedSentence(c),1,'The aided total is named as the aided pass, its source wording is identified, and it carries no band.'],
+      ['Aided pass '+c.as.t+'/40, '+bandPhrase('oberg',c.as.t)+'.',0,'Swapping band sets does not help. The aided total is not banded under any set.'],
+      ['Aided total '+c.as.t+'/40, which replaces the unaided total for this examinee.',0,'The aided total never replaces the unaided total.']]});
+  }
+  if(key==='replace'){
+    c.cline='Total '+c.as.t+'/40 (emotional '+c.as.e+', social '+c.as.s+'), '+bandPhrase('mccabe',c.as.t)+'. Negative screen. '+AIDTXT.wear;
+    c.coll=[['Emotional subtotal',c.as.e],['Social subtotal',c.as.s],['Total reported',c.as.t]];
+    st.push({id:'what',type:'choice',q:'What is wrong with this form?',opts:[
+      ['The aided total replaced the unaided total. The unaided total is banded and judged against the cut, and the aided total never replaces it.',1,'Every examinee answers the unaided pass as they hear without the aid. That total, '+c.us.t+', is the screen result. The aided total, '+c.as.t+', is reported separately without a band.'],
+      ['Nothing. The examinee wears aids daily, so the aided total is the better picture.',0,'The aided total never replaces the unaided total, whatever the examinee wears day to day.'],
+      ['The band is wrong for a total of '+c.as.t+'.',0,'The band does match '+c.as.t+' in McCabe (2019). The problem is which total was banded.'],
+      ['The aided subtotals were added wrong.',0,'The aided subtotals add correctly. The problem is that the aided total stands in for the unaided total.']]});
+    st.push({id:'fix',type:'num',q:'Enter the total that should be banded and judged against the cut.',label:'Total to band',ans:c.us.t,why:'The unaided total is '+breakdown(c.resp,'T')+'. Total '+c.us.t+'.',nk:'eT'});
+    var pos=c.us.t>8;
+    st.push({id:'screen',type:'choice',q:'With the correct total, what is the screen result?',opts:[
+      ['Positive screen.',pos?1:0,'The unaided total of '+c.us.t+' is above 8. The colleague’s negative result came from the aided total.'],
+      ['Negative screen.',pos?0:1,'The unaided total of '+c.us.t+' is above 8, so the screen is positive. The negative result came from the aided total.']]});
+  }
+  if(key==='tscore'){
+    c.aid='none'; c.resp=respWhere(function(r){var t=score(r).t; return t>=12&&t<=24;}); c.us=score(c.resp);
+    var tv=32+rnd(10);
+    c.cline='Total '+c.us.t+', T score '+tv+', low average. '+AIDTXT.none;
+    c.coll=[['Emotional subtotal',c.us.e],['Social subtotal',c.us.s],['Unaided total',c.us.t]];
+    st.push({id:'what',type:'choice',q:'The numbers are right. What is wrong with the results line?',opts:[
+      ['It gives a T score and an AACN label. The screen has cutoff bands and no T-score norms, and AACN labels apply to performance tests.',1,'The screen is reported as a raw total against a named band set, with its source.'],
+      ['The total should be reported as a percentile instead.',0,'The screen has no percentile norms either. Report the raw total against a named band set.'],
+      ['Only the label is wrong. The T score can stay.',0,'No T score exists for this screen. Both the T score and the AACN label come out.'],
+      ['Nothing is wrong.',0,'A T score and an AACN label do not apply to a self-report scale of perceived disability.']]});
+    var cc={us:c.us,aid:'none',set:'mccabe'};
+    st.push({id:'fix',type:'choice',q:'Pick the corrected results line.',opts:[
+      [lineCorrect(cc),1,'Raw total out of 40, both subtotals, the band with its range, and its named source.'],
+      ['Unaided total '+c.us.t+'/40 (emotional '+c.us.e+', social '+c.us.s+'), '+bandOf('mccabe',c.us.t)[2].toLowerCase()+' band. '+AIDTXT.none,0,'The band source and range are missing. Band sets disagree, so the report names the one it used.'],
+      ['Unaided total '+c.us.t+'/40 (emotional '+c.us.e+', social '+c.us.s+'), T score '+tv+', '+bandPhrase('mccabe',c.us.t)+'. '+AIDTXT.none,0,'The T score is still there. The screen has no T-score norms.']]});
+  }
+  c.info=[['Owns hearing aids',c.aid==='none'?'No':'Yes'],['Wears them in daily life',c.aid==='wear'?'Yes':'No'],['In place during testing',c.aid==='wear'?'Yes':'No']];
+  if(key==='aidband'||key==='replace'||key==='tscore') c.info.push(['Band set for this report','McCabe (2019)']);
+  c.steps=st;
+  return c;
+}
+
+// ---------- admin mode ----------
+var ADMIN=[
+ {k:'a1',title:'A story answer',setup:'Partway through the unaided pass, Ms. Helen Pierce answers an item with a long account of a dinner last month and does not say yes, sometimes, or no.',
+  steps:[{id:'d',type:'choice',q:'What do you do?',opts:[
+   ['Repeat the three choices and record the one Ms. Pierce picks.',1,'Only yes, sometimes, or no is accepted. Repeating the choices keeps the answer hers without leading.'],
+   ['Record sometimes, since the story suggests the problem comes and goes.',0,'Recording your reading of the story is choosing the answer for her. Repeat the three choices and record the one she picks.'],
+   ['Explain what the item is asking in your own words, then ask again.',0,'Do not explain or reword an item. Repeat the three choices.'],
+   ['Ask whether she would say yes.',0,'That suggests an answer. Repeat all three choices without leaning toward one.']]}]},
+ {k:'a2',title:'A request for repetition',setup:'Mr. Edward Lyle asks you to say an item again.',
+  steps:[{id:'d',type:'choice',q:'What do you do?',opts:[
+   ['Repeat the item word for word and note the repetition on the form.',1,'A repetition is allowed when asked for. The request is itself an observation about hearing, so it goes on the form.'],
+   ['Repeat it in simpler words so he understands.',0,'Items are read as written. Do not reword an item.'],
+   ['Decline and move on, since items are read once.',0,'When the examinee asks, repeat the item word for word and note that you did.'],
+   ['Repeat it and leave the request off the form, since it is not a response.',0,'The request is an observation about hearing and is noted.']]}]},
+ {k:'a3',title:'Aids worn daily, left at home today',setup:'Ms. Grace Dunn wears hearing aids every day but left them at home this morning.',
+  steps:[{id:'d',type:'choice',q:'Which passes does Ms. Dunn answer?',opts:[
+   ['Both. She answers the aided pass for how she hears with the aids in daily life, and you record that the aids were not worn during testing.',1,'This is the program’s rule, and it rests on daily wear. Ms. Dunn wears her aids every day, so she gives the aided pass, answering for how she hears with them in daily life. The three hearing-aid questions capture that the aids were not worn during testing, and the report states it.'],
+   ['The unaided pass only, because the aids are not in place.',0,'The program’s rule bases the aided pass on daily wear, not on whether the aids are in place today. Ms. Dunn wears them daily, so she answers the aided pass for how she hears with them in daily life. Record that the aids were not worn during testing.'],
+   ['The aided pass only, since she cannot answer without the aids anyway.',0,'Every examinee answers the unaided pass, and the aided total never replaces it.']]}]},
+ {k:'a4',title:'Aids owned, never worn',setup:'Mr. James Fuller owns hearing aids but says they stay in a drawer and he never wears them.',
+  steps:[{id:'d',type:'choice',q:'What do you give and record?',opts:[
+   ['The unaided pass only. Record that he owns aids, does not wear them in daily life, and did not wear them during testing.',1,'The aided pass is for examinees who wear aids in daily life. Ownership alone does not qualify, and all three hearing-aid facts are reported.'],
+   ['Both passes, since he owns aids.',0,'Ownership is not the criterion. The aided pass is for examinees who wear aids in daily life.'],
+   ['The unaided pass only, and record no hearing aids.',0,'He owns aids. Record ownership, daily wear, and wear during testing separately.']]}]},
+ {k:'a5',title:'Who gets which pass',setup:'You are planning the session.',
+  steps:[{id:'d',type:'choice',q:'Which statement is correct?',opts:[
+   ['Everyone answers the unaided pass. Only examinees who wear hearing aids in daily life also answer the aided pass.',1,'The unaided pass, with the published instruction, is for everyone. The aided pass follows it for daily wearers.'],
+   ['Examinees with aids answer only the aided pass.',0,'Every examinee answers the unaided pass first. The aided pass is added for daily wearers.'],
+   ['Anyone who owns aids answers the aided pass.',0,'The criterion is daily wear, not ownership.'],
+   ['The aided pass is given only after a positive unaided screen.',0,'The screen result does not decide it. Daily wear does.']]}]},
+ {k:'a6',title:'Aids in place during the first pass',setup:'Mr. Victor Hall wears his hearing aids daily, and they are in place as you begin.',
+  steps:[{id:'d',type:'choice',q:'How does Mr. Hall answer the first pass?',opts:[
+   ['For how he hears without the aids, as the published instruction asks.',1,'The published instruction asks an aid user to answer as he hears without the aid. The aided pass, with the battery wording, comes second.'],
+   ['For how he hears with the aids in, since they are in place.',0,'The first pass uses the published instruction, which asks for hearing without the aid.'],
+   ['However he prefers, as long as you note which.',0,'The instruction fixes the frame of reference. Without the aid for the first pass, with the aids for the second.']]}]},
+ {k:'a7',title:'What does this item mean?',setup:'Ms. Alice Turner asks what you mean by one of the items.',
+  steps:[{id:'d',type:'choice',q:'What do you do?',opts:[
+   ['Do not explain or reword it, and do not suggest an answer. Hold her to yes, sometimes, or no.',1,'Items are read as written. Explaining, rewording, or suggesting an answer changes the item.'],
+   ['Give an example situation to make it concrete.',0,'Adding an example rewords the item. Read it as written.'],
+   ['Tell her most people answer no.',0,'That suggests an answer.']]}]},
+ {k:'a8',title:'Before the first item',setup:'Mr. Leonard Price is seated across from you in the quiet room you will use for the whole battery.',
+  steps:[{id:'d',type:'choice',q:'What do you ask and record before the first item?',opts:[
+   ['Whether he owns hearing aids, whether he wears them in daily life, and whether they are in place now.',1,'These three facts decide whether the aided pass is given and are reported with the result.'],
+   ['Whether he has trouble hearing.',0,'The screen asks about concrete situations rather than one global question. Before the first item you record the three hearing-aid facts.'],
+   ['Nothing. Start the first item right away.',0,'The three hearing-aid questions come first.']]}]},
+ {k:'a9',title:'Place in the session',setup:'Ms. Margaret Webb has just been greeted, and rapport is established.',
+  steps:[{id:'d',type:'choice',q:'When is the screen given?',opts:[
+   ['Now, before the orientation items and before any test presented aloud.',1,'The administration order places it first so a hearing problem is known before any auditory test.'],
+   ['After the word-list learning test, to fill its delay.',0,'The track keeps the screen first, because hearing must be known before the auditory tests.'],
+   ['At the end, so it does not tire her before the cognitive tests.',0,'It comes first so a hearing problem is known before any test presented aloud.']]}]}
+];
+ADMIN.forEach(function(a){a.kind='admin';});
+
+// ---------- engine ----------
+var mode='score', idx=0, step=0, C=null, tried=false, attempts=0, firstTry={}, inst=0, done={};
+var el=function(id){return document.getElementById(id);};
+var MODES=[['score','Score a respondent'],['errors','Spot the error'],['admin','Administration decisions']];
+MODES.forEach(function(m){var b=document.createElement('button'); b.type='button'; b.textContent=m[1]; b.dataset.mode=m[0]; b.addEventListener('click',function(){setMode(m[0]);}); el('modes').appendChild(b);});
+function keysFor(m){ return m==='errors'?ERRKEYS.map(function(x){return x[0];}):(m==='admin'?ADMIN.map(function(a){return a.k;}):['score']); }
+function setMode(m,key){
+  mode=m; idx=0; if(key){ var i=keysFor(m).indexOf(key); if(i>=0) idx=i; }
+  var ch=el('chips'); ch.innerHTML='';
+  if(m!=='score'){
+    var list=m==='errors'?ERRKEYS.map(function(x){return [x[0],x[1]];}):ADMIN.map(function(a){return [a.k,a.title];});
+    list.forEach(function(x,i){var b=document.createElement('button'); b.type='button'; b.textContent=(i+1)+'. '+x[1]; b.addEventListener('click',function(){load(i);}); ch.appendChild(b);});
+    ch.classList.remove('hidden');
+  } else ch.classList.add('hidden');
+  load(idx);
+}
+function load(i,opts){
+  idx=i; step=0; inst++;
+  if(mode==='score') C=makeScore(opts);
+  else if(mode==='errors') C=makeErr(ERRKEYS[i][0]);
+  else C=ADMIN[i];
+  C.inst=inst;
+  render();
+}
+function renderCase(){
+  el('cTitle').textContent=C.title; el('cSetup').textContent=C.setup;
+  el('info').innerHTML=(C.info||[]).map(function(x){return '<tr><th scope="row">'+esc(x[0])+'</th><td>'+esc(x[1])+'</td></tr>';}).join('');
+  var s=C.steps[step], hi=s&&s.hi;
+  if(C.resp){
+    var wear=!!C.aresp, h='<caption class="setup" style="text-align:left">Recorded answers</caption><tr><th scope="col">Item</th><th scope="col">Unaided pass</th>'+(wear?'<th scope="col">Aided pass</th>':'')+'</tr>';
+    C.resp.forEach(function(r,i){ var cl=(hi&&SCALE[i]===hi)?' class="hi"':''; h+='<tr><td'+cl+'>Item '+(i+1)+' ('+SCALE[i]+')</td><td'+cl+'>'+r+'</td>'+(wear?'<td'+cl+'>'+C.aresp[i]+'</td>':'')+'</tr>'; });
+    el('rec').innerHTML=h; el('rec').classList.remove('hidden');
+  } else { el('rec').innerHTML=''; el('rec').classList.add('hidden'); }
+  var co='';
+  if(C.coll){ co+='<h3>Colleague’s entries</h3><table>'+C.coll.map(function(x){return '<tr><th scope="row">'+esc(x[0])+'</th><td>'+esc(x[1])+'</td></tr>';}).join('')+'</table>'; }
+  if(C.cline){ co+='<h3>Colleague’s results line</h3><p class="line">'+esc(C.cline)+'</p>'; }
+  el('coll').innerHTML=co;
+}
+function render(){
+  tried=false; attempts=0;
+  Array.prototype.forEach.call(el('modes').children,function(b){b.classList.toggle('on',b.dataset.mode===mode);});
+  Array.prototype.forEach.call(el('chips').children,function(b,j){b.classList.toggle('on',j===idx); b.classList.toggle('done',!!done[mode+':'+keysFor(mode)[j]]);});
+  renderCase();
+  var s=C.steps[step];
+  el('q').textContent='Step '+(step+1)+' of '+C.steps.length+'. '+s.q;
+  var o=el('opts'); o.innerHTML='';
+  if(s.type==='choice'){
+    el('numrow').classList.add('hidden'); o.classList.remove('hidden');
+    shuffle(s.opts.slice()).forEach(function(op){var b=document.createElement('button'); b.type='button'; b.textContent=op[0]; b.addEventListener('click',function(){choose(b,op);}); o.appendChild(b);});
+  } else {
+    o.classList.add('hidden'); el('numrow').classList.remove('hidden');
+    el('numLabel').textContent=s.label; el('num').value=''; el('num').disabled=false; el('check').disabled=false;
+  }
+  el('fb').className='fb hidden'; el('fb').innerHTML=''; el('next').classList.add('hidden');
+  showAcc(); report();
+}
+function key(){return C.inst+'-'+step;}
+function showAcc(){ var n=0,t=0; Object.keys(firstTry).forEach(function(k){t++; if(firstTry[k]) n++;}); el('status').textContent=t?('Correct on the first try in '+n+' of '+t+' steps this session.'):''; }
+function markRight(){
+  var last=step===C.steps.length-1;
+  if(last) done[mode+':'+keysFor(mode)[idx]]=true;
+  el('next').textContent=last?(mode==='score'?'New respondent':'Next case'):'Next step';
+  el('next').classList.remove('hidden'); showAcc();
+}
+function choose(b,op){
+  if(!tried){firstTry[key()]=!!op[1]; tried=true;}
+  var fb=el('fb');
+  if(op[1]){
+    b.classList.add('right'); Array.prototype.forEach.call(el('opts').children,function(x){x.disabled=true;});
+    fb.className='fb ok'; fb.innerHTML='<strong>Right.</strong> '+esc(op[2]); markRight();
+  } else {
+    b.classList.add('wrong'); b.disabled=true;
+    fb.className='fb'; fb.innerHTML='<strong>Not this one.</strong> '+esc(op[2])+' Try again.'; showAcc();
+  }
+  report();
+}
+function checkNum(){
+  var s=C.steps[step], raw=el('num').value.trim(), fb=el('fb');
+  if(raw===''||!/^-?\d+$/.test(raw)){ fb.className='fb'; fb.innerHTML='<strong>Enter a whole number.</strong>'; report(); return; }
+  var v=parseInt(raw,10);
+  if(!tried){firstTry[key()]=(v===s.ans); tried=true;}
+  if(v===s.ans){
+    el('num').disabled=true; el('check').disabled=true;
+    fb.className='fb ok'; fb.innerHTML='<strong>Right.</strong> '+esc(s.why); markRight();
+  } else {
+    attempts++;
+    var kind=s.nk||s.id;
+    var msg=numDiag(kind,C,v);
+    if(attempts>=2) msg+=' Here is the item-by-item count. '+(s.id==='uE'?breakdown(C.resp,'E'):s.id==='uS'?breakdown(C.resp,'S'):s.id==='aT'?breakdown(C.aresp,'T'):breakdown(C.resp,'T'))+'.';
+    fb.className='fb'; fb.innerHTML='<strong>Not this one.</strong> '+esc(msg)+' Try again.'; showAcc();
+  }
+  report();
+}
+el('check').addEventListener('click',checkNum);
+el('num').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault(); checkNum();}});
+el('next').addEventListener('click',function(){
+  if(step<C.steps.length-1){ step++; render(); var f=C.steps[step].type==='num'?el('num'):el('opts').firstChild; if(f) f.focus(); }
+  else if(mode==='score') load(0);
+  else load(idx<keysFor(mode).length-1?idx+1:0);
+});
+function report(){ try{ parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:document.documentElement.scrollHeight}),'*'); }catch(e){} }
+window.addEventListener('load',report); window.addEventListener('resize',report);
+function fromHash(){
+  var h={}; location.hash.replace(/^#/,'').split('&').forEach(function(kv){var p=kv.split('='); if(p[0]) h[p[0]]=decodeURIComponent(p[1]||'');});
+  var m=['score','errors','admin'].indexOf(h.mode)>=0?h.mode:'score';
+  setMode(m,h.case);
+}
+window.addEventListener('hashchange',fromHash);
+window.__tool={
+  scale:SCALE, points:PTS, sets:SETS, errKeys:ERRKEYS.map(function(x){return x[0];}), admin:ADMIN,
+  setMode:setMode, load:function(i,opts){load(i,opts);},
+  newScoreCase:function(opts){ if(mode!=='score') setMode('score'); load(0,opts); },
+  state:function(){ var s=C.steps[step]; var correct=s.type==='num'?s.ans:s.opts.filter(function(o){return o[1];})[0][0];
+    return {mode:mode, idx:idx, step:step, nSteps:C.steps.length, stepId:s.id, stepType:s.type, correct:correct,
+      wrong:s.type==='choice'?s.opts.filter(function(o){return !o[1];}).map(function(o){return o[0];}):[],
+      caseKey:C.k, aid:C.aid||null, set:C.set||null, resp:C.resp||null, aresp:C.aresp||null, coll:C.coll||null, cline:C.cline||null, firstTry:Object.assign({},firstTry)}; }
+};
+fromHash();
+})();
+</script>
+</body>
+</html>

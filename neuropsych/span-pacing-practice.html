@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<!--
+  Keep the Presentation Rate (COMETS neuropsych practice tool)
+  Deep links (combine with &, for example #mode=tap&rate=2&seq=digits):
+    #rate=1        one item per second (60 beats per minute)
+    #rate=2        two items per second (120 beats per minute)
+    #mode=listen   metronome click, visual pulse, optional speech
+    #mode=tap      read aloud and tap each item onset
+    #mode=silent   click on the first 3 items only, then keep the pace alone
+    #seq=digits    invented digit strings, lengths 3 to 9
+    #seq=ln        invented letter and number strings
+    #seq=words     15 everyday nouns drawn from a pool, shuffled
+  Nothing is stored. No network requests.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keep the Presentation Rate</title>
+<style>
+  :root{--bg:#ffffff; --card:#f7faf8; --ink:#17251d; --muted:#41544a; --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b;}
+  *{box-sizing:border-box;}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.55;}
+  .wrap{max-width:820px; margin:0 auto; padding:14px 14px 16px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:22px; margin:0 0 4px;}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
+  .warn{font-size:13px; color:#7a3d00; background:#fff3e6; border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px; margin:0 0 10px;}
+  .chips{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 8px;}
+  .chips button{font:inherit; font-size:13px; cursor:pointer; border:1px solid #cfe0d7; border-radius:20px; background:#eef4f1; color:var(--green); padding:4px 11px; text-align:left;}
+  .chips button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .chips button:disabled{opacity:.45; cursor:default;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:0 0 10px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:18px; margin:0 0 6px;}
+  .setup{font-size:14px; color:var(--teach); margin:0 0 8px;}
+  .lbl{font-size:13px; font-weight:600; color:var(--green); margin:4px 0 4px;}
+  table{border-collapse:collapse; width:100%; font-size:14px;}
+  th,td{border:1px solid #cfe0d7; padding:5px 8px; text-align:left; vertical-align:top;}
+  th{background:#eef4f1; color:var(--green); font-weight:600;}
+  .fb{margin:10px 0 0; padding:8px 10px; border-radius:6px; font-size:14px; color:var(--teach); background:#fff7ef; border:1px solid #f0d9c2; border-left:4px solid var(--accent);}
+  .fb.ok{background:#f0f7f3; border-color:#cfe0d7; border-left-color:var(--green);}
+  .fb strong{color:#8a4600;}
+  .fb.ok strong{color:var(--green);}
+  .fb p{margin:0 0 6px;} .fb p:last-child{margin:0;}
+  .nav{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0 0;}
+  button.b{font:inherit; font-size:15px; cursor:pointer; border-radius:8px; padding:9px 16px;}
+  button.b:disabled{opacity:.5; cursor:default;}
+  .primary{background:var(--green); color:#eef4f1; border:1px solid var(--green);}
+  .secondary{background:#eef4f1; color:var(--green); border:1px solid #cfe0d7;}
+  .status{font-size:13px; color:var(--muted);}
+  .hidden{display:none !important;}
+  .small{font-size:12px; color:var(--muted); margin:8px 0 0;}
+  button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent); outline-offset:2px;}
+  .custom{display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:14px; color:var(--teach); margin:0 0 6px;}
+  .custom input[type=number]{font:inherit; width:6em; padding:4px 6px; border:1px solid #9cc3ae; border-radius:6px; background:#fff; color:var(--ink);}
+  .seq{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 0;}
+  .seq span{display:inline-block; min-width:2.2em; text-align:center; font-size:22px; font-weight:600; padding:4px 8px; border-radius:8px; border:1px solid var(--line); background:#fff; color:var(--ink);}
+  .seq.words span{font-size:17px; font-weight:500; min-width:0;}
+  .seq span.done{color:#6b7f74; background:#eef4f1;}
+  .seq span.cur{border-color:var(--green); box-shadow:0 0 0 2px var(--green) inset; background:#e3f0e9;}
+  .pulseRow{display:flex; align-items:center; gap:10px; margin:10px 0 0; font-size:14px; color:var(--teach);}
+  .dot{width:26px; height:26px; border-radius:50%; background:#dcebe3; border:2px solid #9cc3ae; flex:none; transition:background .06s;}
+  .dot.on{background:var(--accent); border-color:var(--accent);}
+  .tap{display:block; width:100%; min-height:120px; margin:10px 0 0; font:inherit; font-size:28px; font-weight:700; letter-spacing:.06em; cursor:pointer; border-radius:14px; border:2px solid var(--green); background:var(--green); color:#eef4f1; touch-action:manipulation; user-select:none; -webkit-user-select:none;}
+  .tap:active,.tap.hit{background:#163a2b;}
+  .tap:disabled{opacity:.5; cursor:default;}
+  .stats td:first-child{width:46%;}
+  svg{display:block; width:100%; height:auto; margin:10px 0 0;}
+  details{margin:8px 0 0; font-size:14px;} summary{cursor:pointer; color:var(--green);}
+  ol.hist{margin:6px 0 0; padding-left:1.4em; font-size:14px; color:var(--teach);}
+  .chk{font-size:14px; color:var(--teach); display:flex; gap:6px; align-items:center; margin:8px 0 0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Keep the Presentation Rate</h1>
+  <p class="lede">Span and list tasks are read aloud at a fixed rate. Reading too fast or too slow changes the task the norms describe. Hear the model pace, then read invented sequences aloud while you tap each item, and check your timing.</p>
+  <div class="warn"><strong>Nothing here is saved.</strong> Every sequence is invented and none comes from a test. Practice as often as you like.</div>
+
+  <div class="card">
+    <h2>Rate</h2>
+    <div class="chips" id="rateChips" role="group" aria-label="Target rate">
+      <button type="button" data-rate="1">One item per second (digit and letter-number spans, word lists)</button>
+      <button type="button" data-rate="2">Two items per second (running number recall)</button>
+      <button type="button" data-rate="custom">Custom rate</button>
+    </div>
+    <div class="custom hidden" id="customRow">
+      <label for="customRate">Items per second</label>
+      <input type="number" id="customRate" min="0.5" max="3" step="0.1" value="1.5">
+      <button type="button" class="b secondary" id="customSet">Use this rate</button>
+    </div>
+    <p class="setup" id="rateNote"></p>
+  </div>
+
+  <div class="card">
+    <h2>Mode</h2>
+    <div class="chips" id="modeChips" role="group" aria-label="Practice mode">
+      <button type="button" data-mode="listen">Listen</button>
+      <button type="button" data-mode="tap">Read and tap</button>
+      <button type="button" data-mode="silent">Steady without the click</button>
+    </div>
+    <p class="setup" id="modeNote"></p>
+  </div>
+
+  <div class="card">
+    <h2>Sequence</h2>
+    <div class="chips" id="seqChips" role="group" aria-label="Sequence type">
+      <button type="button" data-seq="digits">Digits</button>
+      <button type="button" data-seq="ln">Letters and numbers</button>
+      <button type="button" data-seq="words">Words</button>
+    </div>
+    <div id="lenWrap">
+      <p class="lbl" id="lenLbl">Length</p>
+      <div class="chips" id="lenChips" role="group" aria-labelledby="lenLbl"></div>
+    </div>
+    <p class="setup" id="seqNote"></p>
+    <div class="seq" id="seq" aria-label="Sequence to read"></div>
+    <div class="nav"><button type="button" class="b secondary" id="newSeq">New sequence</button></div>
+  </div>
+
+  <div class="card" id="actCard">
+    <div id="listenBox">
+      <div class="nav">
+        <button type="button" class="b primary" id="play">Play the model</button>
+        <button type="button" class="b secondary" id="stop" disabled>Stop</button>
+      </div>
+      <label class="chk"><input type="checkbox" id="speak"> Speak the items too</label>
+      <p class="small" id="speechNote">Speech timing is approximate. The browser's voice takes its own time to begin and say each item, so the click track is the precise model.</p>
+    </div>
+    <div id="tapBox">
+      <div class="nav">
+        <button type="button" class="b primary" id="start">Start the clicks</button>
+        <button type="button" class="b secondary" id="done" disabled>Score what I tapped</button>
+        <button type="button" class="b secondary" id="again">Try this sequence again</button>
+      </div>
+      <button type="button" class="tap" id="tap" aria-describedby="tapCount">TAP</button>
+      <p class="status" id="tapCount"></p>
+    </div>
+    <div class="pulseRow"><span class="dot" id="dot" aria-hidden="true"></span><span id="pulseText"></span></div>
+  </div>
+
+  <div class="card">
+    <h2>Your timing</h2>
+    <div class="fb" id="fb" aria-live="polite"></div>
+    <div id="result" class="hidden">
+      <table class="stats" id="stats"></table>
+      <div id="chart"></div>
+      <details><summary>Gaps as text</summary><table id="ivTable"></table></details>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>This session</h2>
+    <p class="status" id="sessStatus"></p>
+    <p class="status" id="best"></p>
+    <ol class="hist" id="hist"></ol>
+  </div>
+
+  <p class="small">Rules are paraphrased from the sources cited on the Canvas page. Use the manual during a real administration. A trial counts as on pace here when your mean gap is within 10% of the target and at least 80% of your gaps fall within 15% of it. These are practice criteria set by this tool, not rules from a manual.</p>
+</div>
+<script>
+(function(){
+'use strict';
+var BAND = 0.15, MEAN_OK = 0.10, IN_BAND_OK = 80, DRIFT = 0.10, PAIR = 0.20, ON_RATE = 0.05;
+var LETTERS = 'ABCDEFGHJKMNPQRSTUVWXYZ'.split('');   // I, L, O left out
+var DIGITS = '123456789'.split('');                   // 0 left out
+var WORD_POOL = ['spoon','ladder','candle','button','wallet','basket','pillow','mirror','kettle','blanket',
+  'bucket','hammer','napkin','saucer','zipper','towel','glove','helmet','faucet','sponge',
+  'stapler','envelope','magnet','dustpan','thimble','notebook','bottle','jacket','scarf','apron',
+  'pocket','ruler','shovel','rake','fence','chimney','ribbon','needle','curtain','carpet',
+  'drawer','cabinet','mailbox','lantern','sweater','soap','doorknob','wrench','rope','chain',
+  'tray','plate','bowl','mug','jar','cork','ladle','whisk','teapot','colander',
+  'doormat','pliers','suitcase','umbrella','padlock','keyring','toaster','skillet','pitcher','blender'];
+var PRESET_NOTE = {
+  1: 'One item per second, 60 beats per minute. Digit spans and letter-number spans are read at this rate. The battery\'s word list is also read at one word per second. A word-list script in circulation reads one word every 2 seconds, but the governing procedure for the battery sets one word per second, so practice at one.',
+  2: 'Two items per second, 120 beats per minute. Running number recall is read at this rate. The source advises practicing this faster rate in particular.'
+};
+var VOICE_NOTE = 'Let your voice drop slightly on the last item so the examinee hears that the string has ended.';
+var MODE_NOTE = {
+  listen: 'Press Play. Two soft lead-in clicks set the tempo, then a sharper click marks the onset of each item while the item lights up. Listen until the pace feels automatic.',
+  tap: 'Read each item aloud as a separate word and tap the button, or press Space, at the moment you begin it. Timing starts at your first tap. The earlier edition\'s manual suggests a light foot tap under the table (p. 40), and the current edition lists a silenced metronome app as optional (p. 45). The button stands in for your foot.',
+  silent: 'Press Start. Two soft lead-in clicks set the tempo, and the click then sounds on the first three items only. Read and tap from the first item, and hold the same pace through the rest of the string on your own.'
+};
+
+var S = {rate:1, preset:'1', mode:'tap', seq:'digits', len:{digits:6, ln:5}, items:[], seqId:0,
+  taps:[], tapping:false, clickTimes:[], result:null, playing:false,
+  attempts:0, onPace:0, firstTries:0, firstOnPace:0, scoredSeq:{}, hist:[], best:null};
+
+function $(id){ return document.getElementById(id); }
+function rnd(n){ return Math.floor(Math.random()*n); }
+function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=rnd(i+1), t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function target(){ return 1/S.rate; }
+function fmt(x){ return x.toFixed(2); }
+function rateLabel(r){ return (Math.round(r*100)/100)+' per second'; }
+
+// ---------- sequence generators ----------
+function genDigits(len){ var out=[], prev=null; while(out.length<len){ var d=DIGITS[rnd(9)]; if(d!==prev){ out.push(d); prev=d; } } return out; }
+function genLN(len){
+  for(;;){ var out=[], prev=null; while(out.length<len){ var pool=Math.random()<0.5?LETTERS:DIGITS, c=pool[rnd(pool.length)]; if(c!==prev){ out.push(c); prev=c; } }
+    var hasL=out.some(function(c){return /[A-Z]/.test(c);}), hasD=out.some(function(c){return /[0-9]/.test(c);});
+    if(hasL&&hasD) return out; }
+}
+function genWords(){ return shuffle(WORD_POOL).slice(0,15); }
+function minLen(){ return S.mode==='silent'?6:3; }
+function newSequence(){
+  stopAll();
+  if(S.seq==='words') S.items=genWords();
+  else { var L=Math.max(S.len[S.seq], minLen()); S.len[S.seq]=L; S.items = S.seq==='digits'?genDigits(L):genLN(L); }
+  S.seqId++; resetAttempt(); render();
+}
+
+// ---------- scoring ----------
+function mean(a){ var s=0; for(var i=0;i<a.length;i++) s+=a[i]; return s/a.length; }
+function score(ts, tgt){
+  if(!ts || ts.length<3) return null;
+  var iv=[]; for(var i=1;i<ts.length;i++) iv.push((ts[i]-ts[i-1])/1000);
+  var m=iv.length, mu=mean(iv), ss=0;
+  for(i=0;i<m;i++) ss+=(iv[i]-mu)*(iv[i]-mu);
+  var sd = m>1 ? Math.sqrt(ss/(m-1)) : 0;
+  var inBand=iv.map(function(x){ return Math.abs(x-tgt) <= BAND*tgt + 1e-9; });
+  var nIn=inBand.filter(Boolean).length, pct=100*nIn/m;
+  var li=0; for(i=1;i<m;i++) if(iv[i]>iv[li]) li=i;
+  var h=Math.floor(m/2), first=iv.slice(0,h), second=iv.slice(m-h);
+  var m1=h?mean(first):null, m2=h?mean(second):null;
+  var drift = (m>=4) ? m2-m1 : 0, driftFlag = m>=4 && Math.abs(drift) > DRIFT*tgt;
+  var odd=[], even=[]; iv.forEach(function(x,k){ (k%2?odd:even).push(x); });
+  var pairDiff = m>=4 ? Math.abs(mean(even)-mean(odd)) : 0, pairFlag = m>=4 && pairDiff > PAIR*tgt;
+  var dev=(mu-tgt)/tgt;
+  return {n:ts.length, intervals:iv, mean:mu, rate:1/mu, sd:sd, inBand:inBand, nInBand:nIn, pctInBand:pct,
+    longest:iv[li], longestAt:li, firstHalf:m1, secondHalf:m2, drift:drift, driftFlag:driftFlag,
+    pairDiff:pairDiff, pairFlag:pairFlag, dev:dev, onPace: Math.abs(dev)<=MEAN_OK+1e-9 && pct>=IN_BAND_OK-1e-9, target:tgt};
+}
+
+function unit(){ return S.seq==='words'?'word':'item'; }
+function feedback(r){
+  var tgt=r.target, preset = S.preset!=='custom', ps=[], u=unit();
+  var ref = preset ? 'the rate the norms assume' : 'the target rate you set';
+  var pctDev=Math.round(Math.abs(r.dev)*100);
+  var lead='You read '+fmt(r.mean)+' s per '+u+', ';
+  if(Math.abs(r.dev)<=ON_RATE) ps.push(lead+'within 5% of '+ref+' ('+fmt(tgt)+' s per '+u+').');
+  else if(r.dev<0) ps.push(lead+pctDev+'% faster than '+ref+' ('+fmt(tgt)+' s per '+u+'). '+(S.seq==='words'
+      ? 'Faster reading gives the examinee less time with each word than the procedure sets.'
+      : 'Faster reading shortens the time the examinee must hold the string.'));
+  else ps.push(lead+pctDev+'% slower than '+ref+' ('+fmt(tgt)+' s per '+u+'). '+(S.seq==='words'
+      ? 'Slower reading gives the examinee more time with each word than the procedure sets.'
+      : 'Slower reading lengthens the time the examinee must hold the string.'));
+  if(preset && Math.abs(r.dev)>ON_RATE) ps[0]+=' Either direction changes the task the norms describe.';
+  ps.push(r.nInBand+' of '+r.intervals.length+' gaps ('+Math.round(r.pctInBand)+'%) fell within 15% of the target. Your gaps varied with an SD of '+fmt(r.sd)+' s.');
+  if(r.longest > (1+BAND)*tgt) ps.push('Your longest gap was '+fmt(r.longest)+' s, between '+u+' '+(r.longestAt+1)+' and '+u+' '+(r.longestAt+2)+'. A pause inside the string adds holding time the examinee would not have had.');
+  if(r.driftFlag) ps.push('You '+(r.drift<0?'sped up':'slowed down')+' as the string went on (first half '+fmt(r.firstHalf)+' s, second half '+fmt(r.secondHalf)+' s). The rate is fixed for the whole string, so the last '+u+'s should arrive at the same pace as the first.');
+  if(r.pairFlag) ps.push('Your gaps alternated short and long, which is the sound of reading in pairs or in a rhythm. Say each '+u+' as a separate word at an even pace.');
+  if(S.mode==='silent' && r.intervals.length>2){ var sil=mean(r.intervals.slice(2)); ps.push('After the click stopped, your mean gap was '+fmt(sil)+' s against a target of '+fmt(tgt)+' s.'); }
+  ps.push(r.onPace ? 'On pace for this page\'s practice criteria.' : 'Not yet on pace for this page\'s practice criteria. Try the same sequence again, or play the model first.');
+  return ps;
+}
+
+// ---------- audio ----------
+var ac=null;
+function ctx(){ try{ if(!ac){ var C=window.AudioContext||window.webkitAudioContext; if(C) ac=new C(); } if(ac && ac.state==='suspended') ac.resume(); }catch(e){ ac=null; } return ac; }
+function click(t, strong){
+  var a=ctx(); if(!a) return;
+  try{ var o=a.createOscillator(), g=a.createGain(); o.frequency.value=strong?1500:900; o.type='square';
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(strong?0.35:0.18,t+0.002); g.gain.exponentialRampToValueAtTime(0.0001,t+0.05);
+    o.connect(g); g.connect(a.destination); o.start(t); o.stop(t+0.06); }catch(e){}
+}
+var timers=[], raf=null, voices=[];
+function stopAll(){
+  timers.forEach(clearTimeout); timers=[]; if(raf) cancelAnimationFrame(raf); raf=null;
+  try{ if(window.speechSynthesis) speechSynthesis.cancel(); }catch(e){}
+  S.playing=false; S.clickTimes=[]; S.pulse=-1; $('dot').classList.remove('on');
+}
+// schedule: count-in of 2 soft clicks, then item clicks for items 0..nClick-1. Visual events via perf time.
+function schedule(nClick, speak, onEnd){
+  var T=target(), a=ctx(), lead=0.25, nowP=performance.now();
+  var aStart = a ? a.currentTime+lead : 0;
+  var ev=[]; // {p: perf ms, kind:'in'|'item', i}
+  for(var k=0;k<2;k++){ ev.push({p:nowP+ (lead+k*T)*1000, kind:'in', i:k}); if(a) click(aStart+k*T,false); }
+  for(var i=0;i<nClick;i++){ var off=lead+(2+i)*T; ev.push({p:nowP+off*1000, kind:'item', i:i}); if(a) click(aStart+(2+i)*T,true); }
+  S.clickTimes=ev.filter(function(e){return e.kind==='item';}).map(function(e){return e.p;});
+  if(speak && window.speechSynthesis && window.SpeechSynthesisUtterance){
+    S.items.forEach(function(it,i){ timers.push(setTimeout(function(){ try{ var u=new SpeechSynthesisUtterance(it);
+      u.rate=Math.min(2, 0.9+0.3*S.rate); if(i===S.items.length-1) u.pitch=0.7; speechSynthesis.speak(u);}catch(e){} }, ev[2+i].p-nowP-40)); });
+  }
+  var endP = nowP + (lead+(2+nClick)*T)*1000;
+  var shown=-1;
+  function step(){
+    var t=performance.now(), cur=null;
+    for(var j=0;j<ev.length;j++) if(t>=ev[j].p) cur=j;
+    var on = cur!==null && t-ev[cur].p < 110;
+    $('dot').classList.toggle('on', on);
+    if(cur!==null && cur!==shown){ shown=cur; var e=ev[cur]; S.pulse=cur;
+      if(S.mode==='listen'){ if(e.kind==='item') markSeq(e.i, e.i); $('pulseText').textContent = e.kind==='in' ? 'Lead-in '+(e.i+1)+' of 2' : (S.seq==='words'?'Word ':'Item ')+(e.i+1)+' of '+S.items.length; }
+      else $('pulseText').textContent = e.kind==='in' ? 'Lead-in '+(e.i+1)+' of 2' : 'Click on item '+(e.i+1)+' of '+nClick;
+    }
+    if(t < endP+150) raf=requestAnimationFrame(step); else { raf=null; $('dot').classList.remove('on'); if(onEnd) onEnd(); }
+  }
+  raf=requestAnimationFrame(step);
+}
+
+// ---------- listen ----------
+function play(){
+  stopAll(); S.playing=true; renderButtons();
+  schedule(S.items.length, $('speak').checked, function(){ S.playing=false; markSeq(-1,-1); $('pulseText').textContent='Model finished. Switch to Read and tap when the pace feels automatic.'; renderButtons(); report(); });
+}
+
+// ---------- tap ----------
+function resetAttempt(){ stopAll(); S.taps=[]; S.tapping = S.mode==='tap'; S.result=null; }
+function startSilent(){ resetAttempt(); S.tapping=true; S.playing=true; renderButtons();
+  schedule(3, false, function(){ S.playing=false; if(S.tapping) $('pulseText').textContent='Click stopped. Keep the pace.'; }); render(); }
+function addTap(t){
+  if(!S.tapping || S.mode==='listen') return;
+  if(S.taps.length>=S.items.length) return;
+  S.taps.push(t);
+  var b=$('tap'); b.classList.add('hit'); setTimeout(function(){ b.classList.remove('hit'); },90);
+  if(S.mode==='tap'){ $('dot').classList.add('on'); setTimeout(function(){ $('dot').classList.remove('on'); },90); }
+  if(S.taps.length>=S.items.length) finish(); else renderTapState();
+}
+function finish(){
+  if(S.taps.length<3){ S.result=null; $('fb').className='fb'; $('fb').innerHTML='<p><strong>Too few taps.</strong> Tap at least three items so there are two gaps to time.</p>'; report(); return; }
+  stopAll(); S.tapping=false;
+  var r=score(S.taps, target()); S.result=r;
+  S.attempts++; if(r.onPace) S.onPace++;
+  if(!S.scoredSeq[S.seqId]){ S.scoredSeq[S.seqId]=1; S.firstTries++; if(r.onPace) S.firstOnPace++; }
+  var h={n:S.hist.length+1, seq:S.seq, len:S.items.length, rate:S.rate, mode:S.mode, mean:r.mean, pct:r.pctInBand, dev:r.dev, onPace:r.onPace};
+  S.hist.push(h);
+  if(!S.best || r.pctInBand>S.best.pct || (r.pctInBand===S.best.pct && Math.abs(r.dev)<Math.abs(S.best.dev))) S.best=h;
+  render();
+}
+function injectTaps(ts){ // test hook: runs the full scoring path with supplied timestamps
+  if(S.mode==='listen') setMode('tap');
+  resetAttempt(); S.tapping=true; S.taps=ts.slice(0, S.items.length);
+  finish(); return S.result;
+}
+
+// ---------- rendering ----------
+var SEQ_NOTE = {digits:'Invented digits from 1 to 9, with no digit repeated back to back.',
+  ln:'Invented mixes of letters and numbers. The digit 0 and the letters O, I, and L are left out, as on the letter-number task, so that no letter can be heard as a digit.',
+  words:'Fifteen everyday nouns drawn at random from a pool of '+WORD_POOL.length+'. None comes from a published list.'};
+function markSeq(cur, upto){
+  var sp=$('seq').children;
+  for(var i=0;i<sp.length;i++){ sp[i].classList.toggle('cur', i===cur); sp[i].classList.toggle('done', upto>=0 && i<upto && i!==cur); }
+}
+function renderSeq(){
+  var el=$('seq'); el.innerHTML=''; el.className='seq'+(S.seq==='words'?' words':'');
+  S.items.forEach(function(it){ var s=document.createElement('span'); s.textContent=it; el.appendChild(s); });
+}
+function renderTapState(){
+  var n=S.taps.length, L=S.items.length;
+  if(S.mode!=='listen'){ markSeq(n<L && (S.tapping)?n:-1, n); }
+  $('tapCount').textContent = 'Taps '+n+' of '+L+'.' + (S.mode==='silent' && !S.tapping && !S.result ? ' Press Start the clicks first.' : '');
+  $('done').disabled = !(S.tapping && n>=3);
+  $('tap').disabled = !S.tapping;
+  report();
+}
+function renderButtons(){ $('play').disabled=S.playing; $('stop').disabled=!S.playing; }
+function chipOn(id, attr, val){ Array.prototype.forEach.call($(id).children, function(b){ var on=b.getAttribute(attr)===String(val); b.classList.toggle('on',on); b.setAttribute('aria-pressed', on?'true':'false'); }); }
+function renderResult(){
+  var r=S.result, fb=$('fb'), res=$('result');
+  if(!r){ fb.className='fb ok'; fb.innerHTML = S.mode==='listen' ? '<p>Listen mode has nothing to score. Switch to Read and tap or Steady without the click to time yourself.</p>' : '<p>Your timing appears here when you finish the sequence.</p>'; res.classList.add('hidden'); return; }
+  fb.className = r.onPace ? 'fb ok' : 'fb';
+  var ps=feedback(r); fb.innerHTML = ps.map(function(p,i){ return '<p>'+(i===0?'<strong>'+esc(p.split('. ')[0])+'.</strong> '+esc(p.split('. ').slice(1).join('. ')):esc(p))+'</p>'; }).join('');
+  res.classList.remove('hidden');
+  var rows=[['Target gap', fmt(r.target)+' s ('+rateLabel(1/r.target)+')'],['Your mean gap', fmt(r.mean)+' s ('+r.rate.toFixed(2)+' per second)'],['SD of gaps', fmt(r.sd)+' s'],
+    ['Gaps within 15% of target', r.nInBand+' of '+r.intervals.length+' ('+Math.round(r.pctInBand)+'%)'],['Longest gap', fmt(r.longest)+' s, after '+unit()+' '+(r.longestAt+1)]];
+  if(r.intervals.length>=4) rows.push(['First half, second half', fmt(r.firstHalf)+' s, '+fmt(r.secondHalf)+' s'+(r.driftFlag?' (drift)':'')]);
+  $('stats').innerHTML = rows.map(function(x){ return '<tr><td>'+x[0]+'</td><td>'+x[1]+'</td></tr>'; }).join('');
+  $('chart').innerHTML = chartSVG(r);
+  $('ivTable').innerHTML = '<tr><th scope="col">Gap</th><th scope="col">Seconds</th><th scope="col">Against the band</th></tr>' + r.intervals.map(function(x,i){
+    var t=r.target, w = r.inBand[i] ? 'Within' : (x<t ? 'Too short' : 'Too long');
+    return '<tr><td>'+(i+1)+' to '+(i+2)+'</td><td>'+x.toFixed(3)+'</td><td>'+w+'</td></tr>'; }).join('');
+}
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function chartSVG(r){
+  var W=600, H=200, padL=46, padB=26, padT=10, padR=8, iv=r.intervals, t=r.target;
+  var ymax=Math.max(2*t, Math.max.apply(null,iv)*1.1), pw=W-padL-padR, ph=H-padT-padB;
+  function y(v){ return padT+ph*(1-v/ymax); }
+  var bw=pw/iv.length, s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Bar chart of '+iv.length+' gaps against a target band from '+fmt((1-BAND)*t)+' to '+fmt((1+BAND)*t)+' seconds. '+r.nInBand+' of '+iv.length+' gaps fall within the band. The same values appear in the text table below.">';
+  s+='<rect x="'+padL+'" y="'+y((1+BAND)*t)+'" width="'+pw+'" height="'+(y((1-BAND)*t)-y((1+BAND)*t))+'" fill="#dcebe3"/>';
+  [0,t,2*t].forEach(function(v){ if(v<=ymax){ s+='<line x1="'+padL+'" x2="'+(W-padR)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="'+(v===t?'#1e4d3a':'#cfe0d7')+'" stroke-width="'+(v===t?1.5:1)+'"'+(v===t?' stroke-dasharray="5 4"':'')+'/>'; s+='<text x="'+(padL-6)+'" y="'+(y(v)+4)+'" font-size="12" text-anchor="end" fill="#41544a">'+v.toFixed(2)+' s</text>'; } });
+  iv.forEach(function(v,i){ var x=padL+i*bw+bw*0.18, w=bw*0.64;
+    s+='<rect class="bar" x="'+x.toFixed(1)+'" y="'+y(v).toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+(padT+ph-y(v)).toFixed(1)+'" fill="'+(r.inBand[i]?'#1e4d3a':'#b35900')+'"/>';
+    if(iv.length<=16 || i%2===0) s+='<text x="'+(x+w/2).toFixed(1)+'" y="'+(H-8)+'" font-size="11" text-anchor="middle" fill="#41544a">'+(i+1)+'</text>'; });
+  return s+'</svg><p class="small">Bars are the gaps between your taps, numbered in order. The shaded band is the target within 15%, and the dashed line is the target. Green bars fall inside the band and orange bars fall outside it.</p>';
+}
+function renderSession(){
+  $('sessStatus').textContent = S.attempts ? ('On pace in '+S.onPace+' of '+S.attempts+' timed attempts. On pace on the first try with a new sequence in '+S.firstOnPace+' of '+S.firstTries+'.') : 'No timed attempts yet.';
+  var name={digits:'Digits',ln:'Letters and numbers',words:'Words'};
+  $('best').textContent = S.best ? ('Session best is attempt '+S.best.n+', with '+Math.round(S.best.pct)+'% of gaps in the band and a mean of '+fmt(S.best.mean)+' s at '+rateLabel(S.best.rate)+'.') : '';
+  $('hist').innerHTML = S.hist.slice(-8).reverse().map(function(h){ return '<li value="'+h.n+'">'+name[h.seq]+', '+h.len+' items, '+rateLabel(h.rate)+', '+(h.mode==='silent'?'without the click, ':'')+'mean '+fmt(h.mean)+' s, '+Math.round(h.pct)+'% in band'+(h.onPace?', on pace':'')+'</li>'; }).join('');
+}
+function render(){
+  chipOn('rateChips','data-rate',S.preset); chipOn('modeChips','data-mode',S.mode); chipOn('seqChips','data-seq',S.seq);
+  $('customRow').classList.toggle('hidden', S.preset!=='custom');
+  $('rateNote').textContent = S.preset==='custom' ? ('Free practice at '+rateLabel(S.rate)+', a gap of '+fmt(target())+' s. The sources set only one or two items per second for these tasks.') : PRESET_NOTE[S.preset];
+  $('modeNote').textContent = MODE_NOTE[S.mode] + (S.seq!=='words' && S.mode!=='listen' ? ' '+VOICE_NOTE : '');
+  $('seqNote').textContent = SEQ_NOTE[S.seq];
+  var lc=$('lenChips'); lc.innerHTML='';
+  $('lenWrap').classList.toggle('hidden', S.seq==='words');
+  if(S.seq!=='words') for(var L=3;L<=9;L++){ var b=document.createElement('button'); b.type='button'; b.textContent=L; b.setAttribute('data-len',L); b.setAttribute('aria-label','Length '+L);
+    if(L<minLen()) b.disabled=true; if(L===S.len[S.seq]) b.className='on'; b.setAttribute('aria-pressed', L===S.len[S.seq]?'true':'false'); lc.appendChild(b); }
+  renderSeq();
+  var listen=S.mode==='listen';
+  $('listenBox').classList.toggle('hidden', !listen); $('tapBox').classList.toggle('hidden', listen);
+  $('start').classList.toggle('hidden', S.mode!=='silent');
+  $('pulseText').textContent = listen ? 'The dot pulses with each click.' : (S.mode==='silent' ? 'The dot pulses with the lead-in and the first three clicks only.' : 'The dot flashes with each tap.');
+  renderButtons(); renderTapState(); renderResult(); renderSession(); report();
+}
+
+// ---------- state changes ----------
+function setRate(p, val){ S.preset=p; S.rate = p==='custom' ? val : Number(p); resetAttempt(); render(); }
+function setMode(m){ S.mode=m; if(S.seq!=='words' && S.items.length<minLen()){ newSequence(); } resetAttempt(); render(); }
+function setSeq(q){ S.seq=q; newSequence(); }
+
+$('rateChips').addEventListener('click', function(e){ var b=e.target.closest('button'); if(!b) return; var r=b.getAttribute('data-rate');
+  if(r==='custom') setRate('custom', clampRate($('customRate').value)); else setRate(r); });
+function clampRate(v){ v=parseFloat(v); if(!isFinite(v)) v=1; return Math.min(3, Math.max(0.5, Math.round(v*10)/10)); }
+$('customSet').addEventListener('click', function(){ var v=clampRate($('customRate').value); $('customRate').value=v; setRate('custom', v); });
+$('modeChips').addEventListener('click', function(e){ var b=e.target.closest('button'); if(b) setMode(b.getAttribute('data-mode')); });
+$('seqChips').addEventListener('click', function(e){ var b=e.target.closest('button'); if(b) setSeq(b.getAttribute('data-seq')); });
+$('lenChips').addEventListener('click', function(e){ var b=e.target.closest('button'); if(!b||b.disabled) return; S.len[S.seq]=Number(b.getAttribute('data-len')); newSequence(); });
+$('newSeq').addEventListener('click', newSequence);
+$('play').addEventListener('click', play);
+$('stop').addEventListener('click', function(){ stopAll(); markSeq(-1,-1); renderButtons(); $('pulseText').textContent='Stopped.'; });
+$('start').addEventListener('click', startSilent);
+$('again').addEventListener('click', function(){ resetAttempt(); render(); });
+$('done').addEventListener('click', finish);
+var tapBtn=$('tap');
+tapBtn.addEventListener('pointerdown', function(e){ if(e.button!==0) return; e.preventDefault(); addTap(performance.now()); });
+tapBtn.addEventListener('click', function(e){ if(e.detail===0) addTap(performance.now()); }); // keyboard Enter
+document.addEventListener('keydown', function(e){
+  if(e.key!==' ' && e.code!=='Space') return;
+  var tg=e.target, tag=tg && tg.tagName;
+  if(S.mode==='listen' || tag==='INPUT' || tag==='TEXTAREA' || tag==='SELECT' || tag==='SUMMARY' || (tag==='BUTTON' && tg!==tapBtn)) return;
+  e.preventDefault(); if(!e.repeat) addTap(performance.now());
+});
+document.addEventListener('keyup', function(e){ if((e.key===' '||e.code==='Space') && e.target===tapBtn) e.preventDefault(); });
+
+function readHash(){
+  var h=(location.hash||'').replace(/^#/,''), o={};
+  h.split('&').forEach(function(p){ var kv=p.split('='); if(kv[0]) o[kv[0]]=kv[1]; });
+  if(o.rate==='1'||o.rate==='2'){ S.preset=o.rate; S.rate=Number(o.rate); }
+  if(o.mode==='listen'||o.mode==='tap'||o.mode==='silent') S.mode=o.mode;
+  if(o.seq==='digits'||o.seq==='ln'||o.seq==='words') S.seq=o.seq;
+}
+window.addEventListener('hashchange', function(){ readHash(); newSequence(); });
+
+function report(){ try{ parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:document.documentElement.scrollHeight}),'*'); }catch(e){} }
+window.addEventListener('load',report); window.addEventListener('resize',report);
+
+window.__tool = {
+  score: score, injectTaps: injectTaps, wordPool: WORD_POOL, letters: LETTERS, digits: DIGITS,
+  gen: {digits:genDigits, ln:genLN, words:genWords},
+  criteria: {band:BAND, meanOk:MEAN_OK, inBandOk:IN_BAND_OK, drift:DRIFT, pair:PAIR},
+  setRate: setRate, setMode: setMode, setSeq: setSeq, newSequence: newSequence,
+  state: function(){ return {rate:S.rate, preset:S.preset, target:target(), mode:S.mode, seq:S.seq, items:S.items.slice(), taps:S.taps.slice(),
+    tapping:S.tapping, playing:S.playing, clickCount:S.clickTimes.length, pulse:S.pulse, result:S.result, attempts:S.attempts, onPace:S.onPace,
+    firstTries:S.firstTries, firstOnPace:S.firstOnPace, hist:S.hist.slice(), best:S.best}; }
+};
+readHash(); newSequence();
+})();
+</script>
+</body>
+</html>

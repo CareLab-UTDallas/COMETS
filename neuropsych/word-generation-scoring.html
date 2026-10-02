@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Score the Word-Generation Trials</title>
+<style>
+  :root{--bg:#ffffff; --card:#f7faf8; --ink:#17251d; --muted:#41544a; --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b; --ok:#2f6b4f; --okbg:#e8f3ec; --no:#9a3412; --nobg:#fbeee6; --amb:#7a5a00; --ambbg:#fff6d6;}
+  *{box-sizing:border-box;}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.55;}
+  .wrap{max-width:820px; margin:0 auto; padding:14px 14px 16px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:22px; margin:0 0 4px;}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
+  .warn{font-size:13px; color:#7a3d00; background:#fff3e6; border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px; margin:0 0 10px;}
+  .tabs{display:flex; flex-wrap:wrap; gap:4px; margin:0 0 6px;}
+  .tabs button{font:inherit; font-size:14px; cursor:pointer; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--green); padding:5px 10px;}
+  .tabs button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .tabs button.done:not(.on){border-color:#9cc3ae; background:#eef4f1;}
+  .tlab{font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); margin:6px 0 3px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:6px 0 0;}
+  .eyebrow{font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:var(--accent); margin:0 0 2px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:18px; margin:0 0 4px;}
+  .note{font-size:13px; color:var(--muted); margin:0 0 8px;}
+  .key{font-size:13px; color:var(--teach); background:#fff; border:1px solid var(--line); border-radius:8px; padding:8px 10px; margin:0 0 10px;}
+  .key b{color:var(--green);}
+  .iv{margin:10px 0 0;}
+  .ivh{font-size:13px; font-weight:600; color:var(--green); border-bottom:1px solid var(--line); padding:0 0 2px; margin:0 0 4px;}
+  .row{display:grid; grid-template-columns:44px minmax(0,1fr); gap:4px 10px; align-items:start; padding:6px 0; border-bottom:1px dashed #e3ebe6;}
+  .row:last-child{border-bottom:none;}
+  .t{font-size:13px; color:var(--muted); padding-top:3px; font-variant-numeric:tabular-nums;}
+  .w{font-size:16px; font-weight:600; color:var(--ink);}
+  .w .said{font-weight:400; font-size:13px; color:var(--muted); margin-left:6px;}
+  .tags{display:flex; flex-wrap:wrap; gap:4px; margin:4px 0 0;}
+  .tags button{font:inherit; font-size:12.5px; cursor:pointer; border:1px solid #cfe0d7; border-radius:99px; background:#fff; color:var(--green); padding:2px 9px;}
+  .tags button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .tags button:focus-visible,.tabs button:focus-visible,button.b:focus-visible,input:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .prompt{font-size:13px; color:#7a3d00; background:#fff3e6; border-radius:6px; padding:4px 8px; margin:6px 0;}
+  .fbw{font-size:13.5px; color:var(--teach); margin:5px 0 0; padding:6px 8px; border-radius:6px; background:#fff; border:1px solid var(--line);}
+  .tag{display:inline-block; font-size:12px; font-weight:600; border-radius:99px; padding:1px 8px; margin-right:6px;}
+  .tag.ok{background:var(--okbg); color:var(--ok);}
+  .tag.no{background:var(--nobg); color:var(--no);}
+  .tag.amb{background:var(--ambbg); color:var(--amb);}
+  .tot{margin:14px 0 0; padding:10px 12px; background:#fff; border:1px solid var(--line); border-radius:8px;}
+  .tot h3{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:16px; margin:0 0 6px;}
+  .fld{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:0 0 6px; font-size:14px;}
+  .fld label{flex:1 1 260px;}
+  .fld input{width:70px; font:inherit; font-size:15px; padding:4px 6px; border:1px solid #cfe0d7; border-radius:6px;}
+  .fb{margin:12px 0 0; border-radius:8px; border:1px solid var(--line); background:#fff; padding:10px 12px; font-size:14px; color:var(--teach);}
+  .fb h3{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:16px; margin:0 0 6px;}
+  .fb p{margin:0 0 6px;}
+  .fb p:last-child{margin:0;}
+  .nav{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0 0;}
+  button.b{font:inherit; font-size:15px; cursor:pointer; border-radius:8px; padding:9px 16px;}
+  .primary{background:var(--green); color:#eef4f1; border:1px solid var(--green);}
+  .secondary{background:#eef4f1; color:var(--green); border:1px solid #cfe0d7;}
+  button.b:disabled{opacity:.45; cursor:default;}
+  .status{font-size:13px; color:var(--muted);}
+  .tally{font-size:13px; color:var(--muted); margin:8px 0 0;}
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Score the word-generation trials</h1>
+  <p class="lede">Five invented examinees each gave four one-minute trials, animals, vegetables, F, and L. Each transcript shows every response in the order it was said, placed in its 15-second interval, with any examiner prompt where it was given. Tag every response, enter the totals the record form asks for, then check your scoring against the expert key. The rules follow the research protocol's procedures taught on the Canvas page. Keep that page open beside you.</p>
+  <div class="warn"><strong>Nothing here is saved.</strong> These are invented practice transcripts, not patient records.</div>
+  <p class="tlab">Examinee</p>
+  <div class="tabs" id="ptabs"></div>
+  <p class="tlab">Trial</p>
+  <div class="tabs" id="ttabs"></div>
+  <div class="card">
+    <p class="eyebrow" id="eyebrow"></p>
+    <h2 id="title"></h2>
+    <p class="note" id="context"></p>
+    <div class="key" id="key"></div>
+    <div id="list"></div>
+    <div class="tot" id="tot"></div>
+    <div class="fb hidden" id="fb"></div>
+  </div>
+  <div class="nav">
+    <button class="b secondary" id="back" type="button">Back</button>
+    <button class="b secondary" id="next" type="button">Next</button>
+    <button class="b primary" id="check" type="button">Check my scoring</button>
+    <button class="b secondary" id="reset" type="button">Start over</button>
+    <span class="status" id="status" aria-live="polite"></span>
+  </div>
+  <p class="tally" id="tally"></p>
+</div>
+<script>
+var TAGS={C:"Correct",R:"Repetition",V:"Rule violation",P:"Proper noun",G:"Variation",I:"Intrusion",X:"After time"};
+var LET_TAGS=["C","R","V","P","G","I","X"], CAT_TAGS=["C","R","I","X"];
+var TAGHELP_LET="<b>Correct</b> begins with the letter, is in the dictionary, and was not said before. <b>Repetition</b> is the same word said again. <b>Rule violation</b> here means a number or a non-word. <b>Proper noun</b> is the name of a person or place. <b>Variation</b> is an earlier word with a new grammatical ending. <b>Intrusion</b> is a word that begins with another letter. <b>After time</b> is anything said after you called time. Rule violations, proper nouns, variations, and intrusions all go into the same record-form tally.";
+var TAGHELP_CAT="<b>Correct</b> is a credited member of the category not named earlier in the trial. <b>Repetition</b> is the same word said again. <b>Intrusion</b> is anything the protocol's rules do not credit for this category, such as a mythical animal, a prepared product, a spice, or a word from outside the category. <b>After time</b> is anything said after you called time. The record form records only the correct total.";
+
+/* Each trial: kind "cat" or "let", letter or category name, items in order.
+   Item: [seconds, word, key tag, reason (optional), what the examinee added (optional)] or {p:seconds, text:"prompt"} */
+var P=[
+ {name:"Examinee 1", ctx:"A 71-year-old man with 16 years of education. He worked steadily through all four trials.",
+  trials:[
+   {kind:"cat", cat:"Animals", items:[[2,"dog","C"],[3,"cat","C"],[5,"horse","C"],[6,"cow","C"],[8,"pig","C"],[10,"chicken","C"],[12,"sheep","C"],[14,"goat","C"],[17,"lion","C"],[19,"tiger","C"],[21,"elephant","C"],[24,"giraffe","C"],[26,"zebra","C"],[29,"monkey","C"],[33,"bear","C"],[36,"deer","C"],[38,"rabbit","C"],[41,"squirrel","C"],[45,"robin","C","Birds are credited."],[47,"eagle","C"],[50,"hawk","C"],[52,"horse","R","Horse was said at 5 seconds. The same word said again is a repetition and is not credited."],[54,"salmon","C","Fish are credited."],[57,"trout","C"]]},
+   {kind:"cat", cat:"Vegetables", items:[[2,"carrot","C"],[4,"potato","C"],[6,"peas","C"],[8,"beans","C","Legumes are acceptable responses."],[11,"corn","C","The protocol names corn among the credited grains."],[13,"lettuce","C"],[16,"spinach","C"],[19,"broccoli","C"],[22,"cauliflower","C"],[26,"celery","C"],[30,"onion","C"],[35,"cucumber","C"],[39,"tomato","C","The protocol states that tomato, avocado, and pumpkin are acceptable responses."],[44,"squash","C"],[49,"zucchini","C","Squash and zucchini are a superordinate and a subordinate response, and the protocol credits both."],[55,"potato","R","Potato was said at 4 seconds."]]},
+   {kind:"let", letter:"F", items:[[3,"fish","C"],[5,"farm","C"],[7,"fast","C"],[9,"fun","C"],[12,"food","C"],[15,"friend","C"],[19,"family","C"],[23,"fence","C"],[28,"forest","C"],[33,"flower","C"],[38,"faster","G","Faster is fast with a comparative ending, a grammatical variant of an earlier response. The protocol scores it as a rule violation, not a repetition."],[44,"fire","C"],[49,"four","V","Numbers are rule violations, and the instruction told him so."],[55,"fork","C"]]},
+   {kind:"let", letter:"L", items:[[2,"lamp","C"],[4,"light","C"],[7,"lake","C"],[10,"love","C"],[13,"little","C"],[17,"leg","C"],[20,"legs","G","Legs is the plural of leg, said three seconds earlier. A plural is a grammatical variant."],[25,"long","C"],[31,"lunch","C"],[37,"letter","C"],[44,"lemon","C"],[51,"lady","C"],[57,"London","P","London is the name of a place, which the instruction ruled out."]]}
+  ]},
+ {name:"Examinee 2", ctx:"A 79-year-old woman with 12 years of education. She said she had kept animals all her life.",
+  trials:[
+   {kind:"cat", cat:"Animals", items:[[2,"dog","C"],[4,"terrier","C","A breed, and a subordinate example of dog. The protocol credits both dog and terrier."],[6,"poodle","C","Another breed of dog, credited."],[9,"cat","C"],[11,"kitten","C","The protocol credits male, female, and infant names of a species."],[14,"cow","C"],[16,"bull","C","The male name of the species, credited alongside cow."],[18,"calf","C","The infant name, credited. The protocol's own example is bull, cow, calf."],{p:33,text:"Examiner, after 15 seconds of silence, “Tell me all the animals you can think of.” This is the one prompt allowed."},[36,"horse","C"],[41,"bird","C"],[44,"robin","C","Bird and robin are a superordinate and a subordinate example, and the protocol credits both."],[48,"unicorn","I","The protocol does not credit mythical animals."],[51,"dragon","I","A mythical animal, not credited."],[55,"cat","R","Cat was said at 9 seconds."]]},
+   {kind:"cat", cat:"Vegetables", items:[[3,"peppers","C"],[5,"jalapeños","C","Peppers and jalapeños are the protocol's own example of a superordinate and subordinate pair, both credited."],[8,"greens","C","The protocol credits less specific names and gives greens as its example."],[11,"carrots","C"],[14,"peanuts","C","Nuts are acceptable responses."],[18,"rice","C","Grains are credited."],[22,"pumpkin","C","Named in the protocol's rules as acceptable."],[26,"pickles","I","A prepared vegetable product. The protocol gives pickles as its example of what not to credit."],[29,"ketchup","I","A prepared vegetable product, not credited."],[33,"cinnamon","I","Spices are not acceptable responses."],[37,"basil","C","Herbs are counted as acceptable vegetable responses, in contrast to spices."],[42,"cow","I","Not a vegetable. An animal named in the vegetables minute is not credited."],[47,"lentils","C","Legumes are acceptable responses."],[53,"seaweed","C","Seaweed is on the protocol's list of acceptable responses."]]},
+   {kind:"let", letter:"F", items:[[3,"fan","C"],[6,"fat","C"],[9,"fall","C"],[12,"fell","G","Fell is fall with an altered tense, a grammatical variant of the word said three seconds before."],[16,"felt","C","Felt is the past tense of feel, which she had not said, and it is also a noun. It is a new word."],[21,"fire","C"],[25,"fireman","C","A different word built on fire, not fire with a grammatical ending. The protocol credits bakery after bake on the same reasoning."],[30,"fish","C"],[34,"Frank","P","The name of a person."],[38,"Florida","P","The name of a place."],[44,"frog","C"],[49,"fifty","V","A number."],[55,"flip","C"]]},
+   {kind:"let", letter:"L", items:[[2,"long","C"],[5,"lot","C"],[8,"lots","G","The plural of lot, said three seconds earlier."],[11,"let","C"],[14,"let's","C","Contractions are acceptable, and let's is a different word from let."],[18,"love","C"],[22,"lovely","C","A different word built on love. Only grammatical endings, a plural, a tense, a participle, or a comparative, make a variant."],[28,"lamb","C"],[32,"lion","C"],{p:47,text:"Examiner, after 15 seconds of silence, “Keep going.”"},[50,"leaf","C"],[54,"leaves","G","The plural of leaf. An irregular plural is still a plural."],[58,"lip","C"]]}
+  ]},
+ {name:"Examinee 3", ctx:"A 68-year-old man with 14 years of education. He added a comment to two of his words, shown in gray beside them.",
+  trials:[
+   {kind:"cat", cat:"Animals", items:[[2,"cat","C"],[3,"dog","C"],[5,"mouse","C"],[7,"rat","C"],[9,"snake","C","Reptiles are credited."],[12,"lizard","C"],[15,"turtle","C"],[18,"frog","C"],[21,"toad","C"],[25,"fly","C","Insects are credited."],[28,"ant","C"],[31,"bee","C"],[35,"spider","C","A spider is an animal, and nothing in the protocol's rules excludes it."],[40,"whale","C"],[44,"shark","C"],[48,"dolphin","C"],[53,"seal","C"],[58,"octopus","C"],[61,"penguin","X","Said after the examiner called time at 60 seconds. Write it below a line so the record is complete, and do not count it. The record form records the number named in 60 seconds."]]},
+   {kind:"cat", cat:"Vegetables", items:[[3,"corn","C"],[6,"carrot","C"],[10,"beet","C"],[14,"yam","C"],[19,"jicama","C","The protocol's own example of a vegetable from another culture, acceptable when it can be verified in the dictionary."],[24,"okra","C"],[30,"kale","C"],[36,"leek","C"],{p:51,text:"Examiner, after 15 seconds of silence, “Tell me all the vegetables you can think of.”"},[52,"cabbage","C"],[57,"carrot","R","Carrot was said at 6 seconds."]]},
+   {kind:"let", letter:"F", items:[[2,"fun","C"],[4,"fast","C"],[8,"phone","I","Phone begins with the F sound and the letter P. The protocol names this word as its example of a same-sound, different-letter violation."],[11,"photo","I","Same sound, letter P."],[15,"philosophy","I","The third consecutive word that does not begin with F."],{p:16,text:"Examiner, after three consecutive words that do not start with F, “We are now using the letter F.” Given once only."},[19,"fork","C"],[23,"fine","C"],[27,"flour","C"],[31,"frame","C"],[36,"fair","C"],[41,"fare","C","Fare sounds like fair, but he marked a different word and spelling, so it is correct.","“like a bus fare”"],[46,"flower","R","Flower sounds like flour, said at 27 seconds, and he gave no sign of a different meaning. The protocol scores a homophone said without such a sign as a repetition."],[50,"free","C"],[55,"fry","C"]]},
+   {kind:"let", letter:"L", items:[[3,"lead","C","","“the metal”"],[9,"lead","C","The same spelling, but he marked a different meaning, so it is correct and not a repetition.","“to lead a group”"],[13,"line","C"],[17,"lime","C"],[21,"like","C"],[25,"liked","G","Like with a past-tense ending, a grammatical variant."],[30,"lake","C"],[34,"lake","R","Lake was said four seconds earlier, with nothing to mark a new meaning."],[39,"Lexus","C","A brand name. The protocol credits proper nouns that are not names of people or places, such as days, months, and brands."],[44,"Linda","P","The name of a person."],[49,"lurg","V","A non-word. It cannot be found in the dictionary."],[54,"look","C"],[59,"lock","C"]]}
+  ]},
+ {name:"Examinee 4", ctx:"An 83-year-old woman with 10 years of education. She spoke softly, paused often, and said before starting that she felt tired these days.",
+  trials:[
+   {kind:"cat", cat:"Animals", items:[[4,"dog","C"],[9,"cat","C"],{p:24,text:"Examiner, after 15 seconds of silence, “Tell me all the animals you can think of.”"},[27,"bird","C"],[35,"cow","C"],[44,"horse","C"],[52,"dog","R","Dog was said at 4 seconds."]]},
+   {kind:"cat", cat:"Vegetables", items:[[5,"peas","C"],[12,"carrots","C"],[20,"beans","C"],[31,"corn","C"],{p:46,text:"Examiner, after 15 seconds of silence, “Tell me all the vegetables you can think of.”"},[50,"potatoes","C"],[58,"onions","C"]]},
+   {kind:"let", letter:"F", items:[[6,"fall","C"],[14,"fish","C"],[22,"food","C"],{p:37,text:"Examiner, after 15 seconds of silence, “Keep going.”"},[40,"farm","C"],[51,"feet","C"]]},
+   {kind:"let", letter:"L", items:[[7,"lady","C"],[15,"lamp","C"],[29,"love","C"],{p:44,text:"Examiner, after 15 seconds of silence, “What other words beginning with L can you think of?”"},[47,"leg","C"]]}
+  ]},
+ {name:"Examinee 5", ctx:"A 74-year-old man with 18 years of education. He spoke quickly and kept talking as time was called.",
+  trials:[
+   {kind:"cat", cat:"Animals", items:[[1,"lion","C"],[3,"lioness","C","The female name of the species. The protocol credits male, female, and infant names."],[5,"cub","C","An infant name, credited."],[7,"tiger","C"],[9,"cheetah","C"],[11,"leopard","C"],[14,"jaguar","C"],[16,"puma","C"],[18,"cougar","C","Puma and cougar name the same animal, but cougar is a different word, not a verbatim repeat. Give the benefit of the doubt and credit it."],[25,"wolf","C"],[28,"fox","C"],[31,"bear","C"],[34,"grizzly","C","A subordinate example of bear, credited."],[37,"polar bear","C"],[41,"moose","C"],[44,"elk","C"],[48,"bison","C"],[51,"buffalo","C","As with puma and cougar, a different word, credited under the benefit of the doubt."],[55,"deer","C"],[58,"rabbit","C"],[62,"squirrel","X","Said after time was called. Recorded, not counted."]]},
+   {kind:"cat", cat:"Vegetables", items:[[2,"lettuce","C"],[4,"romaine","C","A subordinate response, credited with lettuce."],[6,"iceberg","C","Another kind of lettuce, credited."],[9,"spinach","C"],[12,"kale","C"],[15,"chard","C"],[18,"broccoli","C"],[22,"sprouts","C"],[26,"asparagus","C"],[31,"artichoke","C"],[35,"apple","I","An apple is a fruit. The fruits the protocol's rules name as acceptable are tomato, avocado, and pumpkin."],[40,"salsa","I","A prepared vegetable product."],[45,"oats","C","Grains are credited, and oats are named in the rule."],[49,"acorns","C","Nuts are acceptable, and acorns are the protocol's own example."],[54,"sugarcane","C","Named in the protocol's rules as acceptable."],[58,"paprika","I","A spice, not credited."]]},
+   {kind:"let", letter:"F", items:[[2,"find","C"],[4,"finding","G","A present participle of find, one of the protocol's named grammatical variants."],[7,"fine","C"],[10,"finer","G","A comparative of fine."],[13,"finest","G","Another grammatical ending on fine."],[17,"fire truck","C","A compound that conveys a single meaning, like the protocol's example ferris wheel."],[21,"fireplace","C"],[25,"Friday","C","A day of the week, a proper noun that is not a person or place. Credited."],[29,"February","C","A month, credited on the same rule."],[33,"Fred","P","The name of a person. Words beginning with F that break a rule do not trigger the three-in-a-row reminder, which is only for words that do not start with the letter."],[37,"France","P","The name of a place."],[41,"fifteen","V","A number."],[45,"flag","C"],[48,"flags","G","The plural of flag."],[52,"flat","C"],[56,"float","C"],[61,"fly","X","Said after time was called. Recorded, not counted."]]},
+   {kind:"let", letter:"L", items:[[3,"lamp","C"],[6,"lamps","G","The plural of lamp."],[9,"lamb","C"],[12,"lambs","G","The plural of lamb."],[15,"lamb","R","Lamb itself was said at 9 seconds. Said again verbatim, it is a repetition."],[19,"late","C"],[22,"later","G","A comparative of late."],[25,"latest","G","A superlative ending on late, another grammatical variant."],[29,"lot","C"],[33,"lottery","C","A different word, not lot with a grammatical ending."],[37,"Los Angeles","P","The name of a place."],[42,"lion","C"],[45,"lions","G","The plural of lion."],[50,"ladder","C"],[54,"lamp","R","Lamp was said at 3 seconds."],[58,"leap","C"]]}
+  ]}
+];
+var DEFWHY={cat:{C:"A credited member of the category, not named earlier in this minute."}, let:{C:"Begins with the letter, is a dictionary word, is not a name or a number, and was not said before in this minute."}};
+
+var pi=0, ti=0, ST={};
+function sk(){ return pi+"-"+ti; }
+function blank(){ var tr=P[pi].trials[ti]; var n=tr.items.filter(function(x){return Array.isArray(x);}).length; return {tags:new Array(n).fill(null), tot:{}, checked:false}; }
+function S(){ if(!ST[sk()]) ST[sk()]=blank(); return ST[sk()]; }
+var el=function(id){return document.getElementById(id);};
+function words(tr){ return tr.items.filter(function(x){return Array.isArray(x);}); }
+function iv(t){ return t>60?4:(t<=15?0:(t<=30?1:(t<=45?2:3))); }
+var IVNAME=["0 to 15 seconds","16 to 30 seconds","31 to 45 seconds","46 to 60 seconds","After time was called"];
+function fields(tr){ return tr.kind==="cat" ? [["c","Total correct "+tr.cat.toLowerCase()+" (record form, item "+(tr.cat==="Animals"?"7a":"7b")+")"],["n","Responses not credited, repetitions and intrusions (for your record, not entered on the record form)"]]
+  : [["c","Number of correct "+tr.letter+"-words (item "+(tr.letter==="F"?"11a":"11d")+")"],["r","Number of "+tr.letter+"-word repetitions (item "+(tr.letter==="F"?"11b":"11e")+")"],["v","Number of non-"+tr.letter+"-words and rule violation errors (item "+(tr.letter==="F"?"11c":"11f")+")"]]; }
+function bucket(kind,tag){ if(tag==="X"||tag===null) return null; if(tag==="C") return "c"; if(kind==="cat") return "n"; return tag==="R"?"r":"v"; }
+function expertTot(tr){ var o={c:0,n:0,r:0,v:0}; words(tr).forEach(function(w){ var b=bucket(tr.kind,w[2]); if(b) o[b]++; }); return o; }
+function fmt(t){ return "0:"+(t<10?"0":"")+t; }
+function fmtT(t){ return t>=60? "1:"+((t-60)<10?"0":"")+(t-60) : fmt(t); }
+
+(function(){
+  P.forEach(function(x,k){ var b=document.createElement('button'); b.type='button'; b.textContent=String(k+1); b.setAttribute('aria-label',x.name); b.addEventListener('click',function(){ pi=k; render(); }); el('ptabs').appendChild(b); });
+  ["Animals","Vegetables","F","L"].forEach(function(n,k){ var b=document.createElement('button'); b.type='button'; b.textContent=n; b.addEventListener('click',function(){ ti=k; render(); }); el('ttabs').appendChild(b); });
+})();
+
+function render(){
+  var ex=P[pi], tr=ex.trials[ti], s=S(), W=words(tr), opts=tr.kind==="cat"?CAT_TAGS:LET_TAGS;
+  el('eyebrow').textContent=ex.name+", "+(tr.kind==="cat"?"category word generation":"letter word generation");
+  el('title').textContent=tr.kind==="cat"?tr.cat:("Letter "+tr.letter);
+  el('context').textContent=ex.ctx;
+  el('key').innerHTML=tr.kind==="cat"?TAGHELP_CAT:TAGHELP_LET;
+  var h="", wi=0, cur=-1;
+  tr.items.forEach(function(it){
+    if(!Array.isArray(it)){ h+='<div class="prompt">'+fmt(it.p)+' '+it.text+'</div>'; return; }
+    var b=iv(it[0]); if(b!==cur){ if(cur!==-1) h+='</div>'; h+='<div class="iv"><div class="ivh">'+IVNAME[b]+'</div>'; cur=b; }
+    var mine=s.tags[wi];
+    h+='<div class="row"><div class="t">'+fmtT(it[0])+'</div><div><div class="w">'+it[1]+(it[4]?'<span class="said">'+it[4]+'</span>':'')+'</div><div class="tags" role="group" aria-label="Tag for '+it[1]+'">';
+    opts.forEach(function(o){ h+='<button type="button" data-i="'+wi+'" data-t="'+o+'" class="'+(mine===o?'on':'')+'" aria-pressed="'+(mine===o)+'">'+TAGS[o]+'</button>'; });
+    h+='</div>';
+    if(s.checked){ h+=wordFb(tr,it,mine); }
+    h+='</div></div>'; wi++;
+  });
+  if(cur!==-1) h+='</div>';
+  el('list').innerHTML=h;
+  Array.prototype.forEach.call(el('list').querySelectorAll('.tags button'),function(b){ b.addEventListener('click',function(){ var st=S(); st.tags[+b.getAttribute('data-i')]=b.getAttribute('data-t'); st.checked=false; el('status').textContent=''; render(); }); });
+  var th='<h3>Totals for the record form</h3>';
+  fields(tr).forEach(function(f){ var v=s.tot[f[0]]; th+='<div class="fld"><label for="f-'+f[0]+'">'+f[1]+'</label><input id="f-'+f[0]+'" type="number" min="0" max="80" inputmode="numeric" value="'+(v===undefined||v===null?'':v)+'"></div>'; });
+  el('tot').innerHTML=th;
+  fields(tr).forEach(function(f){ el('f-'+f[0]).addEventListener('input',function(e){ var st=S(); var v=e.target.value; st.tot[f[0]]=v===''?null:parseInt(v,10); if(st.checked){ st.checked=false; el('fb').classList.add('hidden'); } }); });
+  var fb=el('fb');
+  if(s.checked){ fb.innerHTML=totFb(tr,s); fb.classList.remove('hidden'); } else { fb.classList.add('hidden'); fb.innerHTML=''; }
+  Array.prototype.forEach.call(el('ptabs').children,function(b,k){ b.classList.toggle('on',k===pi); var all=[0,1,2,3].every(function(j){ return ST[k+"-"+j]&&ST[k+"-"+j].checked; }); b.classList.toggle('done',all); });
+  Array.prototype.forEach.call(el('ttabs').children,function(b,k){ b.classList.toggle('on',k===ti); b.classList.toggle('done',!!(ST[pi+"-"+k]&&ST[pi+"-"+k].checked)); });
+  var pos=pi*4+ti; el('back').disabled=(pos===0); el('next').disabled=(pos===P.length*4-1);
+  tallyLine(); report();
+}
+function wordFb(tr,it,mine){
+  var key=it[2], why=it[3]||DEFWHY[tr.kind][key]||"";
+  if(mine===key) return it[3]?'<div class="fbw"><span class="tag ok">Match</span>'+why+'</div>':'';
+  if(mine===null) return '<div class="fbw"><span class="tag no">Not tagged</span>Expert tag, '+TAGS[key]+'. '+why+'</div>';
+  var bm=bucket(tr.kind,mine), bk=bucket(tr.kind,key);
+  if(tr.kind==="let" && bm==="v" && bk==="v") return '<div class="fbw"><span class="tag amb">Same tally</span>You tagged '+TAGS[mine]+', the expert tagged '+TAGS[key]+'. Both go into the non-'+tr.letter+'-words and rule violations tally, so your totals are unaffected, but name the type correctly on the protocol. '+why+'</div>';
+  return '<div class="fbw"><span class="tag no">You tagged '+TAGS[mine]+'</span>Expert tag, '+TAGS[key]+'. '+why+'</div>';
+}
+function listOf(tr,b){ return words(tr).filter(function(w){ return bucket(tr.kind,w[2])===b; }).map(function(w){ return w[1]; }); }
+function totFb(tr,s){
+  var E=expertTot(tr), h='<h3>Expert totals</h3>', W=words(tr);
+  var own={c:0,n:0,r:0,v:0}; s.tags.forEach(function(t){ var b=bucket(tr.kind,t); if(b) own[b]++; });
+  fields(tr).forEach(function(f){
+    var k=f[0], mine=s.tot[k], ok=(mine===E[k]);
+    var names=listOf(tr,k);
+    h+='<p><span class="tag '+(ok?'ok':'no')+'">'+(ok?'Match':(mine===null||mine===undefined?'Not entered':'You entered '+mine))+'</span>'+f[1]+', '+E[k]+'. '+(names.length?'The expert counted '+names.join(', ')+'.':'None.')+'</p>';
+    if(!ok && mine!==null && mine!==undefined && mine===own[k]) h+='<p>Your total agrees with your own tags, so the difference comes from the tags marked above.</p>';
+    else if(!ok && mine!==null && mine!==undefined) h+='<p>Your total does not match your own tags either ('+own[k]+'). Recount from the list before you enter it on the form.</p>';
+  });
+  var X=W.filter(function(w){return w[2]==="X";});
+  if(X.length) h+='<p>Not counted in any total, '+X.map(function(w){return w[1];}).join(', ')+', said after time was called.</p>';
+  var agree=0; W.forEach(function(w,i){ if(s.tags[i]===w[2]) agree++; });
+  h+='<p>Your tags matched the expert on '+agree+' of '+W.length+' responses.</p>';
+  return h;
+}
+function tallyLine(){
+  var done=0, tagAgree=0, tagTot=0, totOk=0, totN=0;
+  P.forEach(function(ex,a){ ex.trials.forEach(function(tr,b){ var s=ST[a+"-"+b]; if(!s||!s.checked) return; done++; var E=expertTot(tr); words(tr).forEach(function(w,i){ tagTot++; if(s.tags[i]===w[2]) tagAgree++; }); fields(tr).forEach(function(f){ totN++; if(s.tot[f[0]]===E[f[0]]) totOk++; }); }); });
+  el('tally').textContent='Checked '+done+' of '+(P.length*4)+' trials. Tags matching the expert: '+tagAgree+' of '+tagTot+'. Totals matching: '+totOk+' of '+totN+'.';
+}
+function go(d){ var pos=pi*4+ti+d; pos=Math.max(0,Math.min(P.length*4-1,pos)); pi=Math.floor(pos/4); ti=pos%4; el('status').textContent=''; render(); window.scrollTo(0,0); }
+el('back').addEventListener('click',function(){go(-1);});
+el('next').addEventListener('click',function(){go(1);});
+el('check').addEventListener('click',function(){
+  var s=S(), tr=P[pi].trials[ti];
+  var untagged=s.tags.filter(function(t){return t===null;}).length;
+  var missing=fields(tr).filter(function(f){ return s.tot[f[0]]===undefined||s.tot[f[0]]===null||isNaN(s.tot[f[0]]); }).length;
+  if(untagged||missing){ el('status').textContent=(untagged?('Tag every response ('+untagged+' left). '):'')+(missing?'Enter every total.':''); return; }
+  s.checked=true; el('status').textContent=''; render();
+});
+el('reset').addEventListener('click',function(){ ST={}; pi=0; ti=0; render(); el('status').textContent='Cleared. Start again from Examinee 1, animals.'; });
+function report(){ try{ parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:document.documentElement.scrollHeight}),'*'); }catch(e){} }
+window.addEventListener('load',report); window.addEventListener('resize',report);
+render();
+</script>
+</body>
+</html>

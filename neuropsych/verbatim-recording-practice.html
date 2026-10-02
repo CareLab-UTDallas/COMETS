@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Record Responses Word for Word</title>
+<!--
+  Deep links (location.hash):
+    #level=1         short single-sentence answers
+    #level=2         longer answers with hesitations and a self-correction
+    #level=3         story retellings (story text shown first, then hidden)
+    #mode=notation   mark the notation for an exchange
+  Optional extras, joined with &:
+    item=N           open item N (1-based) of the chosen level or of the notation set
+    flash=1          start in flash mode (words shown one at a time) instead of speech
+  Examples: #level=2&item=3   #mode=notation&item=10   #level=1&flash=1
+-->
+<style>
+  :root{--bg:#ffffff; --card:#f7faf8; --ink:#17251d; --muted:#41544a; --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b;}
+  *{box-sizing:border-box;}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.55;}
+  .wrap{max-width:820px; margin:0 auto; padding:14px 14px 16px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:22px; margin:0 0 4px;}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
+  .warn{font-size:13px; color:#7a3d00; background:#fff3e6; border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px; margin:0 0 10px;}
+  .chips{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 10px;}
+  .chips button{font:inherit; font-size:13px; cursor:pointer; border:1px solid #cfe0d7; border-radius:20px; background:#eef4f1; color:var(--green); padding:4px 11px;}
+  .chips button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:0 0 10px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:18px; margin:0 0 6px;}
+  .setup{font-size:14px; color:var(--teach); margin:0 0 8px;}
+  .q{font-weight:600; margin:0 0 8px;}
+  .opts{display:flex; flex-direction:column; gap:6px;}
+  .opts button{font:inherit; font-size:15px; text-align:left; cursor:pointer; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--ink); padding:8px 12px;}
+  .opts button:hover:not(:disabled){border-color:#9cc3ae;}
+  .opts button[aria-pressed="true"]{background:#eef4f1; border-color:var(--green); box-shadow:inset 4px 0 0 var(--green);}
+  .opts button.right{background:#e3f0e9; border-color:var(--green);}
+  .opts button.wrong{background:#fbeee4; border-color:#e3b58f; color:#6b4a2f;}
+  .opts button:disabled{cursor:default;}
+  .opts .ab{display:inline-block; min-width:2.6em; font-weight:700; color:var(--green);}
+  .fb{margin:10px 0 0; padding:8px 10px; border-radius:6px; font-size:14px; color:var(--teach); background:#fff7ef; border:1px solid #f0d9c2; border-left:4px solid var(--accent);}
+  .fb.ok{background:#f0f7f3; border-color:#cfe0d7; border-left-color:var(--green);}
+  .fb strong{color:#8a4600;}
+  .fb.ok strong{color:var(--green);}
+  .fb p{margin:0 0 6px;} .fb p:last-child{margin:0;}
+  .nav{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0 0;}
+  button.b{font:inherit; font-size:15px; cursor:pointer; border-radius:8px; padding:9px 16px;}
+  button.b:disabled{opacity:.55; cursor:default;}
+  .primary{background:var(--green); color:#eef4f1; border:1px solid var(--green);}
+  .secondary{background:#eef4f1; color:var(--green); border:1px solid #cfe0d7;}
+  .status{font-size:13px; color:var(--muted);}
+  .hidden{display:none !important;}
+  .small{font-size:12px; color:var(--muted); margin:8px 0 0;}
+  button:focus-visible,textarea:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent); outline-offset:2px;}
+  .settings{display:flex; flex-wrap:wrap; gap:10px 18px; align-items:center; font-size:14px;}
+  .settings fieldset{border:0; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:4px 12px; align-items:center;}
+  .settings legend{float:left; font-weight:600; color:var(--green); margin-right:8px; padding:0;}
+  .settings label{cursor:pointer; white-space:nowrap;}
+  .story{background:#fff; border:1px solid var(--line); border-left:4px solid var(--green); border-radius:6px; padding:8px 12px; font-family:Georgia,serif; font-size:15px; margin:0 0 8px;}
+  .flash{min-height:64px; display:flex; align-items:center; justify-content:center; background:#fff; border:1px dashed #9cc3ae; border-radius:8px; font-size:26px; font-family:Georgia,serif; color:var(--ink); margin:8px 0 0; padding:6px; text-align:center; overflow-wrap:anywhere;}
+  textarea{width:100%; min-height:110px; font:inherit; font-size:16px; padding:8px 10px; border:1px solid #b9cdc2; border-radius:8px; background:#fff; color:var(--ink); resize:vertical; margin:8px 0 0;}
+  .lbl{display:block; font-size:14px; font-weight:600; color:var(--green); margin:10px 0 0;}
+  .al{line-height:2.1; font-size:15px; background:#fff; border:1px solid var(--line); border-radius:6px; padding:6px 10px; overflow-wrap:anywhere;}
+  .al span.t{padding:1px 3px; border-radius:4px; margin:0 1px;}
+  .om{background:#fde2d6; color:#6a2a0c; border:1px solid #e9a98a;}
+  .sub{background:#fff1c7; color:#5b4200; border:1px solid #e0c46a;}
+  .ins{background:#dcebf7; color:#123d5e; border:1px solid #97bcd9;}
+  .al .om s,.al .sub s{text-decoration-thickness:2px;}
+  .al small{font-size:11px; font-weight:700; letter-spacing:.02em; margin-left:3px; text-transform:uppercase;}
+  .legend{display:flex; flex-wrap:wrap; gap:6px 12px; font-size:12px; color:var(--muted); margin:6px 0 0;}
+  .legend span.t{padding:0 4px; border-radius:4px;}
+  .score{font-size:15px; font-weight:600; color:var(--green); margin:8px 0 0;}
+  .ref{font-size:15px; background:#fff; border:1px solid var(--line); border-radius:6px; padding:6px 10px; margin:4px 0 0;}
+  details{font-size:14px; color:var(--teach);}
+  details summary{cursor:pointer; color:var(--green); font-weight:600;}
+  details ul{margin:6px 0 0; padding-left:20px;}
+  details li{margin:0 0 4px;}
+  .exch{background:#fff; border:1px solid var(--line); border-radius:6px; padding:8px 12px; margin:0 0 8px; font-size:15px;}
+  .exch p{margin:0 0 4px;} .exch p:last-child{margin:0;}
+  .tag{display:inline-block; font-size:12px; font-weight:600; color:var(--green); background:#eef4f1; border:1px solid #cfe0d7; border-radius:12px; padding:0 8px; margin:0 0 6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Record Responses Word for Word</h1>
+  <p class="lede">Listen to an invented examinee answer once, type exactly what was said, and see each word you dropped, changed, or added. A second exercise asks which notation belongs on the form for a short exchange. The questions and stories here are everyday conversation, not test items.</p>
+  <div class="warn"><strong>Nothing here is saved.</strong> Every person, question, and story is invented. Practice as often as you like.</div>
+  <div class="chips" id="chips" role="group" aria-label="Exercise">
+    <button type="button" data-m="1">Level 1. Short answers</button>
+    <button type="button" data-m="2">Level 2. Longer answers</button>
+    <button type="button" data-m="3">Level 3. Story retellings</button>
+    <button type="button" data-m="n">Mark the notation</button>
+  </div>
+
+  <div class="card" id="setCard">
+    <div class="settings">
+      <fieldset>
+        <legend>Speed</legend>
+        <label><input type="radio" name="spd" value="slow"> Slower practice speed</label>
+        <label><input type="radio" name="spd" value="conv" checked> Conversational speed</label>
+      </fieldset>
+      <label><input type="checkbox" id="replay"> Allow one replay</label>
+      <label><input type="checkbox" id="flashOpt"> Use flash mode (text instead of sound)</label>
+    </div>
+    <p class="small" id="modeNote">An examinee's response is heard once, so each response plays once by default. Beginners may allow one replay.</p>
+  </div>
+
+  <!-- Typing exercise -->
+  <div id="typeArea">
+    <div class="card">
+      <h2 id="tTitle"></h2>
+      <p class="setup" id="tSetup"></p>
+      <div id="storyBox" class="hidden">
+        <p class="lbl" style="margin-top:0">The story as read to the examinee</p>
+        <div class="story" id="storyText"></div>
+        <button type="button" class="b secondary" id="hideStory">I have read it. Hide the story</button>
+      </div>
+      <p class="q" id="tQ"></p>
+      <div class="nav">
+        <button type="button" class="b primary" id="play">Play the response</button>
+        <span class="status" id="playStatus" aria-live="polite"></span>
+      </div>
+      <div class="flash hidden" id="flash" aria-hidden="true"></div>
+      <label class="lbl" for="typed">Type the response exactly as you heard it</label>
+      <textarea id="typed" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>
+      <div class="nav">
+        <button type="button" class="b primary" id="check">Check my record</button>
+        <button type="button" class="b secondary hidden" id="nextT">Next response</button>
+      </div>
+      <div id="result" class="hidden">
+        <p class="score" id="score"></p>
+        <p class="lbl">Your record against what was said</p>
+        <div class="al" id="align"></div>
+        <div class="legend" aria-hidden="true"><span><span class="t om">word</span> omitted, you left it out</span><span><span class="t sub">word</span> substituted, you wrote another word</span><span><span class="t ins">word</span> added, not said</span></div>
+        <p class="lbl">What was said</p>
+        <div class="ref" id="refText"></div>
+      </div>
+      <div class="fb hidden" id="fbT" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <!-- Notation exercise -->
+  <div id="noteArea" class="hidden">
+    <div class="card">
+      <span class="tag" id="nTable"></span>
+      <h2 id="nTitle"></h2>
+      <div class="exch" id="nExch"></div>
+      <div class="nav" style="margin:0 0 8px"><button type="button" class="b secondary hidden" id="nSpeak">Read the exchange aloud</button></div>
+      <p class="q" id="nQ"></p>
+      <div class="opts" id="nOpts"></div>
+      <div class="nav">
+        <button type="button" class="b primary" id="nCheck">Check</button>
+        <button type="button" class="b secondary hidden" id="nNext">Next exchange</button>
+      </div>
+      <div class="fb hidden" id="fbN" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <p class="status" id="stats" aria-live="polite"></p>
+
+  <div class="card">
+    <details>
+      <summary>The recording rules used here</summary>
+      <ul>
+        <li>Where the manual says to record verbatim, write the examinee's words exactly as spoken, including the ones you think are wrong. Scoring happens against those words, and a supervisor can re-score only what you wrote (earlier edition, p. 42).</li>
+        <li>Write verbal responses verbatim even when they are correct, and note queries, prompts, repetitions, and nonverbal responses (intelligence-scale manual, p. 48).</li>
+        <li>Record during the session. The NACC instructions say never to depend on memory to record responses after the session is over.</li>
+        <li>Self-corrections receive credit. Score the response the examinee intends (earlier edition, p. 46). If a later response is meant to replace an earlier one, score only the last (memory-scale manual, p. 36).</li>
+        <li>For story recall, record the response verbatim and score it after the session (memory-scale manual, pp. 35, 65). The stories are never repeated during recall (p. 35).</li>
+        <li>Slang, informal language, regional pronunciation, and mispronunciation are not penalized when context shows the response is correct, and the criteria list acceptable variations (memory-scale manual, p. 36). That judgment is made at scoring, from the words you wrote.</li>
+      </ul>
+      <p class="small">Scoring in this exercise ignores case, punctuation, and hesitation sounds such as um and uh. Words that carry meaning, such as no, wait, I mean, or maybe, count.</p>
+    </details>
+  </div>
+
+  <p class="small">Rules are paraphrased from the sources cited on the Canvas page. Use the manual during a real administration. The earlier edition and intelligence-scale manual are the two intelligence scale manuals cited there, and the memory-scale manual is the memory scale manual cited there.</p>
+</div>
+<script>
+/* ---------- Invented responses ---------- */
+var RESP = [
+ // Level 1, short single-sentence answers
+ {id:"1a", lv:1, who:"Ms. Margaret Webb, 74", sur:"Ms. Webb", q:"How did you get here this morning?", a:"My daughter drove me, and we stopped for coffee on the way.", keys:[]},
+ {id:"1b", lv:1, who:"Mr. Edward Lyle, 81", sur:"Mr. Lyle", q:"What do you like to cook on Sundays?", a:"Usually a pot roast, but lately I've been making soup instead.", keys:[{w:"usually",k:"hedge"},{w:"lately",k:"hedge"}]},
+ {id:"1c", lv:1, who:"Ms. Helen Pierce, 68", sur:"Ms. Pierce", q:"Tell me about your neighbor's dog.", a:"He's a little brown terrier who barks at the mail truck every single day.", keys:[]},
+ {id:"1d", lv:1, who:"Mr. James Fuller, 77", sur:"Mr. Fuller", q:"What time do you usually wake up?", a:"Around six, or maybe a bit earlier in the summer.", keys:[{w:"or maybe",k:"hedge"}]},
+ {id:"1e", lv:1, who:"Ms. Alice Turner, 63", sur:"Ms. Turner", q:"Where did you go on your last bus trip?", a:"We took the bus to the lake, no, to the river park, for a picnic.", keys:[{w:"to the lake no to the river park",k:"sc"}]},
+ {id:"1f", lv:1, who:"Mr. Victor Hall, 85", sur:"Mr. Hall", q:"What are you planting this year?", a:"Tomatoes and beans, but not squash, because it takes over the whole yard.", keys:[{w:"not",k:"neg"}]},
+ {id:"1g", lv:1, who:"Ms. Grace Dunn, 70", sur:"Ms. Dunn", q:"How do you spend a rainy afternoon?", a:"I put on the radio and work on a jigsaw puzzle at the kitchen table.", keys:[]},
+ {id:"1h", lv:1, who:"Mr. Leonard Price, 88", sur:"Mr. Price", q:"What did you have for breakfast?", a:"Just toast with butter, I didn't feel like eggs today.", keys:[{w:"didn't",k:"neg"}]},
+ {id:"1i", lv:1, who:"Ms. Margaret Webb, 74", sur:"Ms. Webb", q:"What is your favorite time of year?", a:"Fall, I think, when the leaves turn and the air gets cool.", keys:[{w:"I think",k:"hedge"}]},
+ {id:"1j", lv:1, who:"Mr. Edward Lyle, 81", sur:"Mr. Lyle", q:"Who looks after your plants when you travel?", a:"My neighbor waters them, well, her grandson does it now.", keys:[{w:"well her grandson does it now",k:"sc"}]},
+ // Level 2, longer answers with hesitations and a self-correction
+ {id:"2a", lv:2, who:"Ms. Helen Pierce, 68", sur:"Ms. Pierce", q:"Walk me through how you plan your vegetable garden.", a:"Well... first I look at where the sun hits in the morning. Then I put the tall plants, the corn, no, I mean the beans on poles, along the back fence so they don't shade everything else. And I always leave a path down the middle.", keys:[{w:"the corn no I mean the beans",k:"sc"},{w:"don't",k:"neg"},{w:"always",k:"hedge"}]},
+ {id:"2b", lv:2, who:"Mr. James Fuller, 77", sur:"Mr. Fuller", q:"How do you get to the senior center by bus?", a:"I catch the number twelve at the corner... no, the fourteen. The twelve stopped running past our street last year. It takes about twenty minutes, and I get off by the pharmacy.", keys:[{w:"the number twelve at the corner no the fourteen",k:"sc"},{w:"about",k:"hedge"}]},
+ {id:"2c", lv:2, who:"Ms. Alice Turner, 63", sur:"Ms. Turner", q:"Tell me how you make your vegetable soup.", a:"I start with onions in a little oil... let me think... then carrots and celery, actually celery first, then carrots. I used to add potatoes, but now I put in barley, because it holds up better when you freeze it.", keys:[{w:"carrots and celery actually celery first then carrots",k:"sc"},{w:"I used to add potatoes but now",k:"hedge"}]},
+ {id:"2d", lv:2, who:"Mr. Victor Hall, 85", sur:"Mr. Hall", q:"Tell me about the time your neighbor's dog got into your yard.", a:"It was a Tuesday... no, a Wednesday, because the trash truck had come. The dog was digging under my roses, and I called over the fence, and my neighbor came out in her slippers to get him. She was very sorry about it.", keys:[{w:"a Tuesday no a Wednesday",k:"sc"}]},
+ {id:"2e", lv:2, who:"Ms. Grace Dunn, 70", sur:"Ms. Dunn", q:"How do you keep track of your appointments?", a:"I write everything on the big calendar by the phone... well, I used to. Now my son put it all in my phone, and it beeps at me the day before, sometimes two days before, which I don't really need.", keys:[{w:"well I used to",k:"sc"},{w:"sometimes two days before",k:"hedge"},{w:"don't",k:"neg"}]},
+ {id:"2f", lv:2, who:"Mr. Leonard Price, 88", sur:"Mr. Price", q:"Describe how you set up for your Friday card game.", a:"We push two tables together in the sunroom... I mean the dining room. The sunroom is too cold in winter. Everybody brings a snack, and I keep score on a yellow pad because nobody trusts my brother to do it.", keys:[{w:"in the sunroom I mean the dining room",k:"sc"},{w:"nobody",k:"neg"}]},
+ {id:"2g", lv:2, who:"Ms. Margaret Webb, 74", sur:"Ms. Webb", q:"Tell me how you plan a trip to visit your sister.", a:"I check the train times first... no, the bus times, the train doesn't go there anymore. Then I call her to see which weekend is good, and I pack the night before so I'm not rushing.", keys:[{w:"the train times first no the bus times",k:"sc"},{w:"doesn't",k:"neg"},{w:"not",k:"neg"}]},
+ {id:"2h", lv:2, who:"Mr. Edward Lyle, 81", sur:"Mr. Lyle", q:"How do you take care of your tomato plants in July?", a:"I water them early, before it gets hot... and I tie them to stakes with strips of old shirts. If the bottom leaves turn yellow, I pull those off. I don't use any spray, well, maybe a little soap and water for the bugs.", keys:[{w:"I don't use any spray well maybe a little soap and water",k:"sc"},{w:"don't",k:"neg"}]},
+ {id:"2i", lv:2, who:"Ms. Helen Pierce, 68", sur:"Ms. Pierce", q:"Tell me about the last bread you baked.", a:"It was a raisin loaf... cinnamon raisin, I should say. I let it rise too long, so it came out a little flat on top, but my neighbor said it tasted fine, and she took half of it home.", keys:[{w:"a raisin loaf cinnamon raisin I should say",k:"sc"},{w:"a little",k:"hedge"}]},
+ // Level 3, invented stories and retellings
+ {id:"3a", lv:3, who:"Mr. Victor Hall, 85", sur:"Mr. Hall", q:"Tell me the story you just heard.",
+  story:"On a cool Saturday morning, a retired carpenter carried six clay pots to the community garden. He planted marigolds in four of them and basil in the other two. A girl from the next plot offered to help him water. By noon a small gray cat was asleep between the pots, and the carpenter decided to leave it there.",
+  a:"A carpenter, a retired one, took some pots to the garden on a Saturday. He planted basil and marigolds, and a cat came and slept between them. A boy helped him water, I think. He had five pots, or six. And he left the cat alone because it looked so comfortable.",
+  keys:[{w:"basil and marigolds",k:"order"},{w:"boy",k:"subst",st:"girl"},{w:"five pots or six",k:"hedge"},{w:"because it looked so comfortable",k:"add"}]},
+ {id:"3b", lv:3, who:"Ms. Grace Dunn, 70", sur:"Ms. Dunn", q:"Tell me the story you just heard.",
+  story:"A group of eight neighbors took an early bus to see the apple orchards in the hills. The driver stopped twice, once for coffee and once because a sheep was standing in the road. At the orchard they picked two baskets of red apples. On the way home it began to rain, and everyone sang to pass the time.",
+  a:"Some neighbors went on a bus to the orchards. It rained on the way home and they all sang songs. They picked apples, two big bags of green apples. The driver had to stop for a cow in the road, and for coffee, and somebody got carsick.",
+  keys:[{w:"It rained on the way home",k:"order"},{w:"bags",k:"subst",st:"baskets"},{w:"green",k:"subst",st:"red"},{w:"cow",k:"subst",st:"sheep"},{w:"somebody got carsick",k:"add"}]},
+ {id:"3c", lv:3, who:"Mr. Leonard Price, 88", sur:"Mr. Price", q:"Tell me the story you just heard.",
+  story:"Every winter a retired mechanic made a large pot of bean soup for the neighborhood supper at the fire hall. He soaked the beans overnight, added carrots, onions, and a ham bone, and let it cook for five hours. One year he forgot the salt, but nobody noticed, because the cornbread was so good.",
+  a:"There was a man, a mechanic, who made soup every winter for a supper. He put in beans and onions and carrots and a ham bone, and he cooked it all day. One time he forgot the pepper... no, the salt, and nobody said anything because of the biscuits.",
+  keys:[{w:"the pepper no the salt",k:"sc"},{w:"all day",k:"subst",st:"five hours"},{w:"biscuits",k:"subst",st:"cornbread"},{w:"beans and onions and carrots",k:"order"}]},
+ {id:"3d", lv:3, who:"Ms. Margaret Webb, 74", sur:"Ms. Webb", q:"Tell me the story you just heard.",
+  story:"A neighbor's old spotted dog named Pepper wandered off during a thunderstorm. The family searched the park and the school field. The next morning a mail carrier found Pepper sitting on the porch of the library, two blocks away, holding a garden glove in his mouth. Nobody ever learned where the glove came from.",
+  a:"A dog, Pepper, ran away in a storm. In the morning the mailman found him at the library with a glove, a work glove, in his mouth. The family had looked all over the park. It was three blocks away. They never knew whose glove it was, and the dog was fine.",
+  keys:[{w:"mailman",k:"subst",st:"mail carrier"},{w:"a work glove",k:"add"},{w:"The family had looked all over the park",k:"order"},{w:"three",k:"subst",st:"two"},{w:"and the dog was fine",k:"add"}]},
+ {id:"3e", lv:3, who:"Ms. Alice Turner, 63", sur:"Ms. Turner", q:"Tell me the story you just heard.",
+  story:"Three sisters spent a whole winter sewing a quilt for the county fair. Each one made squares in her favorite color, blue, yellow, and green. They finished it the night before the fair and stayed up until two in the morning. The quilt won second prize, and they gave it to the nursing home down the road to hang in the front hall.",
+  a:"Some sisters made a quilt for the fair, and it took them all winter. They used blue and green and red. It won first prize, no, second prize. They gave it to a home, a nursing home. They were up late the night before finishing it, till midnight.",
+  keys:[{w:"red",k:"subst",st:"yellow"},{w:"first prize no second prize",k:"sc"},{w:"They were up late the night before",k:"order"},{w:"midnight",k:"subst",st:"two"}]},
+ {id:"3f", lv:3, who:"Mr. James Fuller, 77", sur:"Mr. Fuller", q:"Tell me the story you just heard.",
+  story:"Each spring the town library holds a used book sale on the front lawn. This year a man brought a wagon full of old cookbooks and sold every one before lunch. A sudden wind blew a stack of paperbacks across the street, and two teenagers chased them down. The sale raised enough money to buy new chairs for the reading room.",
+  a:"The library had a book sale outside in the spring. The wind blew some books into the street and some kids ran after them. A man sold cookbooks, a whole wagon of them, all of them by noon. They made money for new tables, new chairs I mean, for the reading room.",
+  keys:[{w:"The wind blew some books",k:"order"},{w:"kids",k:"subst",st:"teenagers"},{w:"noon",k:"subst",st:"lunch"},{w:"new tables new chairs I mean",k:"sc"}]}
+];
+
+/* ---------- Notation items ---------- */
+var TABLES = {
+ A:{name:"Intelligence-scale table", abbr:[["Q","administered query"],["P","administered prompt"],["DK","examinee stated they did not know"],["NR","examinee did not respond"],["IR","item repeated"],["RR","examinee asked for a repetition, and the item was not repeated"],["SV","observable subvocalization"],["SC","examinee self-corrected"]], src:"intelligence-scale manual, p. 48"},
+ B:{name:"Memory-scale table", abbr:[["P","a prompt was used to elicit the response"],["R","directions repeated at the examinee's request"],["SC","incorrect response corrected without prompting"],["DK","shook the head or said I don't know"],["NR","no response, verbal or gestural"]], src:"memory-scale manual, p. 35"}
+};
+var NONE = "None";
+var NOTE = [
+ {id:"n1", t:"A", title:"A vague answer", ex:["You read a spoken item on a verbal subtest.","Mr. Edward Lyle, 81, gives a short answer that you judge vague.","You say, “Tell me more about it.” Mr. Lyle adds two sentences."], ans:["Q"],
+  why:"You administered a query, so Q goes beside the response. Record both parts verbatim, because a queried response is scored as a whole, the spontaneous part and the part after the query together (intelligence-scale manual, pp. 48, 51).",
+  wr:{P:"A prompt teaches or reminds the examinee of the task. Asking for more about a vague answer is a query.", IR:"You did not restate the item. You asked for more about the answer."}},
+ {id:"n2", t:"A", title:"A request to hear the item again", ex:["You read a spoken item on a verbal subtest that allows repetition.","Ms. Helen Pierce, 68, says, “Could you read that again?”","You read the item again, and she answers."], ans:["IR"],
+  why:"The item was repeated, so IR. On the verbal subtests that allow it, repetition may be given as often as requested (intelligence-scale manual, p. 47).",
+  wr:{RR:"RR is for a request that was not honored. Here you did repeat the item.", Q:"A query asks about the examinee's answer. Ms. Pierce had not answered yet."}},
+ {id:"n3", t:"A", title:"A request you cannot grant", ex:["You read a number sequence on one of the auditory span subtests.","Mr. James Fuller, 77, says, “Say it again, please.”","You do not repeat it. He then says the numbers he remembers."], ans:["RR"],
+  why:"Mr. Fuller asked for a repetition and the item was not repeated, so RR. The five auditory span subtests allow no repetition (intelligence-scale manual, p. 47). His answer is then written as given.",
+  wr:{IR:"IR means the item was repeated. On the auditory span subtests it cannot be, so you did not repeat it.", NR:"He gave a response after the request, so NR does not apply.", DK:"He did not say he did not know. He gave the numbers he remembered."}},
+ {id:"n4", t:"A", title:"A plain I don't know", ex:["You read a spoken item.","Ms. Alice Turner, 63, says, “I don't know that one.”"], ans:["DK"],
+  why:"Ms. Turner stated that she did not know, so DK (intelligence-scale manual, p. 48).",
+  wr:{NR:"NR means no response at all. Ms. Turner responded by saying she did not know."}},
+ {id:"n5", t:"A", title:"Silence", ex:["You read a spoken item.","Mr. Victor Hall, 85, looks at the table and says nothing. He makes no gesture.","You go on as the subtest's directions say."], ans:["NR"],
+  why:"Mr. Hall did not respond, so NR (intelligence-scale manual, p. 48).",
+  wr:{DK:"DK is for an examinee who states they do not know. Mr. Hall said nothing."}},
+ {id:"n6", t:"A", title:"Whispering while working", ex:["On a timed task given aloud, Ms. Grace Dunn, 70, moves her lips and you can hear her whispering as she works.","She then gives her answer in a normal voice."], ans:["SV"],
+  why:"You observed subvocalization, so SV (intelligence-scale manual, p. 48). It describes how she worked, which a reader of the form cannot otherwise know.",
+  wr:{SC:"She did not change an answer. She whispered while working.", NR:"She gave an answer."}},
+ {id:"n7", t:"A", title:"A changed answer", ex:["You show a page with several choices.","Mr. Leonard Price, 88, says, “The second one... no, the fourth one.”","You said nothing between his two answers."], ans:["SC"],
+  why:"Mr. Price self-corrected, so SC. Write both answers. Self-corrections receive credit as the response the examinee intends (earlier edition, p. 46, and current intelligence-scale manual, p. 52).",
+  wr:{Q:"You did not ask anything. The change came from Mr. Price alone.", P:"No prompt was given."}},
+ {id:"n8", t:"A", title:"Too few pieces", ex:["On a task that asks the examinee to choose three pieces, Ms. Margaret Webb, 74, chooses only two.","You remind her to choose three, and she adds one."], ans:["P"],
+  why:"A reminder of what the task asks is a prompt, so P. The manual's own example is reminding an examinee to choose three pieces (intelligence-scale manual, pp. 46 to 47).",
+  wr:{Q:"A query asks about an incomplete or vague verbal answer. A reminder of the task is a prompt.", IR:"You did not repeat the item. You reminded her of the task."}},
+ {id:"n9", t:"A", title:"A query that yields nothing", ex:["Ms. Helen Pierce, 68, gives a short answer you judge vague. You say, “What do you mean?”","She says, “I don't know, that's all I can think of.”"], ans:["Q","DK"],
+  why:"Two events belong on the form. You administered a query (Q), and Ms. Pierce then stated that she did not know (DK). If a query produces nothing better, the original score stands (earlier edition, p. 45).",
+  wr:{NR:"She responded to the query. She said she did not know.", SC:"She did not replace her answer with a new one."}},
+ {id:"n10", t:"A", title:"A clear answer", ex:["You read a spoken item.","Mr. Edward Lyle, 81, gives a clear, complete answer right away. You ask nothing more."], ans:[NONE],
+  why:"No query, prompt, repetition, or other listed event occurred, so no abbreviation is needed. The answer itself is still written verbatim, even when it is correct (intelligence-scale manual, p. 48).",
+  wr:{Q:"You did not query. A clear, complete answer is not queried."}},
+ {id:"n11", t:"B", title:"Directions said again", ex:["Before a recall task begins, Ms. Alice Turner, 63, asks, “What am I supposed to do?”","You repeat the directions, and she begins."], ans:["R"],
+  why:"The directions were repeated at her request, so R (memory-scale manual, p. 35). Questions and instructions may be repeated on request unless specifically forbidden (p. 35).",
+  wr:{P:"A prompt is used to elicit a response. Here you restated the directions because she asked."}},
+ {id:"n12", t:"B", title:"A correction on her own", ex:["On a recall task, Ms. Grace Dunn, 70, gives an answer, then says, “No, wait, that's wrong,” and gives a different one.","You said nothing between her two answers."], ans:["SC"],
+  why:"She gave an incorrect response and corrected it without prompting, so SC. If a later response is meant to replace an earlier one, only the last is scored (memory-scale manual, pp. 35 to 36).",
+  wr:{P:"You gave no prompt. The correction came from her alone."}},
+ {id:"n13", t:"B", title:"A correction after a prompt", ex:["On a recall task, Mr. Victor Hall, 85, stops after a partial answer.","You give the prompt the directions allow. He then changes his earlier answer and goes on."], ans:["P"],
+  why:"A prompt was used, so P. SC in this table means a correction made without prompting, and this change followed your prompt (memory-scale manual, p. 35).",
+  wr:{SC:"In this table SC means the examinee corrected the response without prompting. Mr. Hall changed his answer only after your prompt.", R:"You did not repeat the directions. You gave a prompt."}},
+ {id:"n14", t:"B", title:"A shake of the head", ex:["You ask Mr. Leonard Price, 88, to begin a recall task.","He shakes his head and says nothing."], ans:["DK"],
+  why:"In this table DK covers an examinee who shook their head or said they did not know (memory-scale manual, p. 35).",
+  wr:{NR:"NR means no response, verbal or gestural. A head shake is a gestural response."}},
+ {id:"n15", t:"B", title:"No response of any kind", ex:["You ask Mr. James Fuller, 77, to begin a recall task.","He looks at you. He says nothing and makes no gesture."], ans:["NR"],
+  why:"He made no response, verbal or gestural, so NR (memory-scale manual, p. 35).",
+  wr:{DK:"DK in this table needs a head shake or a statement of not knowing. Mr. Fuller did neither."}},
+ {id:"n16", t:"J", title:"Words said under the breath", ex:["On a task that judges repeated words, Ms. Margaret Webb, 74, quietly runs through the words she already gave, under her breath.","Then she says a new word in a clear voice."], single:true,
+  opts:[["Record and score only the new word.",1,"A word repeated as self-cueing, said under the breath or while listing earlier answers aloud, is not recorded or scored (memory-scale manual, p. 36)."],
+        ["Record every word, and score the earlier ones as repetitions.",0,"The earlier words were self-cueing under her breath. Self-cueing repetitions are not recorded or scored."],
+        ["Record every word, and ask whether each was said before.",0,"Asking is for a word you cannot judge. Words said under the breath while listing earlier answers are clearly self-cueing."]]},
+ {id:"n17", t:"J", title:"A word said again with confidence", ex:["On a task that judges repeated words, Ms. Alice Turner, 63, says a word she gave earlier.","She says it in the same voice and with the same confidence as her other answers."], single:true,
+  opts:[["Record it, and score it as a repetition or an incorrect response.",1,"A word repeated with the same intonation and confidence as other responses is scored as a repetition or an incorrect response (memory-scale manual, p. 36)."],
+        ["Leave it off the record, since it was said before.",0,"Only self-cueing repetitions are left off. This one was given like any other answer."],
+        ["Record it and give it credit again.",0,"A repeated word given as an answer is scored as a repetition or an incorrect response, not credited twice."]]},
+ {id:"n18", t:"J", title:"An unclear repeat", ex:["On a task that judges repeated words, you cannot tell whether Mr. Victor Hall, 85, meant a word as a new answer.","You record it and ask whether he said it before. He says, “I think so.”"], single:true,
+  opts:[["Cross it off.",1,"When you ask, a reply of yes or I think so means you cross the word off (memory-scale manual, p. 36)."],
+        ["Keep it as a repetition.",0,"A word stays as a repetition when the reply is no or I don't know. Mr. Hall said I think so."],
+        ["Keep it and give it credit.",0,"His reply shows he knew he had said it before, so it is crossed off."]]}
+];
+
+/* ---------- Text handling and alignment ---------- */
+var NUMS={'0':'zero','1':'one','2':'two','3':'three','4':'four','5':'five','6':'six','7':'seven','8':'eight','9':'nine','10':'ten','11':'eleven','12':'twelve','13':'thirteen','14':'fourteen','15':'fifteen','20':'twenty'};
+var FILL={um:1,umm:1,uh:1,uhh:1,er:1,erm:1,hmm:1,hm:1,mm:1,mmm:1};
+function norm(s){
+  return String(s||'').toLowerCase().replace(/[‘’ʼ]/g,"'").replace(/[\-‐-―\/]/g,' ')
+    .replace(/[^a-z0-9' ]+/g,' ').split(/\s+/).map(function(w){return w.replace(/'/g,'');})
+    .filter(function(w){return w && !FILL[w];}).map(function(w){return NUMS[w]||w;});
+}
+function align(T,Y){
+  var n=T.length,m=Y.length,D=[],i,j;
+  for(i=0;i<=n;i++){D.push(new Array(m+1)); D[i][0]=i;}
+  for(j=0;j<=m;j++) D[0][j]=j;
+  for(i=1;i<=n;i++) for(j=1;j<=m;j++){
+    D[i][j]=Math.min(D[i-1][j-1]+(T[i-1]===Y[j-1]?0:1), D[i-1][j]+1, D[i][j-1]+1);
+  }
+  var ops=[]; i=n; j=m;
+  while(i>0||j>0){
+    if(i>0&&j>0&&D[i][j]===D[i-1][j-1]+(T[i-1]===Y[j-1]?0:1)){ ops.push({op:T[i-1]===Y[j-1]?'match':'sub', t:i-1, tw:T[i-1], yw:Y[j-1]}); i--; j--; }
+    else if(i>0&&D[i][j]===D[i-1][j]+1){ ops.push({op:'om', t:i-1, tw:T[i-1]}); i--; }
+    else { ops.push({op:'ins', t:null, yw:Y[j-1]}); j--; }
+  }
+  ops.reverse();
+  var c={match:0,sub:0,om:0,ins:0}; ops.forEach(function(o){c[o.op]++;});
+  var dist=c.sub+c.om+c.ins;
+  var acc=n?Math.round(Math.max(0,n-dist)/n*100):0;
+  return {ops:ops, n:n, dist:dist, matches:c.match, sub:c.sub, om:c.om, ins:c.ins, acc:acc};
+}
+function score(target, typed){ return align(norm(target), norm(typed)); }
+function findSpan(T, phrase){
+  var P=norm(phrase); if(!P.length) return null;
+  for(var i=0;i+P.length<=T.length;i++){ var ok=true; for(var k=0;k<P.length;k++){ if(T[i+k]!==P[k]){ok=false;break;} } if(ok) return [i,i+P.length-1]; }
+  return null;
+}
+
+/* ---------- Feedback text ---------- */
+function q(s){return '“'+s+'”';}
+function keyMsg(k, typedWord){
+  var w=k.w.replace(/\.\.\./g,'');
+  switch(k.k){
+    case 'sc': return 'Your record loses part of the self-correction, '+q(w)+'. Without both the first answer and the words that replaced it, a scorer cannot see that the final answer replaced the first. If a later response is meant to replace an earlier one, only the last is scored (memory-scale manual, p. 36). Self-corrections receive credit as the response the examinee intends (earlier edition, p. 46).';
+    case 'hedge': return 'You missed '+q(w)+'. A qualifier is part of the response and changes how sure or how settled the answer sounds. Write the words exactly as spoken, because scoring happens against those words (earlier edition, p. 42).';
+    case 'neg': return 'You missed '+q(w)+'. Losing a negative reverses what the examinee said, and a supervisor can re-score only what you wrote (earlier edition, p. 42).';
+    case 'subst':
+      if(typedWord && norm(k.st).indexOf(typedWord)>=0) return 'You wrote '+q(typedWord)+', the story’s word, where the examinee said '+q(w)+'. That credits a detail the examinee did not give. Acceptable variations are judged at scoring against the criteria (memory-scale manual, p. 36), and that judgment needs the examinee’s own word.';
+      return 'You missed '+q(w)+', which the examinee used in place of '+q(k.st)+' from the story. Whether a variation is acceptable is judged at scoring (memory-scale manual, p. 36), so the record must show the word the examinee chose.';
+    case 'add': return 'You missed '+q(w)+', a detail the examinee added that was not in the story. The recall is recorded verbatim and scored after the session (memory-scale manual, pp. 35, 65), so the scorer sees only what you wrote, additions included.';
+    case 'order': return 'Your record changes '+q(w)+', a part the examinee told out of the story’s order. Record it in the order spoken. The recall is scored after the session from your record (memory-scale manual, pp. 35, 65).';
+  }
+  return '';
+}
+function okMsg(r){
+  var kinds={}; r.keys.forEach(function(k){kinds[k.k]=1;});
+  var s=['<strong>Every word matches.</strong>'];
+  if(kinds.sc) s.push('Your record keeps the first answer and the words that replaced it, so a scorer can score the last intended response (memory-scale manual, p. 36).');
+  if(kinds.subst) s.push('You kept the examinee’s own words where they differ from the story, so acceptable variations can be judged at scoring (memory-scale manual, p. 36).');
+  if(kinds.order||kinds.add) s.push('The record keeps the examinee’s order and additions, which is what verbatim recording requires.');
+  if(s.length===1) s.push('A complete record is the only thing a supervisor can re-score (earlier edition, p. 42).');
+  return '<p>'+s.join(' ')+'</p>';
+}
+
+/* ---------- State ---------- */
+var el=function(id){return document.getElementById(id);};
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+var S={mode:'1', idx:0, order:{}, played:0, playing:false, checked:false, storyHidden:false, last:null,
+       nSel:[], nTried:false, nDone:false,
+       flash:false, speechOK:null, flashMs:{slow:620, conv:400}, spoken:[],
+       stats:{typed:0, sumAcc:0, exact:0, nItems:0, nFirst:0}};
+var token=0; // cancels stale playback
+
+function levelList(lv){ return RESP.filter(function(r){return r.lv===lv;}); }
+function deck(m){ if(!S.order[m]){ var n=(m==='n'?NOTE.length:levelList(+m).length), a=[]; for(var i=0;i<n;i++) a.push(i); S.order[m]=shuffle(a); } return S.order[m]; }
+function curResp(){ return levelList(+S.mode)[S.idx]; }
+function curNote(){ return NOTE[S.idx]; }
+
+/* ---------- Speech and flash ---------- */
+var synth=null, voice=null;
+try{ if('speechSynthesis' in window && window.speechSynthesis && typeof window.SpeechSynthesisUtterance!=='undefined') synth=window.speechSynthesis; }catch(e){ synth=null; }
+function pickVoice(){
+  if(!synth) return false;
+  var vs=[]; try{ vs=synth.getVoices()||[]; }catch(e){}
+  var en=vs.filter(function(v){return /^en([\-_]|$)/i.test(v.lang||'');});
+  voice=en.filter(function(v){return /^en[\-_]US/i.test(v.lang)&&v.localService;})[0]||en.filter(function(v){return v.default;})[0]||en[0]||null;
+  return !!voice;
+}
+function setSpeechOK(v){
+  if(S.speechOK===v) return; S.speechOK=v;
+  if(!v){ el('flashOpt').checked=true; el('flashOpt').disabled=true; S.flash=true; }
+  modeNote(); renderStatus();
+}
+function initSpeech(){
+  if(!synth){ setSpeechOK(false); return; }
+  if(pickVoice()){ setSpeechOK(true); return; }
+  var h=function(){ if(S.speechOK===null && pickVoice()) setSpeechOK(true); };
+  try{ if(synth.addEventListener) synth.addEventListener('voiceschanged',h); else synth.onvoiceschanged=h; }catch(e){}
+  setTimeout(function(){ if(S.speechOK===null) setSpeechOK(pickVoice()); },1500);
+}
+function modeNote(){
+  var t='An examinee’s response is heard once, so each response plays once by default. Beginners may allow one replay.';
+  if(S.speechOK===false) t='Your browser has no English speech voice available, so the tool is in flash mode. Each response appears one word at a time at speaking pace and then disappears. Type it from memory as soon as you can, the way you would write while the examinee speaks.';
+  else if(S.flash) t='Flash mode is on. Each response appears one word at a time at speaking pace and then disappears.';
+  else if(S.speechOK===null) t='Checking for a speech voice.';
+  el('modeNote').textContent=t; report();
+}
+function speed(){ var r=document.querySelector('input[name="spd"]:checked'); return r?r.value:'conv'; }
+function chunks(text){
+  var out=[], parts=text.split(/\.\.\.|…/);
+  parts.forEach(function(p,pi){
+    var ss=p.match(/[^.!?]+[.!?]*/g)||[];
+    ss.forEach(function(s,si){ s=s.trim(); if(!s) return; out.push({t:s, pause:(si===ss.length-1 && pi<parts.length-1)?850:250}); });
+  });
+  return out;
+}
+function speakText(text, done){
+  var my=++token, cs=chunks(text), i=0, rate=(speed()==='slow'?0.85:1.05);
+  try{ synth.cancel(); }catch(e){}
+  function nx(){
+    if(my!==token) return;
+    if(i>=cs.length){ done(); return; }
+    var c=cs[i++], fired=false;
+    var fin=function(){ if(fired) return; fired=true; clearTimeout(wd); setTimeout(nx,c.pause); };
+    var u=new SpeechSynthesisUtterance(c.t);
+    u.voice=voice; u.lang=(voice&&voice.lang)||'en-US'; u.rate=rate; u.pitch=1;
+    u.onend=fin; u.onerror=fin;
+    var wd=setTimeout(fin, c.t.split(/\s+/).length*900/rate+4000);
+    S.spoken.push({t:c.t, rate:rate});
+    synth.speak(u);
+  }
+  nx();
+}
+function flashText(text, done){
+  var my=++token, words=text.split(/\s+/).filter(Boolean), i=0, box=el('flash'), ms=S.flashMs[speed()];
+  box.classList.remove('hidden');
+  function nx(){
+    if(my!==token) return;
+    if(i>=words.length){ box.textContent=''; box.classList.add('hidden'); done(); return; }
+    var w=words[i++], pause=/(\.\.\.|…)$/.test(w);
+    box.textContent=w.replace(/\.\.\.$/,'…');
+    setTimeout(nx, ms + (pause?Math.round(ms*1.75):(/[.!?,]$/.test(w)?Math.round(ms*0.45):0)));
+    report();
+  }
+  nx();
+}
+function play(){
+  if(S.mode==='n') return;
+  var r=curResp(); if(!r) return;
+  if(S.playing || S.played>=allowedPlays()) return;
+  if(r.lv===3 && !S.storyHidden) return;
+  if(S.speechOK===null && !S.flash){ el('playStatus').textContent='Checking for a speech voice. Try again in a moment.'; return; }
+  S.playing=true; S.played++; renderStatus();
+  var fin=function(){ S.playing=false; renderStatus(); };
+  if(S.flash||!S.speechOK) flashText(r.a, fin); else speakText(r.a, fin);
+  try{ el('typed').focus({preventScroll:true}); }catch(e){}
+}
+function allowedPlays(){ return el('replay').checked?2:1; }
+function stopPlayback(){ token++; S.playing=false; try{ if(synth) synth.cancel(); }catch(e){} el('flash').textContent=''; el('flash').classList.add('hidden'); }
+
+/* ---------- Render typing ---------- */
+function renderStatus(){
+  if(S.mode==='n') return;
+  var r=curResp(), b=el('play'), left=allowedPlays()-S.played, ps=el('playStatus');
+  var needStory=(r && r.lv===3 && !S.storyHidden);
+  b.disabled = S.playing || left<=0 || S.checked || needStory;
+  if(S.playing){ b.textContent='Playing'; ps.textContent=S.flash?'Watch the words as they appear.':'Listen and type.'; }
+  else if(S.played===0){ b.textContent=S.flash?'Show the response':'Play the response'; ps.textContent=needStory?'Read the story first, then hide it.':''; }
+  else if(left>0 && !S.checked){ b.textContent='Replay (one left)'; ps.textContent='The response has ended. You may replay it once.'; }
+  else { b.textContent=S.flash?'Shown':'Played'; ps.textContent=S.checked?'':'The response has ended. Finish typing, then check your record.'; }
+  el('check').disabled = S.checked || (S.played===0);
+  report();
+}
+function renderType(){
+  stopPlayback();
+  var r=curResp(); S.played=0; S.checked=false; S.storyHidden=false; S.last=null;
+  el('tTitle').textContent=(r.lv===3?'Story retelling':'Practice question')+' '+(S.idx+1)+' of '+levelList(r.lv).length;
+  var setup='Examinee '+r.who+'. ';
+  if(r.lv===1) setup+='A short answer to an everyday question.';
+  if(r.lv===2) setup+='A longer answer with hesitations and a self-correction.';
+  if(r.lv===3) setup+='Read the story as it was read to '+r.sur+'. Then hide it and record the retelling.';
+  el('tSetup').textContent=setup+' Conversation practice, not a test item.';
+  el('tQ').textContent='You ask, '+q(r.q);
+  el('storyBox').classList.toggle('hidden', r.lv!==3);
+  el('storyText').textContent=r.story||''; el('storyText').classList.remove('hidden'); el('hideStory').classList.remove('hidden');
+  el('typed').value=''; el('typed').disabled=false;
+  el('result').classList.add('hidden'); el('fbT').className='fb hidden'; el('fbT').innerHTML='';
+  el('nextT').classList.add('hidden');
+  renderStatus();
+}
+function check(){
+  if(S.checked) return;
+  var r=curResp(), typed=el('typed').value;
+  stopPlayback();
+  var T=norm(r.a), res=align(T, norm(typed)); S.last=res; S.checked=true;
+  // inline display
+  var h=[];
+  res.ops.forEach(function(o){
+    if(o.op==='match') h.push('<span class="t">'+esc(o.tw)+'</span>');
+    else if(o.op==='om') h.push('<span class="t om"><s>'+esc(o.tw)+'</s><small>omitted</small></span>');
+    else if(o.op==='sub') h.push('<span class="t sub"><s>'+esc(o.tw)+'</s> → '+esc(o.yw)+'<small>substituted</small></span>');
+    else h.push('<span class="t ins">+'+esc(o.yw)+'<small>added</small></span>');
+  });
+  el('align').innerHTML=h.join(' ');
+  el('score').textContent='Word accuracy '+res.acc+'%. '+res.matches+' of '+res.n+' words matched, with '+res.om+' omitted, '+res.sub+' substituted, and '+res.ins+' added.';
+  el('refText').textContent=r.a.replace(/\.\.\./g,'…');
+  el('result').classList.remove('hidden');
+  if(r.lv===3){ el('storyText').classList.remove('hidden'); el('hideStory').classList.add('hidden'); el('storyBox').classList.remove('hidden'); }
+  // feedback
+  var missed={}, typedAt={};
+  res.ops.forEach(function(o){ if(o.op==='om'||o.op==='sub'){ missed[o.t]=1; if(o.op==='sub') typedAt[o.t]=o.yw; } });
+  var msgs=[], covered={};
+  r.keys.forEach(function(k){
+    var sp=findSpan(T,k.w); if(!sp) return;
+    var hit=false, tw=null;
+    for(var i=sp[0];i<=sp[1];i++){ covered[i]=1; if(missed[i]){ hit=true; if(typedAt[i]) tw=typedAt[i]; } }
+    if(hit) msgs.push(keyMsg(k,tw));
+  });
+  var other=Object.keys(missed).filter(function(i){return !covered[i];}).length;
+  var fb=el('fbT');
+  if(res.dist===0){ fb.className='fb ok'; fb.innerHTML=okMsg(r); }
+  else {
+    var out=['<p><strong>'+(res.acc>=90?'Close.':'Not yet word for word.')+'</strong> Here is what each miss would change.</p>'];
+    msgs.slice(0,4).forEach(function(m){ out.push('<p>'+esc(m)+'</p>'); });
+    if(other) out.push('<p>'+other+' other word'+(other>1?'s were':' was')+' left out or changed. Each is a word the scorer will never see. Write while the examinee speaks, and never fill in from memory after the session.</p>');
+    if(res.ins){ var adds=res.ops.filter(function(o){return o.op==='ins';}).map(function(o){return o.yw;}).slice(0,5); out.push('<p>You added '+esc(adds.map(q).join(', '))+', which the examinee did not say. A record that holds words the examinee never said can give the examinee credit for words never said.</p>'); }
+    fb.className='fb'; fb.innerHTML=out.join('');
+  }
+  S.stats.typed++; S.stats.sumAcc+=res.acc; if(res.dist===0) S.stats.exact++;
+  el('nextT').classList.remove('hidden');
+  renderStatus(); renderStats();
+  try{ el('nextT').focus({preventScroll:true}); }catch(e){}
+}
+
+/* ---------- Render notation ---------- */
+function noteOpts(it){
+  if(it.opts) return it.opts.map(function(o){return {k:o[0], label:o[0], ok:!!o[1], why:o[2]};});
+  var t=TABLES[it.t];
+  return t.abbr.map(function(a){return {k:a[0], ab:a[0], label:a[1]};}).concat([{k:NONE, ab:'None', label:'no abbreviation needed'}]);
+}
+function renderNote(){
+  stopPlayback();
+  var it=curNote(); S.nSel=[]; S.nTried=false; S.nDone=false;
+  el('nTable').textContent = it.t==='J' ? 'Repeated-word judgment, memory-scale rules' : TABLES[it.t].name;
+  el('nTitle').textContent='Exchange '+(S.idx+1)+' of '+NOTE.length+'. '+it.title;
+  el('nExch').innerHTML=it.ex.map(function(p){return '<p>'+esc(p)+'</p>';}).join('');
+  el('nQ').textContent = it.single ? 'What do you do with the word or words?' : 'Using the abbreviations listed in the manual’s table on the Canvas page, which belong on the form? Choose every one that applies, then check.';
+  var o=el('nOpts'); o.innerHTML='';
+  var list=noteOpts(it); if(it.single) list=shuffle(list.slice());
+  list.forEach(function(op){
+    var b=document.createElement('button'); b.type='button'; b.setAttribute('data-k',op.k);
+    if(it.single) b.textContent=op.label;
+    else { b.setAttribute('aria-pressed','false'); b.innerHTML='<span class="ab">'+esc(op.ab)+'</span> '+esc(op.label); }
+    b.addEventListener('click',function(){ pickNote(op,b); });
+    o.appendChild(b);
+  });
+  el('nCheck').classList.toggle('hidden', !!it.single); el('nCheck').disabled=false;
+  el('nNext').classList.add('hidden');
+  el('nSpeak').classList.toggle('hidden', !(S.speechOK && !S.flash));
+  el('fbN').className='fb hidden'; el('fbN').innerHTML='';
+  report();
+}
+function pickNote(op,b){
+  var it=curNote(); if(S.nDone) return;
+  if(it.single){
+    var first=!S.nTried; S.nTried=true;
+    if(op.ok){ b.classList.add('right'); finishNote(first, '<strong>Right.</strong> '+esc(op.why)); }
+    else { b.classList.add('wrong'); b.disabled=true; el('fbN').className='fb'; el('fbN').innerHTML='<strong>Not this one.</strong> '+esc(op.why)+' Try again.'; }
+    report(); return;
+  }
+  var k=op.k, on=b.getAttribute('aria-pressed')==='true';
+  if(k===NONE && !on){ S.nSel=[]; Array.prototype.forEach.call(el('nOpts').children,function(x){x.setAttribute('aria-pressed','false');}); }
+  else if(k!==NONE && !on){ S.nSel=S.nSel.filter(function(x){return x!==NONE;}); var nb=el('nOpts').querySelector('[data-k="'+NONE+'"]'); if(nb) nb.setAttribute('aria-pressed','false'); }
+  if(on){ S.nSel=S.nSel.filter(function(x){return x!==k;}); b.setAttribute('aria-pressed','false'); }
+  else { S.nSel.push(k); b.setAttribute('aria-pressed','true'); }
+  report();
+}
+function abbrDef(t,k){ var a=TABLES[t].abbr.filter(function(x){return x[0]===k;})[0]; return a?a[1]:''; }
+function checkNote(){
+  var it=curNote(); if(S.nDone||it.single) return;
+  var fb=el('fbN');
+  if(!S.nSel.length){ fb.className='fb'; fb.innerHTML='<strong>Choose at least one.</strong> Pick None if no listed event happened.'; report(); return; }
+  var first=!S.nTried; S.nTried=true;
+  var sel=S.nSel.slice().sort().join(','), ans=it.ans.slice().sort().join(',');
+  if(sel===ans){
+    Array.prototype.forEach.call(el('nOpts').children,function(x){ if(x.getAttribute('aria-pressed')==='true') x.classList.add('right'); });
+    finishNote(first, '<strong>Right.</strong> '+esc(it.why));
+    return;
+  }
+  var out=['<strong>Not yet.</strong>'];
+  S.nSel.forEach(function(k){
+    if(it.ans.indexOf(k)>=0) return;
+    var w=(it.wr&&it.wr[k]) || (k===NONE ? 'Something listed in the table did happen in this exchange.' : k+' means '+abbrDef(it.t,k)+', and that did not happen here.');
+    out.push(esc(k===NONE?'None.':k+'.')+' '+esc(w));
+  });
+  var missing=it.ans.filter(function(k){return S.nSel.indexOf(k)<0;});
+  if(missing.length) out.push(missing.length>1||S.nSel.some(function(k){return it.ans.indexOf(k)>=0;}) ? 'Something that happened is still not marked.' : 'The event that did happen is not marked yet.');
+  out.push('Try again.');
+  Array.prototype.forEach.call(el('nOpts').children,function(x){ var k=x.getAttribute('data-k'); if(x.getAttribute('aria-pressed')==='true' && it.ans.indexOf(k)<0) x.classList.add('wrong'); });
+  fb.className='fb'; fb.innerHTML=out.join(' ');
+  report();
+}
+function finishNote(first, html){
+  S.nDone=true; S.stats.nItems++; if(first) S.stats.nFirst++;
+  Array.prototype.forEach.call(el('nOpts').children,function(x){x.disabled=true;});
+  el('nCheck').disabled=true;
+  el('fbN').className='fb ok'; el('fbN').innerHTML=html;
+  el('nNext').classList.remove('hidden');
+  renderStats(); report();
+  try{ el('nNext').focus({preventScroll:true}); }catch(e){}
+}
+function speakNote(){
+  if(!(S.speechOK && !S.flash)) return;
+  speakText(curNote().ex.join(' '), function(){});
+}
+
+/* ---------- Session ---------- */
+function renderStats(){
+  var s=S.stats, parts=[];
+  if(s.typed) parts.push('Recording practice, '+s.typed+' response'+(s.typed>1?'s':'')+', mean word accuracy '+Math.round(s.sumAcc/s.typed)+'%, '+s.exact+' exact on the first try.');
+  if(s.nItems) parts.push('Notation, right on the first try in '+s.nFirst+' of '+s.nItems+'.');
+  el('stats').textContent=parts.join(' ');
+  report();
+}
+function go(m, i){
+  m=String(m); stopPlayback();
+  S.mode=m;
+  Array.prototype.forEach.call(el('chips').children,function(b){ var on=b.getAttribute('data-m')===m; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on?'true':'false'); });
+  var d=deck(m), n=d.length;
+  S.idx = (typeof i==='number' && i>=0 && i<n) ? i : d[0];
+  S.pos = d.indexOf(S.idx);
+  el('typeArea').classList.toggle('hidden', m==='n');
+  el('noteArea').classList.toggle('hidden', m!=='n');
+  if(m==='n') renderNote(); else renderType();
+}
+function next(){ var d=deck(S.mode); S.pos=(S.pos+1)%d.length; if(S.pos===0) S.order[S.mode]=d=shuffle(d.slice()); go(S.mode, d[S.pos]); }
+
+el('chips').addEventListener('click',function(e){ var b=e.target.closest('button'); if(b) go(b.getAttribute('data-m')); });
+el('play').addEventListener('click',play);
+el('check').addEventListener('click',check);
+el('nextT').addEventListener('click',next);
+el('nNext').addEventListener('click',next);
+el('nCheck').addEventListener('click',checkNote);
+el('nSpeak').addEventListener('click',speakNote);
+el('hideStory').addEventListener('click',function(){ S.storyHidden=true; el('storyText').classList.add('hidden'); el('hideStory').classList.add('hidden'); renderStatus(); try{ el('play').focus({preventScroll:true}); }catch(e){} });
+el('replay').addEventListener('change',renderStatus);
+el('flashOpt').addEventListener('change',function(){ S.flash=el('flashOpt').checked; stopPlayback(); modeNote(); if(S.mode==='n') renderNote(); else renderStatus(); });
+
+function report(){ try{ parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:document.documentElement.scrollHeight}),'*'); }catch(e){} }
+window.addEventListener('load',report); window.addEventListener('resize',report);
+
+function fromHash(){
+  var h=(location.hash||'').replace(/^#/,''), p={};
+  h.split('&').forEach(function(kv){ var a=kv.split('='); if(a[0]) p[a[0]]=a[1]===undefined?'1':decodeURIComponent(a[1]); });
+  if(p.flash==='1'){ el('flashOpt').checked=true; S.flash=true; }
+  var m = p.mode==='notation' ? 'n' : (/^[123]$/.test(p.level||'') ? p.level : '1');
+  var i = p.item ? parseInt(p.item,10)-1 : undefined;
+  go(m, isNaN(i)?undefined:i);
+}
+window.addEventListener('hashchange',fromHash);
+
+window.__tool={responses:RESP, notation:NOTE, tables:TABLES, norm:norm, align:align, score:score, findSpan:findSpan, go:go, levelList:levelList,
+  setFlashMs:function(ms){ S.flashMs={slow:ms, conv:ms}; },
+  state:function(){ var r=S.mode==='n'?curNote():curResp(); return {mode:S.mode, idx:S.idx, id:r&&r.id, played:S.played, playing:S.playing, checked:S.checked, flash:S.flash, speechOK:S.speechOK, last:S.last&&{acc:S.last.acc,n:S.last.n,dist:S.last.dist,om:S.last.om,sub:S.last.sub,ins:S.last.ins,matches:S.last.matches}, nSel:S.nSel.slice(), nDone:S.nDone, spoken:S.spoken.slice(), stats:JSON.parse(JSON.stringify(S.stats))}; }};
+initSpeech(); modeNote(); fromHash();
+</script>
+</body>
+</html>
