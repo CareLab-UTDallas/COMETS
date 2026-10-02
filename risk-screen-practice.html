@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Risk Screen Practice</title>
+<style>
+  :root{--bg:#ffffff; --card:#f7faf8; --ink:#17251d; --muted:#41544a; --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b;
+    --correct-bg:#eef5ee; --correct-line:#bcd6bd; --correct-ink:#3c6b3e;
+    --wrong-bg:#fbecec; --wrong-line:#e3b9b9; --wrong-ink:#a23b34;
+    --focus:#2f6f4f;}
+  *{box-sizing:border-box;}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.55;}
+  .wrap{max-width:820px; margin:0 auto; padding:14px 14px 16px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:22px; margin:0 0 4px;}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
+  .warn{font-size:13px; color:#7a3d00; background:#fff3e6; border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px; margin:0 0 12px;}
+  .bar{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:4px 12px; margin:0 0 8px;}
+  .count{font-size:14px; color:var(--muted);}
+  .prog{height:6px; background:#e4ebe7; border-radius:99px; overflow:hidden; margin:0 0 12px;}
+  .prog div{height:100%; background:var(--green); width:0; transition:width .2s ease;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px 18px;}
+  .eyebrow{font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:var(--accent); margin:0 0 2px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:20px; margin:0 0 6px;}
+  h2:focus,h3:focus{outline:none;}
+  .setup{font-size:14px; color:var(--teach); margin:0 0 10px;}
+  .exchange{margin:0 0 12px; display:flex; flex-direction:column; gap:6px;}
+  .line{background:#fff; border:1px solid var(--line); border-left:3px solid var(--green); border-radius:6px; padding:7px 11px; font-size:15px; overflow-wrap:anywhere;}
+  .line.them{background:#fff7ef; border-color:#f0d9c2; border-left-color:var(--accent);}
+  .line.note{background:#f5f7f8; border-left-color:#b8ccc2; color:var(--muted); font-size:14px; font-style:italic;}
+  .who{font-weight:700; color:var(--green); margin-right:6px;}
+  .line.them .who{color:#8a4600;}
+  .ask{font-size:15px; font-weight:600; color:var(--green); margin:4px 0 8px;}
+  .opts{display:flex; flex-direction:column; gap:8px;}
+  .opt{display:block; width:100%; text-align:left; font:inherit; font-size:15px; color:var(--ink); background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px 13px; cursor:pointer; overflow-wrap:anywhere; transition:border-color .12s,background .12s;}
+  .opt:hover:not([aria-disabled="true"]){border-color:#9cc3ae;}
+  .opt:focus-visible{outline:2px solid var(--focus); outline-offset:2px;}
+  .opt[aria-disabled="true"]{cursor:default;}
+  .opt.correct{background:var(--correct-bg); border-color:var(--correct-line); color:var(--correct-ink); font-weight:600;}
+  .opt.wrong{background:var(--wrong-bg); border-color:var(--wrong-line); color:var(--wrong-ink);}
+  .opt.dim{opacity:.55;}
+  .fb:empty{display:none;}
+  .fb{margin:12px 0 0; border-radius:8px; padding:10px 13px; font-size:14.5px; border:1px solid var(--line);}
+  .fb.ok{background:var(--correct-bg); border-color:var(--correct-line);}
+  .fb.no{background:var(--wrong-bg); border-color:var(--wrong-line);}
+  .fb .verdict{font-weight:700; margin:0 0 3px;}
+  .fb.ok .verdict{color:var(--correct-ink);}
+  .fb.no .verdict{color:var(--wrong-ink);}
+  .fb p{margin:0;}
+  .nav{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:12px 0 0;}
+  button.b{font:inherit; font-size:15px; cursor:pointer; border-radius:8px; padding:9px 16px;}
+  button.b:focus-visible{outline:2px solid var(--focus); outline-offset:2px;}
+  .primary{background:var(--green); color:#eef4f1; border:1px solid var(--green);}
+  .secondary{background:#eef4f1; color:var(--green); border:1px solid #cfe0d7;}
+  .score{font-size:16px; margin:0 0 6px;}
+  .score b{color:var(--green);}
+  .steps{font-size:14px; color:var(--teach); margin:0 0 10px;}
+  .list{border-top:1px solid var(--line); padding-top:6px; margin:0 0 10px;}
+  .r{display:flex; flex-wrap:wrap; justify-content:space-between; gap:4px 10px; font-size:14px; padding:7px 0; border-bottom:1px solid #e8efeb;}
+  .r:last-child{border-bottom:none;}
+  .marks{display:flex; gap:10px; color:var(--muted); font-size:13px;}
+  .marks span{display:inline-flex; align-items:center; gap:3px;}
+  .recap{font-size:14px; color:var(--teach); background:#fff7ef; border:1px solid #f0d9c2; border-left:4px solid var(--accent); border-radius:6px; padding:8px 12px; margin:0 0 4px;}
+  .recap ul{margin:4px 0 0; padding-left:20px;}
+  .selfnote{font-size:12.5px; color:var(--muted); margin-top:14px; line-height:1.55;}
+  .hidden{display:none !important;}
+  .sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
+  @media (prefers-reduced-motion:reduce){ *{transition:none !important;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Practice asking about risk</h1>
+  <p class="lede">Ten invented intake moments, in a new order each time. In each one you choose the next question, name what the person has told you, and choose what you do under PSEC procedure. Feedback follows every choice, and you can keep choosing until you find the best answer. Your first try is what counts toward your score.</p>
+  <div class="warn"><strong>Content note.</strong> These cases include suicidal thoughts, thoughts of harming others, and partner violence, with no graphic detail. Nothing here is saved.</div>
+  <div class="bar"><span class="count" id="count"></span><span class="count" id="acc" aria-live="polite"></span></div>
+  <div class="prog" aria-hidden="true"><div id="prog"></div></div>
+
+  <section class="card" id="caseCard">
+    <p class="eyebrow" id="eyebrow"></p>
+    <h2 id="caseTitle" tabindex="-1"></h2>
+    <p class="setup" id="setup"></p>
+    <div class="exchange" id="exchange"></div>
+    <h3 class="ask" id="ask" tabindex="-1"></h3>
+    <div class="opts" id="opts" role="group" aria-labelledby="ask"></div>
+    <div class="fb" id="fb" aria-live="polite"></div>
+    <div class="nav"><button class="b primary hidden" id="next" type="button">Continue</button></div>
+  </section>
+
+  <section class="card hidden" id="doneCard">
+    <p class="eyebrow">Summary</p>
+    <h2 id="doneTitle" tabindex="-1">You finished every case</h2>
+    <p class="score" id="doneScore"></p>
+    <p class="steps" id="doneSteps"></p>
+    <div class="list" id="doneList"></div>
+    <div class="recap"><strong>The PSEC rules, once more.</strong>
+      <ul>
+        <li>Ask directly, in every interview, and bring anything positive to your supervisor before the person leaves.</li>
+        <li>In an emergency, notify your supervisor immediately, or the PSEC Director if your supervisor is unavailable. Call 911 for imminent danger.</li>
+        <li>988, the Suicide and Crisis Lifeline, is a resource to give. It never replaces telling your supervisor.</li>
+        <li>Never promise confidentiality, and document right away.</li>
+        <li>PSEC does not admit people with suicidal or homicidal ideation for treatment. Your supervisor handles the referral.</li>
+      </ul>
+    </div>
+    <div class="nav"><button class="b primary" id="restart" type="button">Start again in a new order</button></div>
+  </section>
+
+  <p class="selfnote">Practice only. These cases are invented, and with a real person your supervisor decides what happens next. The cases include suicidal thoughts, thoughts of harming others, and partner violence, without graphic detail. If you are struggling yourself, call or text 988. Nothing here is saved or sent.</p>
+</div>
+<script>
+// Risk Screen Practice (Unstructured Clinical Interviewing, "Asking About Risk").
+// Ten invented cases, shuffled each session. Three steps per case.
+// Step 1 follows the C-SSRS screen order (wish to be dead, thoughts of killing
+// oneself, method, intent, plan, and behavior always asked).
+// Step 3 follows PSEC procedure as written in the 2026 UT Dallas Self-Study.
+
+var SUICIDE_SET = [
+  {id:"none",    label:"No ideation", def:"No ideation means every screen answer was negative."},
+  {id:"passive", label:"Passive ideation, a wish to be dead or not to wake up", def:"Passive ideation is a wish to be dead or not to wake up, with no thoughts of killing oneself."},
+  {id:"active",  label:"Active ideation, without method, intent, or plan", def:"Active ideation without method means thoughts of killing oneself, with no method, intent, or plan reported."},
+  {id:"method",  label:"Active ideation with method", def:"Active ideation with method means thoughts of killing oneself plus a way of doing it, without intent or a plan."},
+  {id:"intent",  label:"Active ideation with intent or plan", def:"Active ideation with intent or plan means the person reports some intention to act, or has worked out details."},
+  {id:"other",   label:"Thoughts of harming someone else", def:"Thoughts of harming someone else are about another person, not about oneself."}
+];
+var SAFETY_SET = [
+  {id:"none",     label:"No safety concern identified", def:"No safety concern would mean no violence, no threats, and no access to a firearm alongside risk."},
+  {id:"conflict", label:"Partner conflict without physical violence", def:"Conflict without physical violence means arguments with no pushing, hitting, or worse."},
+  {id:"pv",       label:"Partner violence, with no lethality marker reported", def:"Partner violence with no lethality marker means physical violence without strangulation or a gun in the home."},
+  {id:"pvl",      label:"Partner violence with a lethality marker such as strangulation", def:"A lethality marker in partner violence is something like past strangulation or a gun in the home."},
+  {id:"fa",       label:"Firearm in the home, with no ideation reported", def:"This category fits a firearm at home when the person reports no suicidal or homicidal thoughts."},
+  {id:"fasi",     label:"Firearm in the home, with suicidal ideation", def:"This category fits a firearm at home together with thoughts of killing oneself."}
+];
+var ACTIONS = [
+  {id:"cont", label:"Continue the interview with no action"},
+  {id:"sup",  label:"Tell your supervisor before {n} leaves"},
+  {id:"911",  label:"Call 911 now and notify your supervisor"},
+  {id:"988",  label:"Give the 988 number and end the session"},
+  {id:"conf", label:"Promise {n} that you will keep it confidential"}
+];
+var ADMIT = " If this is a treatment intake, PSEC does not admit people with suicidal or homicidal ideation for treatment, so your supervisor decides about admission and handles any referral.";
+var ACT_WRONG = {
+  cont: "Any positive answer goes to your supervisor before the person leaves. Continuing with no action leaves what {n} told you with you alone.",
+  sup:  "Telling your supervisor is right whenever a screen answer is positive. Look again at what {n} said.",
+  "911":"911 is for imminent danger. {n} has not described danger in the next few hours. Tell your supervisor, who decides what happens next.",
+  "988":"988, the Suicide and Crisis Lifeline, is a resource you can give. It never replaces telling your supervisor, and ending the session sends {n} out before your supervisor knows.",
+  conf: "Never promise confidentiality. Your supervisor has to hear what {n} said, and some disclosures can be shared to keep someone safe. Tell {n} calmly that you will talk with your supervisor."
+};
+
+var CASES = [
+ {id:"maria", n:"Maria", head:"Maria, 34", set:"s",
+  setup:"Maria is at intake for low mood since a layoff in the spring. You are in the diagnostic screen.",
+  ex:[["you","How has your mood been over the past month?"],["them","Flat. I get up, I do the minimum, and I go back to bed. Some nights I lie there and think, what's the point of any of it."]],
+  q:[
+   {k:"ok", t:"Have you wished you were dead, or wished you could go to sleep and not wake up?", fb:"\"What's the point\" could mean many things, so you ask the first screen question directly. A calm, specific question about wishing to be dead tells Maria you can hear the answer."},
+   {k:"lead", t:"You're not thinking about hurting yourself or anything like that, are you?", fb:"This question is built for a no. Its wording signals the answer you hope for, and people tend to give it. Ask in a way that makes yes easy to say."},
+   {k:"euph", t:"When you say what's the point, are you having any dark thoughts?", fb:"\"Dark thoughts\" can mean sadness, worry, or anger, so a yes or a no tells you little. Name what you are asking about."},
+   {k:"move", t:"Let's talk about your sleep. How many hours are you getting?", fb:"Sleep matters, but Maria just gave you a possible risk signal. Moving on tells her the topic is closed. Ask about it now, while it is in the room."}
+  ],
+  reply:"Yeah, sometimes. Some nights I hope I just don't wake up. I've never thought about actually killing myself.",
+  cls:"passive", clsWhy:"Maria wishes she would not wake up and says she has never thought about killing herself. That is passive ideation. It is still a positive answer, and you still ask about any past attempt.",
+  act:"sup", actWhy:"Passive ideation is a positive answer, so your supervisor hears about it before Maria leaves. Finish the screen, including past behavior, and document right away."+ADMIT
+ },
+ {id:"darnell", n:"Darnell", head:"Darnell, 52", set:"s",
+  setup:"Darnell is at intake a month after his divorce was finalized. Earlier in the screen he told you he sometimes wishes he were dead.",
+  ex:[["you","You mentioned wishing you were dead. How often does that come up?"],["them","Most weeks. Mostly late at night, after the house gets quiet."]],
+  q:[
+   {k:"ok", t:"Have you had any thoughts of killing yourself?", fb:"He has said yes to wishing he were dead, so the next question in the sequence is about thoughts of killing himself. Use the words. Calm, direct language makes the question easier to answer."},
+   {k:"stack", t:"Have you thought about killing yourself, and do you have a way you would do it?", fb:"Two questions in one. Darnell can answer either half, and you will not know which. Ask about thoughts first, then about method."},
+   {k:"euph", t:"Have you thought about, you know, not being around anymore?", fb:"\"Not being around\" blurs the line between a wish to be dead and thoughts of killing himself, which is the line you are trying to find. Say \"killing yourself.\""},
+   {k:"lead", t:"But you'd never actually do anything, right?", fb:"This invites reassurance, not information. A person who feels judged by a question will often agree with it. Ask the next screen question neutrally."}
+  ],
+  reply:"Yeah. I've thought about killing myself. I haven't gotten as far as how. I just think about it all being over.",
+  cls:"active", clsWhy:"Darnell reports thoughts of killing himself, with no method, intent, or plan yet. That is active ideation without method. Method, intent, plan, and past behavior still get asked.",
+  act:"sup", actWhy:"Active ideation goes to your supervisor before Darnell leaves. Finish the screen, document right away, and let your supervisor decide the next steps."+ADMIT
+ },
+ {id:"priya", n:"Priya", head:"Priya, 27", set:"s",
+  setup:"Priya, a graduate student, is at intake for anxiety and low mood. She has already told you she has had thoughts of killing herself this past month.",
+  ex:[["you","Thank you for telling me. When those thoughts come, what are they like?"],["them","They come and go. Usually after a bad day in the lab. It's this thought that everyone would be fine without me."]],
+  q:[
+   {k:"ok", t:"Have you thought about how you might do it?", fb:"After thoughts of killing herself, the sequence moves to method. Asking about method does not suggest one. It tells you how far the thinking has gone."},
+   {k:"lead", t:"You haven't thought about how, have you?", fb:"This frames method as something she should not have, which makes yes harder to say. Ask openly."},
+   {k:"move", t:"Let's go back to the anxiety. When did that start?", fb:"Leaving the screen halfway means you know nothing yet about method, intent, plan, or past behavior. Finish the sequence before you move on."},
+   {k:"stack", t:"Have you thought about how you'd do it, or made any plans?", fb:"Method and plan are different steps, and a single yes leaves you guessing which one she means. Ask about method alone."}
+  ],
+  reply:"Pills, sometimes. But I haven't decided anything, and I don't want to act on it.",
+  cls:"method", clsWhy:"Priya has thoughts of killing herself and names a method, pills, with no intent or plan. That is active ideation with method. Intent, plan, and past behavior still get asked.",
+  act:"sup", actWhy:"Active ideation with method goes to your supervisor before Priya leaves. Document right away, including the method she named."+ADMIT
+ },
+ {id:"walt", n:"Walt", head:"Walt, 68", set:"s",
+  setup:"Walt, retired, is at intake a year after his wife's death. He has told you he has thoughts of killing himself and that he has thought about using a gun.",
+  ex:[["you","You said you've thought about a gun. Is there one at home?"],["them","My hunting rifle. It's in the hall closet. I think about it more than I'd like to."]],
+  q:[
+   {k:"ok", t:"Have you had any intention of acting on these thoughts?", fb:"With thoughts and a method in place, the next step in the sequence is intent. Ask about it directly and wait for the answer."},
+   {k:"euph", t:"Do you think you might do something you'd regret?", fb:"\"Something you'd regret\" could be a fight, a drink, or a phone call. Ask about acting on thoughts of killing himself."},
+   {k:"lead", t:"You wouldn't really go through with it, would you?", fb:"Walt may tell you what you seem to want to hear. Ask about intent neutrally, without a hoped-for answer inside the question."},
+   {k:"move", t:"Tell me more about your wife. How long were you married?", fb:"His grief matters, and you will come back to it. He has just named a firearm at home, so stay with the screen and ask about intent now."}
+  ],
+  reply:"Some days, yes. Some days I think I would. Not this week, though. My granddaughter's recital is Saturday.",
+  cls:"intent", clsWhy:"Walt reports some intention to act on thoughts of killing himself. That is active ideation with intent, and the rifle at home makes it more serious.",
+  act:"sup", actWhy:"Intent with a firearm at home goes to your supervisor during the session, and certainly before Walt leaves. He has not described danger in the next few hours, so 911 is not the step here unless your supervisor decides otherwise. Storing the rifle away from the home is part of what your supervisor will take up. Document right away."+ADMIT
+ },
+ {id:"jordan", n:"Jordan", head:"Jordan, 22", set:"s",
+  setup:"Jordan uses they and them. They came in on a walk-in afternoon. Earlier they told you they have had thoughts of killing themself and think about driving off the road.",
+  ex:[["you","You mentioned driving off the road. When did you last have that thought?"],["them","On the way here. It was loud today. It's been loud all week."]],
+  q:[
+   {k:"ok", t:"Do you have any intention of acting on that?", fb:"Jordan has thoughts and a method, so the sequence moves to intent. A calm, direct question is the fastest way to learn how urgent this is."},
+   {k:"stack", t:"Do you intend to do it, and when would you do it?", fb:"Intent first, then timing. Bundling them lets Jordan answer the easier half, and you lose the clear answer you need."},
+   {k:"euph", t:"Are you feeling unsafe right now?", fb:"\"Unsafe\" could mean many things to Jordan. Ask about intention to act on thoughts of killing themself."},
+   {k:"move", t:"Okay. Let's talk about how school has been going.", fb:"Jordan has named a method and had the thought an hour ago. Moving on now leaves the most urgent question unasked."}
+  ],
+  reply:"Yes. I'm done. I'm going to do it tonight, on the drive home. I'm leaving now.",
+  note:"Jordan picks up their keys and stands.",
+  cls:"intent", clsWhy:"Jordan reports intent, a method, and a time, tonight. That is active ideation with intent and plan, and the plan is for the next few hours.",
+  act:"911", actWhy:"This is imminent danger. Call 911 and notify your supervisor immediately, or the PSEC Director if your supervisor is unavailable. Stay calm, stay with Jordan if it is safe to do so, and do not try to block the door. Document immediately.",
+  actWrong:{
+   sup:"Your supervisor needs to know right now, but Jordan has said they are leaving to act tonight. Waiting until they leave is too late. Call 911 and notify your supervisor at the same time.",
+   cont:"Jordan has told you they plan to act tonight and are leaving. This is an emergency, and continuing the interview does nothing to keep them safe."
+  }
+ },
+ {id:"hannah", n:"Hannah", head:"Hannah, 41", set:"s",
+  setup:"Hannah is at intake for work stress after a promotion. Nothing so far points toward risk. You are in the diagnostic screen.",
+  ex:[["you","How have you been sleeping?"],["them","Badly. I lie awake making lists for the next day. I'm tired all the time, but I like my job. I just have too much of it."]],
+  q:[
+   {k:"ok", t:"I ask everyone this. In the past month, have you wished you were dead, or wished you could go to sleep and not wake up?", fb:"You ask every person, every time, whether or not anything points toward risk. Saying that you ask everyone makes the question ordinary."},
+   {k:"lead", t:"I assume you're not having any thoughts of suicide?", fb:"An assumption invites a polite no. Hannah may be fine, but this wording would hide it if she were not."},
+   {k:"move", t:"It sounds like the workload is the main problem. Tell me about your team.", fb:"Nothing points to risk, and you still ask. Skipping the screen because someone seems fine is how risk goes unasked."},
+   {k:"stack", t:"Have you wished you were dead, or have you thought about hurting someone else?", fb:"Two different screens in one breath. A no could answer one half only. Ask each on its own."}
+  ],
+  reply:"No. Never. I'm worn out, not hopeless.",
+  note:"You go on through the screen. Hannah says no to thoughts of killing herself and no to ever having done anything to end her life.",
+  cls:"none", clsWhy:"Hannah denies a wish to be dead, thoughts of killing herself, and any past attempt. There is no ideation.",
+  act:"cont", actWhy:"Every answer is negative, so you continue the interview. Document that you asked about risk and what Hannah said, so the record shows the screen was done.",
+  actWrong:{
+   sup:"Nothing here is positive, so there is no disclosure to bring to your supervisor beyond your usual review. Continue, and document that you asked.",
+   "911":"Nothing Hannah said suggests any danger. Continue the interview, and document that you asked.",
+   "988":"Nothing Hannah said calls for a crisis line, and ending the session cuts off an intake that is going well. Continue, and document that you asked.",
+   conf:"There is nothing to keep secret here, and you never promise confidentiality in any case. Continue, and document that you asked."
+  }
+ },
+ {id:"luis", n:"Luis", head:"Luis, 30", set:"s",
+  setup:"Luis is at intake for anger at work. He has been talking about a coworker he blames for a missed promotion.",
+  ex:[["you","What happens for you when you see him at work?"],["them","I get so angry I can't think. I swear, one of these days he's going to get what's coming to him."]],
+  q:[
+   {k:"ok", t:"Have you had thoughts of hurting him?", fb:"\"Get what's coming to him\" could mean anything from a complaint to violence. Ask directly about thoughts of harming him."},
+   {k:"euph", t:"Do you ever feel like you might lose it with him?", fb:"\"Lose it\" could mean yelling. Name what you are asking about, which is hurting him."},
+   {k:"lead", t:"You're not going to do anything to him, right?", fb:"A question aimed at reassurance tells Luis what you want to hear. Ask neutrally about thoughts of harming him."},
+   {k:"stack", t:"Have you thought about hurting him, and do you have a weapon?", fb:"Thoughts and access are separate questions. Ask about thoughts first, then about intent and access."}
+  ],
+  reply:"Yeah, I've thought about hurting him. Really hurting him. I wouldn't do it. But I think about it. You can't tell anybody I said that.",
+  cls:"other", clsWhy:"Luis reports thoughts of hurting a specific person. That is thoughts of harming someone else, and your next questions concern intent and access.",
+  act:"sup", actWhy:"Thoughts of harming someone go to your supervisor before Luis leaves. He asked you to keep it secret, and you do not promise that. Tell him calmly that your supervisor, who is part of his care, will hear what he said. Document right away."+ADMIT,
+  actWrong:{
+   conf:"Never promise confidentiality. You cannot keep that promise, and breaking it later would cost his trust. Tell Luis now that your supervisor will hear what he said."
+  }
+ },
+ {id:"aisha", n:"Aisha", head:"Aisha, 38", set:"p",
+  setup:"Aisha is at intake for panic attacks. In the relational part of the interview, she has just mentioned her partner.",
+  ex:[["you","How do disagreements go between you and your partner?"],["them","He has a temper. He's pushed me a couple of times. It's not every day."]],
+  q:[
+   {k:"ok", t:"Has he ever put his hands on your neck or choked you?", fb:"Once she has described physical violence, you ask directly about strangulation, one of the strongest lethality markers in partner violence."},
+   {k:"lead", t:"But he's never really hurt you, has he?", fb:"This wording minimizes what she just told you and invites her to minimize it too."},
+   {k:"euph", t:"Do things ever get out of hand at home?", fb:"She has already told you he pushes her. A vague question now steps backward. Ask about the specific lethality marker."},
+   {k:"move", t:"Okay. Let's go back to the panic attacks.", fb:"She has just disclosed partner violence. Moving on tells her it was not heard."}
+  ],
+  reply:"Once. Last spring. He apologized after. Please don't tell anyone. He'd be so angry.",
+  cls:"pvl", clsWhy:"Physical violence with a past strangulation is partner violence with a lethality marker.",
+  act:"sup", actWhy:"Partner violence with a lethality marker goes to your supervisor before Aisha leaves. Do not promise secrecy. Tell her you will talk with your supervisor so the clinic can help her stay safe. You also ask whether there is a gun in the home, and you document right away.",
+  actWrong:{
+   "911":"Nothing Aisha has said points to danger in the next few hours, and she is here with you. Tell your supervisor before she leaves, and your supervisor decides about further steps.",
+   "988":"988 is the Suicide and Crisis Lifeline, and Aisha has not described suicidal thoughts. Ending the session also sends her home before your supervisor knows about the strangulation."
+  }
+ },
+ {id:"kevin", n:"Kevin", head:"Kevin, 45", set:"p",
+  setup:"Kevin is at intake for stress and drinking. Earlier, in the diagnostic screen, he told you he has had passing thoughts of killing himself, with no method or intent. Now you are asking about his habits.",
+  ex:[["you","What do your evenings look like?"],["them","A few beers in the garage. I clean my dad's old rifle. It calms me down."]],
+  q:[
+   {k:"ok", t:"When those thoughts of killing yourself come, have you thought about using the rifle?", fb:"He has already told you about thoughts of killing himself, and now he names a gun he handles at night while drinking. Method is the next step in the sequence, so ask whether the rifle is part of those thoughts."},
+   {k:"stack", t:"How much do you drink, and is the rifle loaded?", fb:"Two topics at once, and neither is the question that matters most right now. Ask whether the rifle is part of his thoughts of killing himself."},
+   {k:"move", t:"How many beers is a few?", fb:"Drinking counts, and you will come back to it. A gun handled at night while drinking, by a man with thoughts of killing himself, comes first."},
+   {k:"euph", t:"Does it ever feel risky having that around?", fb:"\"Risky\" lets him answer about gun safety in general. Ask about the rifle and his thoughts of killing himself."}
+  ],
+  reply:"Sometimes, on bad nights, after a few beers. It's loaded. It's in the cabinet out there.",
+  cls:"fasi", clsWhy:"A loaded firearm at home, thoughts of killing himself, and drinking. That is a firearm in the home with suicidal ideation.",
+  act:"sup", actWhy:"Firearm access with ideation goes to your supervisor before Kevin leaves. Storing the rifle away from the home is the concrete step, and your supervisor leads that conversation. Document right away."+ADMIT
+ },
+ {id:"grace", n:"Grace", head:"Grace, 63", set:"s",
+  setup:"Grace is at intake for low mood after retiring. She has told you she sometimes wishes she would not wake up, and she has said no to thoughts of killing herself.",
+  ex:[["you","So the wish not to wake up is there, and thoughts of killing yourself are not. Is that right?"],["them","That's right. I never would. I just get tired of it all."]],
+  q:[
+   {k:"ok", t:"Have you ever done anything to try to end your life?", fb:"Past behavior is asked every time, even when current thoughts are passive. A no to active thoughts does not end the screen."},
+   {k:"move", t:"Good. Let's talk about your retirement.", fb:"Stopping at her no skips past behavior, which is always asked, along with the time frame of any past attempt."},
+   {k:"lead", t:"And you've never tried anything, I'm guessing?", fb:"\"I'm guessing\" tells her the expected answer. Ask about past behavior openly."},
+   {k:"euph", t:"Have you ever been through a really dark time before?", fb:"\"A dark time\" could mean any hard stretch. Ask about doing something to end her life."}
+  ],
+  reply:"Once. In my twenties, I took pills. I was in the hospital overnight. Nothing since then, not in forty years.",
+  cls:"passive", clsWhy:"Right now Grace reports a wish not to wake up, without thoughts of killing herself, so her current ideation is passive. The past attempt is separate information, and you note when it happened.",
+  act:"sup", actWhy:"Passive ideation and a past attempt go to your supervisor before Grace leaves, along with the time frame of the attempt. Document right away."+ADMIT
+ }
+];
+
+var STEP_NAMES = ["Next question","Classify","PSEC action"];
+var order=[], ci=0, step=0, optOrder=[], picked=[], solved=false, results=[], firstTry=0, answered=0;
+var $=function(id){return document.getElementById(id);};
+function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function fill(s,c){ return s.replace(/\{n\}/g,c.n); }
+function cur(){ return CASES[order[ci]]; }
+
+// Options for the current step, in display order. Each has text, ok, and feedback.
+function stepOptions(){
+  var c=cur();
+  if(step===0){
+    return optOrder.map(function(i){ var o=c.q[i]; return {t:o.t, ok:o.k==="ok", fb:o.fb}; });
+  }
+  if(step===1){
+    var set=c.set==="p"?SAFETY_SET:SUICIDE_SET;
+    return set.map(function(o){
+      var ok=o.id===c.cls;
+      return {t:o.label, ok:ok, fb: ok ? c.clsWhy : o.def+" "+c.clsWhy};
+    });
+  }
+  return ACTIONS.map(function(o){
+    var ok=o.id===c.act;
+    var wrong=(c.actWrong&&c.actWrong[o.id])||ACT_WRONG[o.id];
+    return {t:fill(o.label,c), ok:ok, fb: fill(ok ? c.actWhy : wrong, c)};
+  });
+}
+
+function start(noFocus){
+  order=shuffle(CASES.map(function(_,i){return i;}));
+  ci=0; results=order.map(function(){return [null,null,null];}); firstTry=0; answered=0;
+  $('doneCard').classList.add('hidden'); $('caseCard').classList.remove('hidden');
+  beginStep(0,true,noFocus);
+}
+
+function beginStep(s,newCase,noFocus){
+  step=s; picked=[]; solved=false;
+  if(step===0) optOrder=shuffle(cur().q.map(function(_,i){return i;}));
+  render();
+  if(noFocus) return;
+  var target = newCase ? $('caseTitle') : $('ask');
+  target.focus({preventScroll:true});
+}
+
+function line(cls,who,txt){
+  var d=document.createElement('div'); d.className='line '+cls;
+  if(who){ var w=document.createElement('span'); w.className='who'; w.textContent=who; d.appendChild(w); }
+  d.appendChild(document.createTextNode(txt)); return d;
+}
+
+function render(){
+  var c=cur();
+  $('count').textContent='Case '+(ci+1)+' of '+order.length;
+  $('prog').style.width=((ci*3+step)/(order.length*3)*100)+'%';
+  renderAcc();
+  $('eyebrow').textContent='Step '+(step+1)+' of 3. '+STEP_NAMES[step];
+  $('caseTitle').textContent=c.head;
+  $('setup').textContent=c.setup;
+  var ex=$('exchange'); ex.innerHTML='';
+  c.ex.forEach(function(l){ ex.appendChild(line(l[0]==='you'?'':'them', l[0]==='you'?'You':c.n, l[1])); });
+  if(step>0){
+    var ok=c.q.filter(function(o){return o.k==='ok';})[0];
+    ex.appendChild(line('','You',ok.t));
+    ex.appendChild(line('them',c.n,c.reply));
+    if(c.note) ex.appendChild(line('note','',c.note));
+  }
+  $('ask').textContent = step===0 ? 'Which question do you ask next?' :
+    step===1 ? (c.set==='p' ? 'What safety concern has '+c.n+' described?' : 'How would you classify what '+c.n+' has said?') :
+    'What do you do now, under PSEC procedure?';
+  var box=$('opts'); box.innerHTML='';
+  var opts=stepOptions();
+  opts.forEach(function(o,i){
+    var b=document.createElement('button'); b.type='button'; b.className='opt'; b.textContent=o.t;
+    b.setAttribute('data-i',i);
+    if(picked.indexOf(i)>=0) b.classList.add(o.ok?'correct':'wrong');
+    if(solved){ b.setAttribute('aria-disabled','true'); if(!o.ok && picked.indexOf(i)<0) b.classList.add('dim'); }
+    else if(picked.indexOf(i)>=0) b.setAttribute('aria-disabled','true');
+    b.addEventListener('click',function(){ choose(i); });
+    box.appendChild(b);
+  });
+  $('fb').className='fb'; $('fb').innerHTML='';
+  $('next').classList.add('hidden');
+  report();
+}
+
+function renderAcc(){
+  $('acc').textContent = 'First-try accuracy '+firstTry+' of '+answered+(answered?' ('+Math.round(firstTry/answered*100)+'%)':'');
+}
+
+function choose(i){
+  if(solved || picked.indexOf(i)>=0) return;
+  var opts=stepOptions(), o=opts[i];
+  if(picked.length===0){ answered++; if(o.ok) firstTry++; results[ci][step]=o.ok; }
+  picked.push(i);
+  if(o.ok) solved=true;
+  var btns=$('opts').children;
+  for(var j=0;j<btns.length;j++){
+    if(j===i) btns[j].classList.add(o.ok?'correct':'wrong');
+    if(j===i || solved) btns[j].setAttribute('aria-disabled','true');
+    if(solved && !opts[j].ok && picked.indexOf(j)<0) btns[j].classList.add('dim');
+  }
+  var fb=$('fb'); fb.className='fb '+(o.ok?'ok':'no'); fb.innerHTML='';
+  var v=document.createElement('p'); v.className='verdict'; v.textContent=o.ok?'Correct.':'Not this one. Try another.';
+  var p=document.createElement('p'); p.textContent=o.fb;
+  fb.appendChild(v); fb.appendChild(p);
+  renderAcc();
+  if(solved){
+    var last = ci===order.length-1 && step===2;
+    $('next').textContent = last ? 'See your summary' : (step===2 ? 'Next case' : 'Continue');
+    $('next').classList.remove('hidden');
+    $('next').focus({preventScroll:true});
+  }
+  report();
+}
+
+function next(){
+  if(!solved) return;
+  if(step<2){ beginStep(step+1,false); return; }
+  if(ci<order.length-1){ ci++; beginStep(0,true); window.scrollTo(0,0); return; }
+  finish();
+}
+
+var CHECK='<svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8.2" stroke="#3c6b3e" stroke-width="1.4"/><path d="M6.4 10.2l2.3 2.3 4.7-4.9" stroke="#3c6b3e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+var CROSS='<svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8.2" stroke="#a23b34" stroke-width="1.4"/><path d="M7.2 7.2l5.6 5.6M12.8 7.2l-5.6 5.6" stroke="#a23b34" stroke-width="1.6" stroke-linecap="round"/></svg>';
+
+function finish(){
+  $('caseCard').classList.add('hidden'); $('doneCard').classList.remove('hidden');
+  $('prog').style.width='100%'; $('count').textContent='All '+order.length+' cases done';
+  var pct=answered?Math.round(firstTry/answered*100):0;
+  $('doneScore').innerHTML='First-try accuracy <b>'+firstTry+' of '+answered+'</b> ('+pct+'%).';
+  var per=[0,1,2].map(function(s){ return results.filter(function(r){return r[s];}).length; });
+  $('doneSteps').textContent='Next question '+per[0]+' of '+order.length+'. Classify '+per[1]+' of '+order.length+'. PSEC action '+per[2]+' of '+order.length+'.';
+  var list=$('doneList'); list.innerHTML='';
+  order.forEach(function(k,i){
+    var r=document.createElement('div'); r.className='r';
+    var nm=document.createElement('span'); nm.textContent=CASES[k].head; r.appendChild(nm);
+    var m=document.createElement('span'); m.className='marks';
+    STEP_NAMES.forEach(function(s,j){
+      var x=document.createElement('span');
+      x.innerHTML=(results[i][j]?CHECK:CROSS);
+      x.appendChild(document.createTextNode(s));
+      var h=document.createElement('span'); h.className='sr'; h.textContent=results[i][j]?', right on the first try':', missed on the first try'; x.appendChild(h);
+      m.appendChild(x);
+    });
+    r.appendChild(m); list.appendChild(r);
+  });
+  window.scrollTo(0,0);
+  $('doneTitle').focus({preventScroll:true});
+  report();
+}
+
+$('next').addEventListener('click',next);
+$('restart').addEventListener('click',function(){ start(); window.scrollTo(0,0); });
+function report(){ try{ parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:document.documentElement.scrollHeight}),'*'); }catch(e){} }
+window.addEventListener('load',report); window.addEventListener('resize',report);
+
+window.__tool = {
+  state:function(){
+    var done=!$('doneCard').classList.contains('hidden');
+    var opts=done?[]:stepOptions();
+    return { done:done, caseNum:ci+1, total:order.length, caseId:done?null:cur().id, step:step,
+      options:opts.map(function(o){return o.t;}), correct:opts.map(function(o){return o.ok;}).indexOf(true),
+      picked:picked.slice(), solved:solved, firstTry:firstTry, answered:answered,
+      feedback:$('fb').textContent, order:order.map(function(k){return CASES[k].id;}) };
+  },
+  answer:function(i){ choose(i); return this.state(); },
+  next:function(){ next(); return this.state(); },
+  restart:function(){ start(); return this.state(); },
+  cases:function(){ return CASES.map(function(c){return c.id;}); }
+};
+start(true);
+</script>
+</body>
+</html>
