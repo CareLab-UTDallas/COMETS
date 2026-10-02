@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<!--
+  Score a Categorized Word-List Protocol (COMETS, neuropsych/category-list-scoring.html)
+  Deep links:
+    #case=1, #case=2, #case=3   open a fixed invented examinee
+    #case=random                open a randomly generated invented examinee
+  All words, lists, and examinees are invented for this practice. No test content.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Score a Categorized Word-List Protocol</title>
+<style>
+  :root{--bg:#ffffff; --card:#f7faf8; --ink:#17251d; --muted:#41544a; --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b; --ok:#2f6b4f; --okbg:#e8f3ec; --no:#9a3412; --nobg:#fbeee6;}
+  *{box-sizing:border-box;}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.55;}
+  .wrap{max-width:820px; margin:0 auto; padding:14px 14px 16px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:22px; margin:0 0 4px;}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
+  .warn{font-size:13px; color:#7a3d00; background:#fff3e6; border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px; margin:0 0 10px;}
+  .tabs{display:flex; flex-wrap:wrap; gap:4px; margin:0 0 8px;}
+  .tabs button{font:inherit; font-size:14px; cursor:pointer; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--green); padding:5px 10px;}
+  .tabs button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .tabs button.done:not(.on){border-color:#9cc3ae; background:#eef4f1;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:0 0 10px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:18px; margin:0 0 4px;}
+  h3{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:16px; margin:12px 0 6px;}
+  .note{font-size:13px; color:var(--muted); margin:0 0 8px;}
+  .lists{display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:13px; color:var(--teach); margin:0 0 6px;}
+  @media (max-width:560px){ .lists{grid-template-columns:1fr;} }
+  .lists div{background:#fff; border:1px solid var(--line); border-radius:6px; padding:6px 8px;}
+  .tablewrap{overflow-x:auto;}
+  table{border-collapse:collapse; width:100%; font-size:14px; background:#fff;}
+  th,td{border:1px solid #cfe0d7; padding:5px 6px; text-align:left; vertical-align:top;}
+  th{background:#eef4f1; color:var(--green); font-weight:600;}
+  td.said{color:var(--teach); min-width:180px;}
+  td.said s{color:var(--muted);}
+  td.said .pm{font-weight:600; color:var(--accent);}
+  td.said .cat{display:block; font-size:12px; color:var(--muted); margin-top:3px;}
+  td.num{width:70px;}
+  input[type=number]{width:62px; font:inherit; font-size:15px; padding:3px 5px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink);}
+  input[type=number]:focus{outline:2px solid #bcd6c8; border-color:#bcd6c8;}
+  input.ok{border-color:var(--ok); background:var(--okbg);}
+  input.no{border-color:var(--no); background:var(--nobg);}
+  .key{display:block; font-size:12px; color:var(--no); margin-top:2px;}
+  .sumgrid{display:grid; grid-template-columns:minmax(0,1fr) 90px; gap:4px 10px; align-items:center; font-size:14px;}
+  .sumgrid label{color:var(--teach);}
+  .sumgrid small{color:var(--muted);}
+  .fb{margin:10px 0 0; border-radius:8px; border:1px solid var(--line); background:#fff; padding:10px 12px; font-size:14px; color:var(--teach);}
+  .fb h3{margin:0 0 6px;}
+  .fb p{margin:0 0 6px;}
+  .fb ul{margin:0 0 6px; padding-left:20px;}
+  .tag{display:inline-block; font-size:12px; font-weight:600; border-radius:99px; padding:1px 8px; margin-right:6px;}
+  .tag.ok{background:var(--okbg); color:var(--ok);}
+  .tag.no{background:var(--nobg); color:var(--no);}
+  .nav{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0 0;}
+  button.b{font:inherit; font-size:15px; cursor:pointer; border-radius:8px; padding:9px 16px;}
+  .primary{background:var(--green); color:#eef4f1; border:1px solid var(--green);}
+  .secondary{background:#eef4f1; color:var(--green); border:1px solid #cfe0d7;}
+  button.b:focus-visible,.tabs button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .status{font-size:13px; color:var(--muted);}
+  .source{font-size:12px; color:var(--muted); margin:12px 0 0; border-top:1px solid var(--line); padding-top:8px;}
+  .source p{margin:0 0 4px;}
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Score a categorized word-list protocol</h1>
+  <p class="lede">Each examinee below is invented, and so are both word lists, which were written for this practice and are not any published list. Read what the examinee said on each trial, count correct words, repetitions, and intrusions, total the errors across trials, then work out semantic clustering for the five learning trials. Keep the scoring rules from the Canvas page open beside you.</p>
+  <div class="warn"><strong>Nothing here is saved.</strong> These are practice responses, not patient records. The tool checks raw values only and gives no norms.</div>
+  <div class="tabs" id="tabs" role="tablist" aria-label="Examinees"></div>
+
+  <div class="card">
+    <h2 id="title"></h2>
+    <p class="note" id="context"></p>
+    <div class="lists">
+      <div><strong>First list, in reading order</strong><br><span id="la"></span></div>
+      <div><strong>Second list, in reading order</strong><br><span id="lb"></span></div>
+    </div>
+    <p class="note">First-list categories are birds, kitchen utensils, trees, and sports. The second list shares birds and trees and adds weather and gemstones.</p>
+
+    <h3>1. Code and count each recall trial</h3>
+    <p class="note">P marks the single prompt. A struck-through word was self-cueing, confirmed by asking, and is not scored. Singular and plural are the same word. A repeated intrusion counts as both a repetition and an intrusion. On the cued trials, count across all four categories together.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Trial</th><th>What the examinee said, in order</th><th>Correct</th><th>Repetitions</th><th>Intrusions</th></tr></thead>
+      <tbody id="trials"></tbody>
+    </table></div>
+
+    <h3>2. Totals across trials</h3>
+    <div class="sumgrid" id="sums"></div>
+
+    <h3>3. Semantic clustering, learning trials</h3>
+    <p class="note">Count a cluster each time a correct word immediately follows another correct word from the same category. A repetition or intrusion between them breaks the pair. Expected clustering for a trial is (correct &minus; 1) / 5, and the chance-adjusted score is observed minus expected. Average the chance-adjusted scores over the trials with at least 2 correct words, and give the average to one decimal place.</p>
+    <div class="sumgrid" id="clus"></div>
+    <div class="fb hidden" id="fb" aria-live="polite"></div>
+  </div>
+
+  <div class="nav">
+    <button class="b primary" id="check" type="button">Check my scoring</button>
+    <button class="b secondary" id="show" type="button">Show the key</button>
+    <button class="b secondary" id="clear" type="button">Clear this examinee</button>
+    <button class="b secondary" id="newrand" type="button">New random examinee</button>
+    <span class="status" id="acc" aria-live="polite"></span>
+  </div>
+
+  <div class="source">
+    <p><strong>Sources.</strong> Rules are paraphrased from the sources cited on the Canvas page. Use the manual during a real administration.</p>
+    <p>The tool covers coding and counting only. Converting raw scores to scaled and index scores uses the published tables, which are taught on the Canvas page and are not reproduced here.</p>
+  </div>
+</div>
+<script>
+var LA=["heron","ladle","maple","hockey","whisk","finch","archery","cedar","pelican","bowling","colander","willow","fencing","wren","spatula","birch"];
+var LB=["sleet","crane","ruby","spruce","magpie","drizzle","poplar","opal","gull","hail","aspen","garnet","sparrow","fog","hickory","jade"];
+var CAT={heron:"bird",finch:"bird",pelican:"bird",wren:"bird",ladle:"utensil",whisk:"utensil",colander:"utensil",spatula:"utensil",
+  maple:"tree",cedar:"tree",willow:"tree",birch:"tree",hockey:"sport",archery:"sport",bowling:"sport",fencing:"sport"};
+var PLURAL={herons:"heron",maples:"maple",whisks:"whisk",finches:"finch",ladles:"ladle",cedars:"cedar",wrens:"wren"};
+var CUES=["birds","kitchen utensils","trees","sports"];
+var TRIALS=[["t1","Trial 1","A"],["t2","Trial 2","A"],["t3","Trial 3","A"],["t4","Trial 4","A"],["t5","Trial 5","A"],["b","Second list","B"],
+  ["sdfr","Short-delay free recall","A"],["sdcr","Short-delay cued recall","A"],["ldfr","Long-delay free recall","A"],["ldcr","Long-delay cued recall","A"]];
+var LEARN=["t1","t2","t3","t4","t5"];
+var CASES=[
+ {title:"Ms. Margaret Webb", context:"An invented examinee, 71 years old. She grouped words by category from the second trial on.",
+  said:{t1:["heron","ladle","birch","spatula","wren","robin"],
+   t2:["heron","finch","ladle","whisk","birch","maple","spatula","wren","herons"],
+   t3:["heron","finch","wren","ladle","whisk","spatula","maple","birch","cedar","hockey","P","robin"],
+   t4:["heron","finch","wren","pelican","ladle","whisk","spatula","colander","maple","birch","cedar","hockey","bowling","robin","finch"],
+   t5:["heron","finch","wren","pelican","ladle","whisk","spatula","colander","maple","birch","cedar","willow","hockey","bowling","archery"],
+   b:["sleet","hail","fog","crane","gull","ruby","opal","heron","spruce"],
+   sdfr:["heron","finch","wren","ladle","whisk","maple","birch","crane","hockey","spatula"],
+   sdcr:[["heron","finch","wren","pelican"],["ladle","whisk","spatula"],["maple","birch","cedar","spruce"],["hockey","bowling","P","tennis"]],
+   ldfr:["heron","finch","wren","ladle","whisk","spatula","maple","birch","hockey"],
+   ldcr:[["heron","finch","wren","crane"],["ladle","whisk","spatula","colander"],["maple","birch","cedar"],["hockey","bowling","archery"]]}},
+ {title:"Mr. Edward Lyle", context:"An invented examinee, 79 years old. He tended to recall the words in the order he heard them and said \"pillow\" on several trials.",
+  said:{t1:["heron","ladle","maple","hockey","P","pillow"],
+   t2:["heron","ladle","maple","hockey","whisk","~heron","~ladle","finch"],
+   t3:["heron","ladle","maple","hockey","whisk","finch","pillow","pillow"],
+   t4:["heron","ladle","maple","hockey","whisk","finch","archery","cedar","maples"],
+   t5:["heron","ladle","maple","hockey","whisk","finch","archery","cedar","pelican","pillow"],
+   b:["sleet","crane","ruby","heron"],
+   sdfr:["heron","ladle","maple","sleet","hockey","pillow"],
+   sdcr:[["heron","crane"],["ladle"],["maple","oak"],["hockey","heron"]],
+   ldfr:["heron","ladle","maple","pillow"],
+   ldcr:[["heron"],["ladle","whisk"],["maple"],["hockey","tennis"]]}},
+ {title:"Ms. Grace Dunn", context:"An invented examinee, 66 years old. On cued recall she gave one word under the wrong category.",
+  said:{t1:["whisk","cedar","birch","fencing","wren","spatula","falcon"],
+   t2:["whisk","ladle","cedar","birch","willow","fencing","hockey","wren","heron","spatula"],
+   t3:["whisk","ladle","spatula","cedar","birch","willow","maple","fencing","hockey","bowling","wren","heron","finch"],
+   t4:["whisk","ladle","spatula","colander","cedar","birch","willow","maple","fencing","hockey","bowling","archery","wren","heron","finch","pelican"],
+   t5:["wren","heron","finch","pelican","whisk","ladle","spatula","colander","fencing","hockey","bowling","archery","cedar","birch","willow","maple","falcon"],
+   b:["crane","magpie","gull","sparrow","sleet","hail","fog","drizzle","ruby","opal"],
+   sdfr:["whisk","ladle","spatula","colander","cedar","birch","willow","maple","crane","fencing","hockey","bowling","wren","heron","finch"],
+   sdcr:[["heron","wren","finch"],["ladle","whisk","colander","spatula"],["maple","cedar","willow","pelican"],["hockey","bowling","fencing","P","archery"]],
+   ldfr:["whisk","ladle","spatula","colander","cedar","birch","willow","maple","hockey","bowling","fencing","wren","heron","finch","pelican","whisks"],
+   ldcr:[["heron","wren","finch","pelican"],["ladle","whisk","colander","spatula"],["maple","cedar","willow","birch","finch"],["hockey","bowling","fencing","archery"]]}}
+];
+var POOL={catA:["robin","eagle","tongs","grater","oak","pine","tennis","skiing"],none:["pillow","ribbon","ticket","pebble"]};
+
+/* ---------- scoring engine ---------- */
+function canon(w){ return PLURAL[w]||w; }
+function flat(said){ // returns scored responses in order (P and crossed-out removed), capped at 20 free or 8 per cued category
+  if(said.length && Array.isArray(said[0])){ var out=[]; said.forEach(function(cat){ var n=0; cat.forEach(function(w){ if(w==="P"||w.charAt(0)==="~") return; if(n<8){ out.push(w); n++; } }); }); return out; }
+  var o=[]; said.forEach(function(w){ if(w==="P"||w.charAt(0)==="~") return; if(o.length<20) o.push(w); }); return o;
+}
+function codeTrial(said,list){
+  var seen={}, codes=[], c=0, r=0, x=0, words=flat(said);
+  words.forEach(function(w){ var k=canon(w), on=list.indexOf(k)>=0, code;
+    if(seen[k]) code= on?"R":"I/R"; else code= on?"C":"I";
+    seen[k]=1; codes.push(code);
+    if(code==="C")c++; if(code==="R"||code==="I/R")r++; if(code==="I"||code==="I/R")x++; });
+  return {words:words, codes:codes, c:c, r:r, x:x};
+}
+function r1(v){ return Math.round(v*10+1e-9)/10; }
+function clusterTrial(t){ var obs=0;
+  for(var i=1;i<t.words.length;i++){ if(t.codes[i]==="C"&&t.codes[i-1]==="C"&&CAT[canon(t.words[i])]===CAT[canon(t.words[i-1])]) obs++; }
+  var exp= t.c>=2 ? r1((t.c-1)/5) : null; return {obs: t.c>=2?obs:null, exp:exp, ca: exp===null?null:r1(obs-exp)}; }
+function keyFor(cs){ var t={}, K={t:t, cl:{}};
+  TRIALS.forEach(function(tr){ t[tr[0]]=codeTrial(cs.said[tr[0]], tr[2]==="A"?LA:LB); });
+  var t15=0; LEARN.forEach(function(k){ t15+=t[k].x; });
+  K.s={t15int:t15, frint:t15+t.b.x+t.sdfr.x+t.ldfr.x, crint:t.sdcr.x+t.ldcr.x, rep:0};
+  K.s.totint=K.s.frint+K.s.crint; TRIALS.forEach(function(tr){ K.s.rep+=t[tr[0]].r; });
+  var sum=0, n=0; LEARN.forEach(function(k){ var c=clusterTrial(t[k]); K.cl[k]=c; if(c.ca!==null){ sum+=c.ca; n++; } });
+  K.cl.avg = n? r1(sum/n) : null; return K; }
+
+/* ---------- random invented examinee ---------- */
+var seed=1;
+function rnd(){ seed=(seed*1103515245+12345)%2147483648; return seed/2147483648; }
+function pick(a){ return a[Math.floor(rnd()*a.length)]; }
+function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(rnd()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function orderWords(ws, grp){ // grouped by category with probability grp
+  if(rnd()<grp){ var cats={}; ws.forEach(function(w){ (cats[CAT[w]]=cats[CAT[w]]||[]).push(w); }); var o=[]; shuffle(Object.keys(cats)).forEach(function(k){ o=o.concat(shuffle(cats[k])); }); return o; }
+  return shuffle(ws); }
+function makeRandom(s){ seed=s||Math.floor(Math.random()*2147483000)+1; var said={}, start=3+Math.floor(rnd()*5), gain=rnd()*2.2+0.3, grp=rnd();
+  var names=["Mr. Victor Hall","Ms. Alice Turner","Mr. Leonard Price","Ms. Helen Pierce","Mr. James Fuller"];
+  var sayIntr=pick(POOL.catA.concat(POOL.none)), last=[];
+  LEARN.forEach(function(k,i){ var n=Math.min(16,Math.round(start+gain*i)); var ws=orderWords(shuffle(LA).slice(0,n), grp); last=ws;
+    if(rnd()<0.45) ws.splice(Math.floor(rnd()*ws.length)+1,0,sayIntr);
+    if(rnd()<0.3) ws.splice(Math.floor(rnd()*ws.length)+1,0,pick(POOL.catA));
+    if(rnd()<0.35){ var w=ws[Math.floor(rnd()*Math.min(3,ws.length))]; ws.push(PLURALOF[w]||w); }
+    if(rnd()<0.5 && ws.length<19) ws.splice(ws.length-1,0,"P");
+    said[k]=ws; });
+  var nb=Math.max(2,start-1+Math.floor(rnd()*3)); var b=shuffle(LB).slice(0,nb); if(rnd()<0.6) b.splice(Math.floor(rnd()*b.length),0,pick(LA)); said.b=b;
+  var keep=Math.max(2,last.filter(function(w){return LA.indexOf(w)>=0;}).length-1-Math.floor(rnd()*3));
+  function fr(drop){ var ws=orderWords(shuffle(LA.filter(function(w){return last.indexOf(w)>=0;})).slice(0,Math.max(1,keep-drop)), grp);
+    if(rnd()<0.6) ws.splice(Math.floor(rnd()*ws.length),0,pick(b.filter(function(w){return LB.indexOf(w)>=0;}).concat([sayIntr])));
+    return ws; }
+  said.sdfr=fr(0); said.ldfr=fr(Math.floor(rnd()*3));
+  function cued(base){ var got=base.filter(function(w){return LA.indexOf(canon(w))>=0;}).map(canon), extra=shuffle(LA.filter(function(w){return got.indexOf(w)<0;})).slice(0,1+Math.floor(rnd()*2));
+    var all=got.concat(extra), groups=[[],[],[],[]], ord=["bird","utensil","tree","sport"];
+    all.forEach(function(w){ groups[ord.indexOf(CAT[w])].push(w); });
+    groups=groups.map(function(g){ g=shuffle(g); if(g.length<4 && rnd()<0.5) g.push("P"); return g; });
+    if(rnd()<0.5){ var gi=Math.floor(rnd()*4); groups[gi].push(pick(POOL.catA)); }
+    if(rnd()<0.3){ var w=pick(all); groups[3].push(w); }
+    return groups; }
+  said.sdcr=cued(said.sdfr); said.ldcr=cued(said.ldfr);
+  return {title:pick(names), context:"A randomly generated invented examinee, "+(60+Math.floor(rnd()*30))+" years old. Seed "+seed+".", said:said, random:true}; }
+var PLURALOF={}; Object.keys(PLURAL).forEach(function(p){ PLURALOF[PLURAL[p]]=p; });
+
+/* ---------- interface ---------- */
+var SUMS=[["t15int","Intrusions, Trials 1 to 5"],["frint","Free recall intrusions","learning trials, second list, both free recalls"],
+  ["crint","Cued recall intrusions","both cued trials"],["totint","Total intrusions"],["rep","Total repetitions","every recall trial"]];
+var cur=0, st=CASES.map(function(){return {v:{}, checked:false};}), first={};
+function el(id){return document.getElementById(id);}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+function sayHtml(said){
+  function one(w){ if(w==="P") return '<span class="pm">[P]</span>'; if(w.charAt(0)==="~") return '<s title="self-cueing, crossed out">'+esc(w.slice(1))+'</s>'; return esc(w); }
+  if(said.length && Array.isArray(said[0])) return said.map(function(g,i){ return '<span class="cat">'+CUES[i]+'</span>'+(g.length? g.map(one).join(", "):"(nothing)"); }).join("");
+  return said.map(one).join(", "); }
+function build(){
+  el('la').textContent=LA.join(", "); el('lb').textContent=LB.join(", ");
+  var h=""; TRIALS.forEach(function(tr){ h+='<tr><td>'+tr[1]+'</td><td class="said" id="said-'+tr[0]+'"></td>'+
+    ['c','r','x'].map(function(f){return '<td class="num"><input type="number" inputmode="numeric" id="in-'+tr[0]+'-'+f+'" aria-label="'+tr[1]+' '+({c:'correct',r:'repetitions',x:'intrusions'})[f]+'"><span class="key" id="k-'+tr[0]+'-'+f+'"></span></td>';}).join('')+'</tr>'; });
+  el('trials').innerHTML=h;
+  var g=""; SUMS.forEach(function(s){ g+='<label for="in-s-'+s[0]+'">'+s[1]+(s[2]?' <small>('+s[2]+')</small>':'')+'</label><span><input type="number" inputmode="numeric" id="in-s-'+s[0]+'"><span class="key" id="k-s-'+s[0]+'"></span></span>'; });
+  el('sums').innerHTML=g;
+  var c=""; LEARN.forEach(function(k,i){ c+='<label for="in-o-'+k+'">Observed clusters, Trial '+(i+1)+'</label><span><input type="number" inputmode="numeric" id="in-o-'+k+'"><span class="key" id="k-o-'+k+'"></span></span>'; });
+  c+='<label for="in-avg">Chance-adjusted clustering, Trials 1 to 5 <small>(one decimal)</small></label><span><input type="number" step="0.1" id="in-avg"><span class="key" id="k-avg"></span></span>';
+  el('clus').innerHTML=c;
+  CASES.forEach(function(cs,k){ addTab(k); });
+  allInputs().forEach(function(i){ i.addEventListener('input',function(){ i.classList.remove('ok','no'); }); });
+  el('check').addEventListener('click',function(){check(false);}); el('show').addEventListener('click',function(){check(true);});
+  el('clear').addEventListener('click',function(){ st[cur]={v:{},checked:false}; go(cur); });
+  el('newrand').addEventListener('click',function(){ save(); addRandom(); });
+}
+function addTab(k){ var b=document.createElement('button'); b.type='button'; b.setAttribute('role','tab'); b.textContent=CASES[k].random? 'Random '+(k-2):'Examinee '+(k+1); b.addEventListener('click',function(){save(); go(k);}); el('tabs').appendChild(b); }
+function addRandom(s){ CASES.push(makeRandom(s)); st.push({v:{},checked:false}); addTab(CASES.length-1); go(CASES.length-1); }
+function allInputs(){ return Array.prototype.slice.call(document.querySelectorAll('input[type=number]')); }
+function save(){ allInputs().forEach(function(i){ st[cur].v[i.id]=i.value; }); }
+function go(k){ cur=k; var cs=CASES[k];
+  el('title').textContent=cs.title; el('context').textContent=cs.context;
+  TRIALS.forEach(function(tr){ el('said-'+tr[0]).innerHTML=sayHtml(cs.said[tr[0]]); });
+  allInputs().forEach(function(i){ i.value=st[k].v[i.id]||''; i.classList.remove('ok','no'); });
+  document.querySelectorAll('.key').forEach(function(s){s.textContent='';});
+  el('fb').classList.add('hidden'); el('fb').innerHTML='';
+  Array.prototype.forEach.call(el('tabs').children,function(b,j){ b.classList.toggle('on',j===k); b.setAttribute('aria-selected',j===k?'true':'false'); b.classList.toggle('done',st[j].checked); });
+  report(); }
+function pairs(K){ var out=[];
+  TRIALS.forEach(function(tr){ var t=K.t[tr[0]]; out.push(['in-'+tr[0]+'-c',t.c,tr[1]+' correct'],['in-'+tr[0]+'-r',t.r,tr[1]+' repetitions'],['in-'+tr[0]+'-x',t.x,tr[1]+' intrusions']); });
+  SUMS.forEach(function(s){ out.push(['in-s-'+s[0],K.s[s[0]],s[1]]); });
+  LEARN.forEach(function(k,i){ out.push(['in-o-'+k,K.cl[k].obs===null?0:K.cl[k].obs,'Observed clusters, Trial '+(i+1)]); });
+  out.push(['in-avg',K.cl.avg,'Chance-adjusted clustering']); return out; }
+function why(cs,K,trial){ var t=K.t[trial], parts=[];
+  t.words.forEach(function(w,i){ if(t.codes[i]!=="C") parts.push(esc(w)+" "+t.codes[i]); });
+  return parts.length? 'Not counted as correct here: '+parts.join(", ")+'.' : 'Every scored response was a first recall of a list word.'; }
+function mark(key,ok){ if(!(key in first)) first[key]=!!ok; var ks=Object.keys(first), n=0; ks.forEach(function(x){ if(first[x]) n++; });
+  el('acc').textContent='Correct on the first try in '+n+' of '+ks.length+' answers this session.'; }
+function check(showAll){ save(); var cs=CASES[cur], K=keyFor(cs), wrong=[], right=0;
+  pairs(K).forEach(function(p){ var i=el(p[0]), ks=el(p[0].replace(/^in-/,'k-')); var v=i.value.trim();
+    if(showAll){ i.value=p[1]; i.classList.remove('no'); i.classList.add('ok'); ks.textContent=''; return; }
+    if(v===''){ i.classList.remove('ok','no'); ks.textContent=''; return; }
+    var ok=Math.abs(parseFloat(v)-p[1])<0.051; i.classList.toggle('ok',ok); i.classList.toggle('no',!ok); ks.textContent= ok?'':'Key '+p[1];
+    mark(cur+':'+p[0]+':'+(cs.random?cs.context:''),ok); if(ok) right++; else wrong.push(p); });
+  st[cur].checked=true;
+  var h='<h3>'+(showAll?'The key':(wrong.length?'<span class="tag no">Check these</span>':'<span class="tag ok">All entries match</span>'))+'</h3><ul>';
+  TRIALS.forEach(function(tr){ var t=K.t[tr[0]]; h+='<li><strong>'+tr[1]+'</strong>. Correct '+t.c+', repetitions '+t.r+', intrusions '+t.x+'. '+why(cs,K,tr[0])+'</li>'; });
+  h+='</ul><p>Intrusions on Trials 1 to 5 total '+K.s.t15int+'. Free recall intrusions add the second list and both free recalls, '+K.s.frint+'. Cued recall intrusions total '+K.s.crint+', so total intrusions are '+K.s.totint+'. A repeated intrusion is in both the intrusion and repetition totals. Repetitions across every trial total '+K.s.rep+'.</p>';
+  h+='<p>Clustering by trial, observed, expected, and chance adjusted. '+LEARN.map(function(k,i){ var c=K.cl[k]; return 'Trial '+(i+1)+' '+(c.ca===null?'not scorable, fewer than 2 correct':c.obs+', '+c.exp.toFixed(1)+', '+c.ca.toFixed(1)); }).join('. ')+'. The average over scorable trials is '+(K.cl.avg===null?'not scorable':K.cl.avg.toFixed(1))+'.</p>';
+  if(!showAll && wrong.length) h+='<p>Recheck '+wrong.map(function(p){return esc(p[2]);}).join(', ')+'. A word said under a cue for the wrong category the first time is still correct, a crossed-out self-cueing word is not scored, and a plural repeats its singular.</p>';
+  el('fb').innerHTML=h; el('fb').classList.remove('hidden');
+  Array.prototype.forEach.call(el('tabs').children,function(b,j){ b.classList.toggle('done',st[j].checked); });
+  report(); }
+function report(){ try{ parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:document.documentElement.scrollHeight}),'*'); }catch(e){} }
+window.addEventListener('load',report); window.addEventListener('resize',report);
+window.__tool={LA:LA, LB:LB, CAT:CAT, PLURAL:PLURAL, CASES:CASES, keyFor:keyFor, makeRandom:makeRandom, addRandom:addRandom, go:go,
+  state:function(){ return {cur:cur, ncases:CASES.length, acc:el('acc').textContent, fb:el('fb').textContent}; }};
+build();
+(function(){ var m=/case=([a-z0-9]+)/.exec(location.hash||""); if(m&&m[1]==="random"){ addRandom(); return; } var n=m?parseInt(m[1],10)-1:0; go(n>=0&&n<CASES.length?n:0); })();
+el('acc').textContent='No answers yet this session.';
+</script>
+</body>
+</html>

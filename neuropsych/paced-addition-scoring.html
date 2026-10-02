@@ -161,11 +161,11 @@ var DIGITS=[1,2,3,4,5,6,8,9]; // the digit 7 is excluded
 var PROF={
   steady:{label:"Steady", who:"Mr. Edward Lyle", short:"Mr. Lyle", age:66, pace:0,
     setup:"works at an even pace."},
-  slows:{label:"Slows at faster paces", who:"Ms. Helen Pierce", short:"Ms. Pierce", age:74, pace:2,
+  slows:{label:"Slows at faster paces", who:"Ms. Helen Pierce", short:"Ms. Pierce", age:58, pace:2,
     setup:"keeps up at the slower paces."},
   alternate:{label:"Alternate-answer strategy", who:"Mr. Victor Hall", short:"Mr. Hall", age:63, pace:3,
     setup:"kept up well on the first series."},
-  misunderstood:{label:"Misunderstood instructions", who:"Ms. Alice Turner", short:"Ms. Turner", age:81, pace:0, lock:true,
+  misunderstood:{label:"Misunderstood instructions", who:"Ms. Alice Turner", short:"Ms. Turner", age:47, pace:0, lock:true,
     setup:"said she understood the sample sets. This profile runs in series 1, the only trial during which the sheet allows stopping for a misunderstanding."}
 };
 var PKEYS=["steady","slows","alternate","misunderstood"];
@@ -285,10 +285,10 @@ var QUESTIONS={
     ["Move the playback position back a few digits so the examinee can rejoin.",0,"The recording is never rewound. Even when you stop for a misunderstanding, you begin again where you left off."],
     ["Leave the silent items off the count of items possible.",0,"A full series allows 49 sums whatever the examinee does. Silent items stay in the count and are recorded as missed."]]}],
   slows:[{q:"Suppose Ms. Pierce asks to stop during series 3. How is the total reported?", opts:[
-    ["Stop the recording and write the series reached and what she said. The total is a modified administration and is not compared with the full-length norms or the short-form norms.",1,"The sheet has no rule for an examinee who asks to stop, so the battery sets one. A test ended early is a modified administration. Neither the full-length norms nor the 50- and 100-item short-form norms are applied to it."],
-    ["Apply the 100-item short-form norms, since series 1 and 2 were completed.",0,"The battery rule says the short-form norms are not applied to a test ended early, even when the first two series are complete."],
+    ["Stop the recording and write the series reached and what she said. The total is a modified administration and is not compared with the full-length norms or the short-form norms.",1,"The sheet has no rule for an examinee who asks to stop, so the program sets one. A test ended early is a modified administration. Neither the full-length norms nor the 50- and 100-item short-form norms are applied to it."],
+    ["Apply the 100-item short-form norms, since series 1 and 2 were completed.",0,"The program’s rule says the short-form norms are not applied to a test ended early, even when the first two series are complete."],
     ["Score the items not given as missed and compare the total with the full-length norms.",0,"A test ended early is a modified administration. Its total is not compared with the full-length norms."],
-    ["Keep the recording running and encourage her to finish.",0,"The battery rule is to stop the recording. Coaching once the recording is running is not part of the administration."]]},
+    ["Keep the recording running and encourage her to finish.",0,"The program’s rule is to stop the recording. Coaching once the recording is running is not part of the administration."]]},
    {q:"Her accuracy fell as the pace quickened. What do the two percentages add?", opts:[
     ["They describe how she worked and are written on the form. They are not normed.",1,"The sheet asks for percentage correct of attempted and percentage attempted, and both are a description. The trial score, the number correct, is the score the norms use."],
     ["They replace the trial score when many items were missed.",0,"The trial score is always the number correct out of 49. The percentages sit beside it as a description."],

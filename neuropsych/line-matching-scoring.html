@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Deep links: #part=items | #part=practice | #part=correct opens that part. #case=<n> (with #part=practice) opens practice case n (1-7). -->
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Score a Two-Line Matching Record</title>
+<style>
+  :root{--bg:#ffffff; --card:#f7faf8; --ink:#17251d; --muted:#41544a; --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b;}
+  *{box-sizing:border-box;}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.55;}
+  .wrap{max-width:820px; margin:0 auto; padding:14px 14px 16px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:22px; margin:0 0 4px;}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
+  .warn{font-size:13px; color:#7a3d00; background:#fff3e6; border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px; margin:0 0 10px;}
+  .chips{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 10px;}
+  .chips button{font:inherit; font-size:13px; cursor:pointer; border:1px solid #cfe0d7; border-radius:20px; background:#eef4f1; color:var(--green); padding:4px 11px;}
+  .chips button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:0 0 10px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:18px; margin:0 0 6px;}
+  .setup{font-size:14px; color:var(--teach); margin:0 0 8px;}
+  table{border-collapse:collapse; width:100%; font-size:14px;}
+  th,td{border:1px solid #cfe0d7; padding:5px 8px; text-align:left; vertical-align:top;}
+  th{background:#eef4f1; color:var(--green); font-weight:600;}
+  td.mk{white-space:nowrap; width:1%;}
+  td.mk button{font:inherit; font-size:13px; cursor:pointer; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink); padding:3px 8px; margin:0 4px 0 0;}
+  td.mk button.right{background:#e3f0e9; border-color:var(--green);}
+  td.mk button.wrong{background:#fbeee4; border-color:#e3b58f; color:#6b4a2f;}
+  td.mk button:disabled{cursor:default;}
+  .q{font-weight:600; margin:0 0 8px;}
+  .opts{display:flex; flex-direction:column; gap:6px;}
+  .opts button{font:inherit; font-size:15px; text-align:left; cursor:pointer; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--ink); padding:8px 12px;}
+  .opts button:hover:not(:disabled){border-color:#9cc3ae;}
+  .opts button.right{background:#e3f0e9; border-color:var(--green);}
+  .opts button.wrong{background:#fbeee4; border-color:#e3b58f; color:#6b4a2f;}
+  .opts button:disabled{cursor:default;}
+  .fb{margin:10px 0 0; padding:8px 10px; border-radius:6px; font-size:14px; color:var(--teach); background:#fff7ef; border:1px solid #f0d9c2; border-left:4px solid var(--accent);}
+  .fb.ok{background:#f0f7f3; border-color:#cfe0d7; border-left-color:var(--green);}
+  .fb strong{color:#8a4600;}
+  .fb.ok strong{color:var(--green);}
+  .nav{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0 0;}
+  button.b{font:inherit; font-size:15px; cursor:pointer; border-radius:8px; padding:9px 16px;}
+  .primary{background:var(--green); color:#eef4f1; border:1px solid var(--green);}
+  .secondary{background:#eef4f1; color:var(--green); border:1px solid #cfe0d7;}
+  button:focus-visible{outline:3px solid #b35900; outline-offset:2px;}
+  input[type=number]{font:inherit; font-size:15px; width:90px; padding:6px 8px; border:1px solid #9cc3ae; border-radius:6px;}
+  .status{font-size:13px; color:var(--muted);}
+  .hidden{display:none !important;}
+  .small{font-size:12px; color:var(--muted); margin:8px 0 0;}
+  .tablewrap{overflow-x:auto;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Score a two-line matching record</h1>
+  <p class="lede">The examinee matches two short stimulus lines to two of eleven numbered lines and names them. Every record here is invented, and so is its answer key. Score the items, judge the practice criterion, and apply the age and sex corrections. The reason appears after every choice.</p>
+  <div class="warn"><strong>Nothing here is saved.</strong> No test items, answers, or norm tables appear here. Practice as often as you like.</div>
+  <div class="chips" id="chips">
+    <button type="button" data-part="items">Score the items</button>
+    <button type="button" data-part="practice">Practice criterion</button>
+    <button type="button" data-part="correct">Age and sex corrections</button>
+  </div>
+
+  <div id="pItems" class="hidden">
+    <div class="card">
+      <h2>Score ten items</h2>
+      <p class="setup">The key column is invented for this record. For each item, mark Correct or Error from what the examinee said, using the scoring rules taught on the course page. One try per item, and the reason follows each mark.</p>
+      <div class="tablewrap"><table id="itemTable"></table></div>
+      <div class="fb hidden" id="itemFb" aria-live="polite"></div>
+      <div id="totalBox" class="hidden" style="margin:10px 0 0;">
+        <label for="totalIn" class="q" style="display:inline;">Number correct on these ten items </label>
+        <input type="number" id="totalIn" min="0" max="10">
+        <button type="button" class="b secondary" id="totalBtn">Check total</button>
+        <div class="fb hidden" id="totalFb" aria-live="polite"></div>
+      </div>
+      <div class="nav"><button type="button" class="b primary" id="newItems">New record</button><span class="status" id="itemStatus"></span></div>
+    </div>
+  </div>
+
+  <div id="pPractice" class="hidden">
+    <div class="card">
+      <h2 id="prTitle"></h2>
+      <p class="setup" id="prSetup"></p>
+      <div class="tablewrap"><table id="prTable"></table></div>
+    </div>
+    <div class="card">
+      <p class="q">What follows from these practice answers?</p>
+      <div class="opts" id="prOpts"></div>
+      <div class="fb hidden" id="prFb" aria-live="polite"></div>
+      <div class="nav"><button type="button" class="b primary hidden" id="prNext">Next case</button><span class="status" id="prStatus"></span></div>
+    </div>
+  </div>
+
+  <div id="pCorrect" class="hidden">
+    <div class="card">
+      <h2>Apply the corrections</h2>
+      <p class="setup">The published adult norms run from age 16 to 74. Add 1 point at ages 50 to 64, 3 points at ages 65 to 74, and 2 points for a woman at any age in that range. Men aged 16 to 49 receive nothing.</p>
+      <p class="q" id="coQ"></p>
+      <div class="opts" id="coOpts"></div>
+      <div class="fb hidden" id="coFb" aria-live="polite"></div>
+      <div class="nav"><button type="button" class="b primary hidden" id="coNext">New examinee</button><span class="status" id="coStatus"></span></div>
+    </div>
+  </div>
+
+  <p class="small">Rules are paraphrased from the sources cited on the Canvas page. Use the chapter and record form during a real administration.</p>
+</div>
+<script>
+function el(id){ return document.getElementById(id); }
+function rnd(n){ return Math.floor(Math.random()*n); }
+function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=rnd(i+1), t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+var CODES=["HH","LL","MM","HL","LH","HM","MH","LM"];
+var firstTry={}; // key -> bool
+function tally(){ var k=Object.keys(firstTry), r=k.filter(function(x){return firstTry[x];}).length; return 'Correct on the first try in '+r+' of '+k.length+' decisions this session.'; }
+function setStatus(){ var t=tally(); ['itemStatus','prStatus','coStatus'].forEach(function(i){ el(i).textContent=t; }); }
+
+/* ---------- Part 1: items ---------- */
+var TYPES=[
+ {t:"exact", ok:true, why:"Both lines match the key. The item is correct."},
+ {t:"reversed", ok:true, why:"Both lines are right. The rule asks the examinee to identify both lines, and the order in which they are named does not change that. The key simply lists the lower number first."},
+ {t:"adjacent", ok:false, why:"One line is right and the other is the neighboring line on the fan. An item counts only when both lines are correct. There is no half credit."},
+ {t:"bothwrong", ok:false, why:"Neither line matches the key. Circle the item as an error and keep the examinee's actual choices on the form."},
+ {t:"fixright", ok:true, why:"The examinee changed the answer without any prompt, and the final answer is right. Spontaneous corrections are accepted, so score the final answer."},
+ {t:"fixwrong", ok:false, why:"The first answer was right, but the examinee changed it without any prompt. The final answer is the one scored, and it is wrong."},
+ {t:"guess", ok:true, why:"After 30 seconds you encouraged a best guess, which the rules allow. Encouragement to guess does not change the scoring. The guess matches the key."}
+];
+function pair(){ var a=1+rnd(11), b; do{ b=1+rnd(11); }while(b===a); return a<b?[a,b]:[b,a]; }
+function neighbor(x, avoid){ var c=[x-1,x+1].filter(function(v){return v>=1&&v<=11&&avoid.indexOf(v)<0;}); return c[rnd(c.length)]; }
+function other(avoid){ var v; do{ v=1+rnd(11); }while(avoid.indexOf(v)>=0); return v; }
+var REC=[], marks=[];
+function newRecord(){
+  var types=shuffle(TYPES.concat(shuffle(TYPES.slice()).slice(0,3)).slice()).slice(0,10);
+  REC=types.map(function(ty,i){
+    var k=pair(), code=CODES[rnd(CODES.length)], said;
+    var A=k[0], B=k[1];
+    if(ty.t==="exact") said='"'+A+' and '+B+'."';
+    else if(ty.t==="reversed") said='"'+B+' and '+A+'."';
+    else if(ty.t==="adjacent"){ var keep=rnd(2), n=neighbor(keep?A:B,[A,B]); said='"'+(keep?B:A)+' and '+n+'."'; }
+    else if(ty.t==="bothwrong"){ var x=other([A,B]), y=other([A,B,x]); said='"'+Math.min(x,y)+' and '+Math.max(x,y)+'."'; }
+    else if(ty.t==="fixright"){ var z=neighbor(B,[A,B]); said='"'+A+' and '+z+'." A few seconds later, unprompted, "No, '+A+' and '+B+'."'; }
+    else if(ty.t==="fixwrong"){ var w=neighbor(A,[A,B]); said='"'+A+' and '+B+'." Then, unprompted, "Wait, '+w+' and '+B+'."'; }
+    else said='No answer for 30 seconds. After you encourage a best guess, "'+A+' and '+B+', I think."';
+    return {n:i+1, key:A+'&ndash;'+B, code:code, said:said, ok:ty.ok, why:ty.why, type:ty.t};
+  });
+  marks=REC.map(function(){return null;});
+  renderItems();
+}
+function renderItems(){
+  var h='<tr><th>Item</th><th>Key (invented)</th><th>The examinee said</th><th>Your mark</th></tr>';
+  REC.forEach(function(r,i){
+    var m=marks[i];
+    var cB='<button type="button" data-i="'+i+'" data-v="1"'+(m?' disabled':'')+(m&&m.final&&r.ok?' class="right"':'')+(m&&m.tried===1&&!r.ok?' class="wrong"':'')+'>Correct</button>';
+    var eB='<button type="button" data-i="'+i+'" data-v="0"'+(m?' disabled':'')+(m&&m.final&&!r.ok?' class="right"':'')+(m&&m.tried===0&&r.ok?' class="wrong"':'')+'>Error</button>';
+    h+='<tr><td>'+r.n+'</td><td>'+r.key+' '+r.code+'</td><td>'+r.said+'</td><td class="mk">'+cB+eB+'</td></tr>';
+  });
+  el('itemTable').innerHTML=h;
+  Array.prototype.forEach.call(document.querySelectorAll('#itemTable td.mk button'),function(b){ b.addEventListener('click',function(){ markItem(+b.getAttribute('data-i'), +b.getAttribute('data-v')); }); });
+  var done=marks.every(function(m){return m;});
+  el('totalBox').classList.toggle('hidden',!done);
+  report();
+}
+function markItem(i,v){
+  var r=REC[i], right=(v===1)===r.ok, fb=el('itemFb');
+  firstTry['item-'+i+'-'+REC[i].key+REC[i].said]=right;
+  marks[i]={tried:v, final:true};
+  fb.className=right?'fb ok':'fb';
+  fb.innerHTML=(right?'<strong>Right.</strong> ':'<strong>Not this one.</strong> ')+'Item '+r.n+' is '+(r.ok?'correct':'an error')+'. '+r.why;
+  setStatus(); renderItems();
+}
+function checkTotal(){
+  var want=REC.filter(function(r){return r.ok;}).length, got=parseInt(el('totalIn').value,10), fb=el('totalFb');
+  var right=got===want;
+  if(!('total-'+REC[0].said in firstTry)) firstTry['total-'+REC[0].said]=right;
+  fb.className=right?'fb ok':'fb';
+  fb.innerHTML=right?'<strong>Right.</strong> '+want+' of 10 items are completely correct. On the form you would write the examinee\'s choices for every item, circle each error, and enter the count in the box.':'<strong>Not this one.</strong> Count only the items where both lines are right after any spontaneous correction. Check your marks above and count again.';
+  setStatus(); report();
+}
+
+/* ---------- Part 2: practice criterion ---------- */
+var PK=[[2,7],[4,9],[1,5],[6,10],[3,8]]; // invented practice key
+var OPTS=[
+ ["met","Criterion met. Go on to the test items."],
+ ["valid","Criterion not met, and the failure is valid. Discontinue and record a score of 0."],
+ ["invalid","Criterion not met, and the failure is invalid. Discontinue and do not interpret it as a visuospatial result."]
+];
+var PCASES=[
+ {title:"Three right on the first trial", setup:"An alert examinee names both lines on every practice item.", resp:["2 and 7","4 and 9","1 and 6","6 and 10","3 and 7"], ans:"met",
+  why:"Practice items 1, 2, and 4 are completely correct on the first trial, and the criterion needs only two. Items 3 and 5 each had one wrong line, so each received the single-line follow-up before you went on."},
+ {title:"Exactly two", setup:"An examinee who is slow but attentive.", resp:["2 and 8","4 and 9","1 and 4","6 and 11","3 and 8"], ans:"met",
+  why:"Items 2 and 5 are completely correct on the first trial. Two is enough, even though they are not consecutive."},
+ {title:"Right only after the single-line help", setup:"An alert, cooperative examinee. On every item she missed, she named the correct line once you covered one line and asked about the other.", resp:["2 and 7","3 and 9","2 and 5","5 and 10","4 and 8"], ans:"valid",
+  why:"Only item 1 is correct on the first trial. Answers on the single-line trials never count toward the criterion. Her wrong answers name two lines on the card, as the instructions ask, and she pointed accurately to the lines she named, so the failure is valid and the score is 0."},
+ {title:"One line at a time", setup:"The examinee looks at the card for a long time on each item and names a single number.", resp:["7","4","5","10","3"], ans:"invalid",
+  why:"Choosing only one line is an inappropriate response form. The chapter treats it as an invalid failure that likely reflects something other than the ability to judge line orientation, such as confusion or failure to acquire the test set."},
+ {title:"The same answer again and again", setup:"The examinee answers item 1 correctly, then gives one pair repeatedly.", resp:["2 and 7","3 and 9","3 and 9","3 and 9","3 and 9"], ans:"invalid",
+  why:"Giving the same choices on consecutive practice items is perseveration, which the chapter lists as an invalid response. With one correct item the criterion is not met, and the failure is not interpreted as a visuospatial result."},
+ {title:"Numbers that are not on the card", setup:"The examinee answers quickly and confidently each time.", resp:["14 and 20","4 and 9","16 and 41","12 and 30","18 and 25"], ans:"invalid",
+  why:"The card has lines 1 to 11. Numbers outside that range are responses inappropriate to the instructions, so the failure is invalid. One correct item does not meet the criterion."},
+ {title:"Wrong pairs, pointed accurately", setup:"An alert examinee. Asked to show you each pair on the card, she points to exactly the two lines she named.", resp:["3 and 8","4 and 9","2 and 6","7 and 11","4 and 9"], ans:"valid",
+  why:"Only item 2 is correct, so the criterion is not met. Every answer names two lines on the card, and she points to the lines she named. The chapter calls that a valid failure, scored 0. Answering 4 and 9 again on item 5 is not perseveration, because the repeat is not on consecutive items."}
+];
+var pc=0, pTried=false;
+function renderPractice(){
+  var c=PCASES[pc];
+  el('prTitle').textContent='Case '+(pc+1)+' of '+PCASES.length+'. '+c.title;
+  el('prSetup').textContent=c.setup;
+  var h='<tr><th>Practice item</th><th>Key (invented)</th><th>First-trial answer</th></tr>';
+  c.resp.forEach(function(r,i){ h+='<tr><td>'+(i+1)+'</td><td>'+PK[i][0]+'&ndash;'+PK[i][1]+'</td><td>"'+r+'"</td></tr>'; });
+  el('prTable').innerHTML=h;
+  var o=el('prOpts'); o.innerHTML='';
+  shuffle(OPTS.slice()).forEach(function(op){
+    var b=document.createElement('button'); b.type='button'; b.textContent=op[1]; b.setAttribute('data-k',op[0]);
+    b.addEventListener('click',function(){ choosePractice(b,op[0]); }); o.appendChild(b);
+  });
+  pTried=false; el('prFb').className='fb hidden'; el('prNext').classList.add('hidden'); report();
+}
+function choosePractice(b,k){
+  var c=PCASES[pc], right=k===c.ans, fb=el('prFb');
+  if(!pTried){ firstTry['practice-'+pc]=right; pTried=true; }
+  if(right){
+    b.classList.add('right'); Array.prototype.forEach.call(el('prOpts').children,function(x){x.disabled=true;});
+    fb.className='fb ok'; fb.innerHTML='<strong>Right.</strong> '+c.why; el('prNext').classList.remove('hidden');
+  } else {
+    b.classList.add('wrong'); b.disabled=true; fb.className='fb';
+    var hint = k==='met' ? 'Count only the items with both lines right on the first trial. The criterion needs two.' :
+               (c.ans==='met' ? 'At least two items are completely correct on the first trial, so the criterion is met.' :
+               (k==='valid' ? 'Look at the form of the answers. A valid failure needs two lines from the card, named or pointed to as asked, without perseveration.' :
+                              'The answers take the form the instructions ask for, two lines on the card, pointed to accurately. That makes the failure valid.'));
+    fb.innerHTML='<strong>Not this one.</strong> '+hint;
+  }
+  setStatus(); report();
+}
+
+/* ---------- Part 3: corrections ---------- */
+var CO=null, cTried=false;
+function newExaminee(){
+  var age, woman, raw, corr;
+  do{
+    age = [18+rnd(32), 50+rnd(15), 65+rnd(10), 75+rnd(15)][rnd(4)];
+    woman = rnd(2)===1; raw = 10+rnd(19);
+    corr = raw + (age>=50&&age<=64?1:0) + (age>=65&&age<=74?3:0) + (woman&&age<=74?2:0);
+  } while(age<=74 && corr>30);
+  CO={age:age, woman:woman, raw:raw, corr:corr, out:age>74};
+  el('coQ').textContent='An examinee aged '+age+', a '+(woman?'woman':'man')+', answers '+raw+' of 30 items correctly. What is the corrected score?';
+  var outT='No corrected score. These norms stop at age 74.';
+  var opts=[], seen={};
+  function add(v,t){ if(seen[t]) return; seen[t]=1; opts.push([v,t]); }
+  if(CO.out){
+    add(1,outT);
+    add(0,String(raw+3+(woman?2:0)));
+    add(0,String(raw+(woman?2:0)));
+    add(0,String(raw+3));
+  } else {
+    add(1,String(corr));
+    var ageAdd=(age>=50&&age<=64?1:0)+(age>=65&&age<=74?3:0);
+    add(0,String(raw+ageAdd+(woman?0:2)));
+    add(0,String(raw+(woman?2:0)+(age>=65?1:(age>=50?3:1))));
+    add(0,String(raw));
+    add(0,outT);
+  }
+  opts=opts.filter(function(o,i){ return o[0]===1 || opts.slice(0,i).every(function(p){return p[1]!==o[1];}); });
+  opts=opts.filter(function(o){ return o[0]===1 || o[1]!==String(CO.corr) || CO.out; });
+  var o=el('coOpts'); o.innerHTML='';
+  shuffle(opts.slice(0,4)).forEach(function(op){
+    var b=document.createElement('button'); b.type='button'; b.textContent=op[1];
+    b.addEventListener('click',function(){ chooseCo(b,op[0]===1); }); o.appendChild(b);
+  });
+  cTried=false; el('coFb').className='fb hidden'; el('coNext').classList.add('hidden'); report();
+}
+function why(){
+  var c=CO;
+  if(c.out) return 'At '+c.age+' the examinee is older than the norm sample, which ran from 16 to 74. The corrections belong to those norms and do not extend past them. Report the raw score with the age limit stated, or use another norm set chosen in supervision.';
+  var parts=[String(c.raw)];
+  if(c.age>=50&&c.age<=64) parts.push('1 for ages 50 to 64');
+  if(c.age>=65&&c.age<=74) parts.push('3 for ages 65 to 74');
+  if(c.woman) parts.push('2 for a woman');
+  if(parts.length===1) return 'A man aged 16 to 49 receives no correction, so the corrected score equals the number correct, '+c.raw+'.';
+  return parts.join(' plus ')+' gives '+c.corr+'. The age and sex corrections add together.';
+}
+function chooseCo(b,right){
+  var fb=el('coFb');
+  if(!cTried){ firstTry['co-'+Object.keys(firstTry).length]=right; cTried=true; }
+  if(right){
+    b.classList.add('right'); Array.prototype.forEach.call(el('coOpts').children,function(x){x.disabled=true;});
+    fb.className='fb ok'; fb.innerHTML='<strong>Right.</strong> '+why(); el('coNext').classList.remove('hidden');
+  } else {
+    b.classList.add('wrong'); b.disabled=true; fb.className='fb';
+    fb.innerHTML='<strong>Not this one.</strong> '+(CO.out?'Check the age range of the norms before you add anything.':'Check which age band applies, and whether the sex correction applies. Each one is added once.');
+  }
+  setStatus(); report();
+}
+
+/* ---------- navigation ---------- */
+var part='items';
+function show(p){
+  part=p;
+  el('pItems').classList.toggle('hidden',p!=='items');
+  el('pPractice').classList.toggle('hidden',p!=='practice');
+  el('pCorrect').classList.toggle('hidden',p!=='correct');
+  Array.prototype.forEach.call(document.querySelectorAll('#chips button'),function(b){ b.classList.toggle('on',b.getAttribute('data-part')===p); });
+  report();
+}
+Array.prototype.forEach.call(document.querySelectorAll('#chips button'),function(b){ b.addEventListener('click',function(){ show(b.getAttribute('data-part')); }); });
+el('newItems').addEventListener('click',function(){ el('totalIn').value=''; el('totalFb').className='fb hidden'; el('itemFb').className='fb hidden'; newRecord(); });
+el('totalBtn').addEventListener('click',checkTotal);
+el('prNext').addEventListener('click',function(){ pc=(pc+1)%PCASES.length; renderPractice(); });
+el('coNext').addEventListener('click',newExaminee);
+function fromHash(){
+  var h=location.hash.replace('#',''), o={};
+  h.split('&').forEach(function(kv){ var p=kv.split('='); if(p[0]) o[p[0]]=p[1]; });
+  if(o.case){ var n=parseInt(o.case,10); if(n>=1&&n<=PCASES.length){ pc=n-1; } }
+  return ['items','practice','correct'].indexOf(o.part)>=0?o.part:(o.case?'practice':'items');
+}
+function report(){ try{ parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:document.documentElement.scrollHeight}),'*'); }catch(e){} }
+window.addEventListener('load',report); window.addEventListener('resize',report);
+window.addEventListener('hashchange',function(){ var p=fromHash(); renderPractice(); show(p); });
+newRecord(); renderPractice(); newExaminee(); setStatus(); show(fromHash());
+window.__tool={ types:TYPES, practice:PCASES, practiceKey:PK,
+  state:function(){ return {part:part, record:REC, marks:marks, pc:pc, examinee:CO}; } };
+</script>
+</body>
+</html>

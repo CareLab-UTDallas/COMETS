@@ -679,7 +679,7 @@ var P4FIX=[
 function solve4(out){ var r={c:0,s:0,p:0,x:0}; out.split('').forEach(function(x){ r[x.toLowerCase()]++; }); r.total=r.c+r.s; var f=0,m=0; out.split('').forEach(function(x){ if(x==='X'){f++; if(f>m)m=f;} else f=0; }); r.maxRun=m; return r; }
 function gen4(){ var s=''; var hard=Math.random()<0.3; for(var i=0;i<15;i++){ s+= hard && i>=6 && i<12 ? 'X' : pick(0.72,0.1,0.1); } return {k:"new", who:P3NAMES[rnd(P3NAMES.length)]+", aged "+(60+rnd(30)), out:s}; }
 var P4Q=[
- ["Start with the first of the 15 items, give all 15 in item order, and stop only after the last. The short form has no start point, basal, or discontinue rule.",1,"The battery's 15-item form has no start point, basal, or discontinue rule. The normative studies gave every item of each 15-item form."],
+ ["Start with the first of the 15 items, give all 15 in item order, and stop only after the last. The short form has no start point, basal, or discontinue rule.",1,"The program’s 15-item form has no start point, basal, or discontinue rule. The normative studies gave every item of each 15-item form."],
  ["Stop after 6 consecutive failures, as on the full form.",0,"The discontinue rule belongs to the full form. The short form has none, and its norms come from administrations that gave every item."],
  ["Start partway through the list and work backward to a basal of 8.",0,"The start point and basal belong to the full form. Give all 15 items in item order."]
 ];
@@ -688,7 +688,7 @@ function load4(i){
   p4i=i; p4=(i<P4FIX.length)?P4FIX[i]:gen4(); p4mc=null; p4tried=false;
   Array.prototype.forEach.call(el('chips4').children,function(b,j){ b.classList.toggle('on',j===i); b.setAttribute('aria-pressed',j===i?'true':'false'); });
   var sv=solve4(p4.out);
-  el('t4').textContent=(i<P4FIX.length?('Case '+p4.k):'Random case')+'. The battery\'s 15-item form';
+  el('t4').textContent=(i<P4FIX.length?('Case '+p4.k):'Random case')+'. The program’s 15-item form';
   el('s4').textContent=p4.who+". The outcomes below are listed by position on the 15-item form, after the full cueing sequence on each item."+(sv.maxRun>=6?" Notice the run of "+sv.maxRun+" failures in a row.":"");
   var h=''; p4.out.split('').forEach(function(x,j){ h+='<div aria-label="Position '+(j+1)+', outcome '+x+'">'+(j+1)+'<b>'+x+'</b></div>'; });
   el('sf4').innerHTML=h;

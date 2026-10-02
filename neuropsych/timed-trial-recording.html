@@ -254,9 +254,9 @@ function buildPre(){
   var p=S.person, W=S.writer, H=S.hand, O=other(W);
   S.pre=[];
   S.pre.push({k:'dom', q:p.short+' tells you '+p.she+' writes with '+p.her+' '+W+' hand. When you set the board down, '+p.she+' reached toward it with '+p.her+' '+O+' hand. Which hand do you test first?', opts:[
-    ['The '+W+' hand, the writing hand.',1,'The battery defines the dominant hand as the writing hand, and the dominant hand is tested first. Circle it on the form before the first trial, since it also decides which norm column each time is read against.'],
+    ['The '+W+' hand, the writing hand.',1,'The program defines the dominant hand as the writing hand, and the dominant hand is tested first. Circle it on the form before the first trial, since it also decides which norm column each time is read against.'],
     ['The '+O+' hand, the hand '+p.she+' reached with.',0,'Deciding dominance by the hand the examinee reaches with is one of the examiner errors that change the score. Each time would then be read against the wrong column.'],
-    ['Ask which hand '+p.she+' prefers and start with that one.',0,'Preference can be answered differently on different days. The battery uses the writing hand, one fact the examinee reports the same way every time.']]});
+    ['Ask which hand '+p.she+' prefers and start with that one.',0,'Preference can be answered differently on different days. The program uses the writing hand, one fact the examinee reports the same way every time.']]});
   if(W!==H){
     S.pre.push({k:'second', q:p.short+'’s '+W+'-hand trial is finished. Before the '+H+'-hand trial, what do you do?', opts:[
       ['Clear the board, return every peg to the tray, give the instruction with the hand and the direction reversed, and demonstrate one full row again.',1,'The second hand gets the same instruction with the hand and direction reversed, a full demonstration row, and an empty board.'],
@@ -290,7 +290,7 @@ function eventDef(type){
     ['Pick up the dropped peg and hand it back.',0,'The examiner does not retrieve a dropped peg.'],
     ['Stop the trial and begin again.',0,'A drop is handled inside the trial and tallied while the stopwatch keeps running.']]};
   if(type==='twoPegs') return {q:sh+' comes up from the tray with two pegs pinched together. What do you do?', opts:[
-    ['Keep the stopwatch running and say at once “Only one peg at a time.” Have '+objOf(p)+' put the extra peg back in the tray, and note the reminder on the form.',1,'The program’s rule is that two pegs do not stop the trial. Keep timing, interrupt at once with the battery’s reminder, and have the examinee return the extra peg to the tray. The extra peg is not a drop and is not tallied. The reminder goes on the form.'],
+    ['Keep the stopwatch running and say at once “Only one peg at a time.” Have '+objOf(p)+' put the extra peg back in the tray, and note the reminder on the form.',1,'The program’s rule is that two pegs do not stop the trial. Keep timing, interrupt at once with the program’s reminder, and have the examinee return the extra peg to the tray. The extra peg is not a drop and is not tallied. The reminder goes on the form.'],
     ['Stop the trial and begin it again. Note the restart on the form.',0,'The program’s rule does not stop or restart the trial for two pegs. Keep the stopwatch running, give the reminder, and have the extra peg returned to the tray.'],
     ['Take one peg from '+p.her+' fingers and let '+objOf(p)+' go on.',0,'Taking the peg yourself skips the reminder. Say “Only one peg at a time” and have the examinee put the extra peg back in the tray.'],
     ['Let '+objOf(p)+' go on and note it on the form.',0,'Two pegs in the fingers break a rule the examinee was told. Interrupt at once with “Only one peg at a time” and have the extra peg returned before the examinee goes on.'],
@@ -304,7 +304,7 @@ function eventDef(type){
       ['Repeat the whole instruction and demonstrate the row again.',0,'The procedure calls for pointing to the correct starting point with a short prompt, not a second instruction.']]};
   }
   if(type==='fiveMin') return {q:'The stopwatch reaches 5:00. '+sh+' is still working. What do you do?', opts:[
-    ['Stop '+objOf(p)+' now. Enter 300 s and count the pegs placed.',1,'The battery stops the trial at 5 minutes, enters the time as 300 s, and counts the pegs in the board.'],
+    ['Stop '+objOf(p)+' now. Enter 300 s and count the pegs placed.',1,'The program stops the trial at 5 minutes, enters the time as 300 s, and counts the pegs in the board.'],
     ['Let '+objOf(p)+' finish and record the full time.',0,'Letting a trial run past 5 minutes is one of the examiner errors that change the score.'],
     ['Stop '+objOf(p)+' and leave the seconds blank, since the trial was not finished.',0,'A stopped trial still has a time. It is entered as 300 s, with the pegs placed beside it.'],
     ['Stop '+objOf(p)+' and record the stopwatch reading to the tenth of a second.',0,'The time for a stopped trial is entered as 300 s, with the pegs placed beside it.']]};

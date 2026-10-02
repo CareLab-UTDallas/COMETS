@@ -62,7 +62,7 @@
 <body>
 <div class="wrap">
   <h1>Time a connect-the-circles administration</h1>
-  <p class="lede">A simulated examinee works through an original practice layout with the same logic as the published connect-the-circles task, 25 circles, numbers only for A-style and numbers alternating with letters for B-style. It is not the research battery's test sheet. You give the begin instruction, run the stopwatch, mark each error the moment it happens, choose the correction, and record the result. The examinee runs in real time.</p>
+  <p class="lede">A simulated examinee works through an original practice layout with the same logic as the published connect-the-circles task, 25 circles, numbers only for A-style and numbers alternating with letters for B-style. It is not the published test sheet. You give the begin instruction, run the stopwatch, mark each error the moment it happens, choose the correction, and record the result. The examinee runs in real time.</p>
   <div class="warn"><strong>Nothing here is saved.</strong> Keyboard shortcuts while a case runs are the space bar for the stopwatch and E to mark an error.</div>
   <div class="tabs" id="tabs"></div>
   <div class="card">
@@ -101,7 +101,7 @@
     </div>
     <div class="fb hidden" id="fb"></div>
   </div>
-  <p class="ref">Procedure as taught on the Canvas page, which follows the research battery's published administration instructions. Norms and percentiles are taught on the Canvas page and are not included here. Examinees and layouts are invented.</p>
+  <p class="ref">Procedure as taught on the Canvas page, which follows the published administration instructions. Norms and percentiles are taught on the Canvas page and are not included here. Examinees and layouts are invented.</p>
 </div>
 <script>
 (function(){
@@ -115,8 +115,8 @@ function rng(seed){ var a=seed>>>0; return function(){ a|=0; a=a+0x6D2B79F5|0; v
 var W=700, H=500, R=17, M=34;
 function segDist(p,a,b){ var dx=b.x-a.x, dy=b.y-a.y, L=dx*dx+dy*dy, t=L?((p.x-a.x)*dx+(p.y-a.y)*dy)/L:0; t=Math.max(0,Math.min(1,t)); var x=a.x+t*dx, y=a.y+t*dy; return Math.hypot(p.x-x,p.y-y); }
 function cross(a,b,c,d){ function o(p,q,r){ return (q.x-p.x)*(r.y-p.y)-(q.y-p.y)*(r.x-p.x); } return (o(a,b,c)*o(a,b,d)<0)&&(o(c,d,a)*o(c,d,b)<0); }
-function makeLayout(seed){
-  for(var attempt=0; attempt<400; attempt++){
+function makeLayout(seed, extra){
+  for(var attempt=0; attempt<2000; attempt++){
     var r=rng(seed*1000+attempt), pts=[{x:M+r()*(W-2*M), y:M+r()*(H-2*M)}], ok=true;
     for(var i=1;i<25 && ok;i++){
       var placed=false;
@@ -125,17 +125,34 @@ function makeLayout(seed){
         var c={x:prev.x+Math.cos(ang)*d, y:prev.y+Math.sin(ang)*d};
         if(c.x<M||c.x>W-M||c.y<M||c.y>H-M) continue;
         if(pts.some(function(p){ return Math.hypot(p.x-c.x,p.y-c.y)<50; })) continue;
-        if(pts.slice(0,-1).some(function(p){ return segDist(p,prev,c)<R+9; })) continue;
+        if(pts.slice(0,-1).some(function(p){ return segDist(p,prev,c)<CLR; })) continue;
+        var near=false; for(var s=0;s<i-1;s++){ if(segDist(c,pts[s],pts[s+1])<CLR){ near=true; break; } } if(near) continue;
         var bad=false; for(var s=0;s<i-2;s++){ if(cross(pts[s],pts[s+1],prev,c)){ bad=true; break; } } if(bad) continue;
         pts.push(c); placed=true; break;
       }
       if(!placed) ok=false;
     }
-    if(ok) return pts;
+    if(ok && layoutOk(pts, extra||[])) return pts;
   }
   return null;
 }
-var LAY = {A:makeLayout(7), B:makeLayout(19)};
+// Rejection test for a whole layout: every drawn segment (correct i->i+1 and each scripted
+// error line) must clear every non-endpoint circle by CLR, and the Begin/End labels must stay
+// on the sheet, off other circles, and uncrossed by any segment.
+var CLR=R+13;
+function layoutOk(pts, extra){
+  var segs=[]; for(var i=0;i<24;i++) segs.push([i,i+1]); segs=segs.concat(extra);
+  for(var k=0;k<segs.length;k++){ var a=pts[segs[k][0]], b=pts[segs[k][1]];
+    for(var j=0;j<pts.length;j++){ if(j!==segs[k][0]&&j!==segs[k][1]&&segDist(pts[j],a,b)<CLR) return false; } }
+  for(var n=0;n<2;n++){ var o=n?24:0, c=pts[o], hw=n?16:20, bx={x0:c.x-hw, x1:c.x+hw, y0:c.y-R-6-15, y1:c.y-R-6+5};
+    if(bx.y0<0||bx.x0<0||bx.x1>W) return false;
+    for(var j=0;j<pts.length;j++){ if(j===o) continue; var qx=Math.max(bx.x0,Math.min(pts[j].x,bx.x1)), qy=Math.max(bx.y0,Math.min(pts[j].y,bx.y1)); if(Math.hypot(pts[j].x-qx,pts[j].y-qy)<R+4) return false; }
+    var C=[{x:bx.x0,y:bx.y0},{x:bx.x1,y:bx.y0},{x:bx.x1,y:bx.y1},{x:bx.x0,y:bx.y1}];
+    for(var k=0;k<segs.length;k++){ var a=pts[segs[k][0]], b=pts[segs[k][1]];
+      for(var e=0;e<4;e++){ if(cross(a,b,C[e],C[(e+1)%4])) return false; }
+      if(segs[k][0]===o||segs[k][1]===o){ var f=segs[k][0]===o?b:a; if(f.y<c.y && Math.abs(f.x-c.x)<=(c.y-f.y)*hw/(R+6)) return false; } } }
+  return true;
+}
 var LAB = {A:[], B:[]};
 for(var i=1;i<=25;i++) LAB.A.push(String(i));
 (function(){ var L="ABCDEFGHIJKL"; for(var i=0;i<25;i++) LAB.B.push(i%2===0 ? String(i/2+1) : L[(i-1)/2]); })();
@@ -156,6 +173,8 @@ var CASES=[
   pauses:{3:2000, 9:2600, 14:1800, 22:2400}}
 ];
 var MAX = {A:150000, B:300000};
+function errSegs(part){ var x=[]; CASES.forEach(function(c){ if(c.part===part) c.errors.forEach(function(e){ x.push([e.after,e.wrong]); }); }); return x; }
+var LAY = {A:makeLayout(7, errSegs("A")), B:makeLayout(19, errSegs("B"))};
 
 function opts(c, e){
   var lay=LAB[c.part], last=lay[e.after], next=lay[e.after+1];

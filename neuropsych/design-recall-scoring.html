@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Score a Design-Recall Protocol</title>
+<!--
+  Deep links (location.hash)
+    #mode=trial      Award points figure by figure and total a trial (default)
+    #mode=summary    Compute the summary scores from trial totals and recognition counts
+  All examinees, drawings, and decisions are invented. No test figures, criteria text, or norms appear here.
+-->
+<style>
+  :root{--bg:#ffffff; --card:#f7faf8; --ink:#17251d; --muted:#41544a; --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b;}
+  *{box-sizing:border-box;}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.55;}
+  .wrap{max-width:820px; margin:0 auto; padding:14px 14px 16px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:22px; margin:0 0 4px;}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
+  .warn{font-size:13px; color:#7a3d00; background:#fff3e6; border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px; margin:0 0 10px;}
+  .chips{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 10px;}
+  .chips button{font:inherit; font-size:14px; cursor:pointer; border:1px solid #cfe0d7; border-radius:20px; background:#eef4f1; color:var(--green); padding:6px 13px;}
+  .chips button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:0 0 10px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:18px; margin:0 0 6px;}
+  .setup{font-size:14px; color:var(--teach); margin:0 0 8px;}
+  table{border-collapse:collapse; width:100%; font-size:14px;}
+  th,td{border:1px solid #cfe0d7; padding:5px 8px; text-align:left; vertical-align:top; overflow-wrap:anywhere;}
+  th{background:#eef4f1; color:var(--green); font-weight:600;}
+  tr.hi td{background:#fff7ef;}
+  .rules th{width:150px;}
+  .q{font-weight:600; margin:0 0 8px;}
+  .opts{display:flex; flex-direction:column; gap:6px;}
+  .opts button{font:inherit; font-size:15px; text-align:left; cursor:pointer; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--ink); padding:8px 12px; overflow-wrap:anywhere;}
+  .opts button:hover:not(:disabled){border-color:#9cc3ae;}
+  .opts button.right{background:#e3f0e9; border-color:var(--green);}
+  .opts button.wrong{background:#fbeee4; border-color:#e3b58f; color:#6b4a2f;}
+  .numrow{display:flex; flex-wrap:wrap; gap:8px; align-items:center;}
+  .numrow label{font-size:15px;}
+  .numrow input{font:inherit; font-size:16px; width:6em; padding:7px 9px; border:1px solid #9cb5a8; border-radius:8px; background:#fff; color:var(--ink);}
+  .fb{margin:10px 0 0; padding:8px 10px; border-radius:6px; font-size:14px; color:var(--teach); background:#fff7ef; border:1px solid #f0d9c2; border-left:4px solid var(--accent);}
+  .fb.ok{background:#f0f7f3; border-color:#cfe0d7; border-left-color:var(--green);}
+  .nav{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0 0;}
+  button.b{font:inherit; font-size:15px; cursor:pointer; border-radius:8px; padding:9px 16px;}
+  .primary{background:var(--green); color:#eef4f1; border:1px solid var(--green);}
+  .secondary{background:#eef4f1; color:var(--green); border:1px solid #cfe0d7;}
+  .status{font-size:13px; color:var(--muted);}
+  .hidden{display:none !important;}
+  .small{font-size:12px; color:var(--muted); margin:8px 0 0;}
+  button:focus-visible, input:focus-visible{outline:3px solid var(--accent); outline-offset:2px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Score a design-recall protocol</h1>
+  <p class="lede">An examinee studies a page of six figures and draws them from memory. Each record below gives the scorer's two decisions for every figure, whether the drawing met the written accuracy criteria and whether it is in its own position on the page. You turn those decisions into points, then into the summary scores.</p>
+  <div class="warn"><strong>Nothing here is saved.</strong> Every examinee and every record is invented. Practice as often as you like.</div>
+  <div class="chips" id="modes" role="group" aria-label="Practice mode">
+    <button type="button" data-mode="trial">Points for a trial</button>
+    <button type="button" data-mode="summary">Summary scores</button>
+  </div>
+  <div class="card">
+    <h2 id="cTitle"></h2>
+    <p class="setup" id="cSetup"></p>
+    <table id="rec"></table>
+  </div>
+  <div class="card">
+    <p class="q" id="q"></p>
+    <div class="opts" id="opts"></div>
+    <div class="numrow hidden" id="numrow">
+      <label for="num" id="numLabel"></label>
+      <input id="num" type="number" inputmode="numeric" min="0" max="100" step="1">
+      <button class="b secondary" id="check" type="button">Check</button>
+    </div>
+    <div class="fb hidden" id="fb" aria-live="polite"></div>
+    <div class="nav">
+      <button class="b primary hidden" id="next" type="button">Next step</button>
+      <span class="status" id="status" aria-live="polite"></span>
+    </div>
+  </div>
+  <table class="rules" aria-label="Scoring rules">
+    <tr><th scope="row">Each figure</th><td>One point if the drawing meets the written accuracy criteria for that figure. One point if it is in that figure's own position. The two points are awarded independently, so a figure scores 0, 1, or 2.</td></tr>
+    <tr><th scope="row">Each trial</th><td>Six figures, 0 to 12.</td></tr>
+    <tr><th scope="row">Total Recall</th><td>Trial 1 plus Trial 2 plus Trial 3. The delayed trial is not included.</td></tr>
+    <tr><th scope="row">Learning</th><td>The higher of Trial 2 and Trial 3, minus Trial 1.</td></tr>
+    <tr><th scope="row">Percent Retained</th><td>Delayed recall divided by the higher of Trial 2 and Trial 3, times 100. Round to a whole number here.</td></tr>
+    <tr><th scope="row">Discrimination</th><td>Recognition hits minus recognition false alarms.</td></tr>
+  </table>
+  <p class="small">Rules are paraphrased from the sources cited on the Canvas page. Use the manual during a real administration.</p>
+</div>
+<script>
+(function(){
+var PEOPLE=[['Ms.','Margaret','Webb'],['Ms.','Helen','Pierce'],['Mr.','Edward','Lyle'],['Mr.','James','Fuller'],['Ms.','Alice','Turner'],['Mr.','Victor','Hall'],['Ms.','Grace','Dunn'],['Mr.','Leonard','Price']];
+var POS=['Top left','Top right','Middle left','Middle right','Bottom left','Bottom right'];
+var TRIALS=['first learning trial','second learning trial','third learning trial','delayed recall trial'];
+function rnd(n){return Math.floor(Math.random()*n);}
+function pick(a){return a[rnd(a.length)];}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=rnd(i+1),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function person(){var p=pick(PEOPLE); return {full:p[0]+' '+p[1]+' '+p[2], short:p[0]+' '+p[2], age:60+rnd(30)};}
+function pts(f){return f.drawn?(f.acc?1:0)+(f.loc?1:0):0;}
+function yn(b){return b?'Yes':'No';}
+
+var S={mode:'trial', c:null, step:0, first:0, tries:0, attempted:false};
+
+// ---------- trial mode ----------
+function makeTrial(opts){
+  opts=opts||{};
+  var p=person();
+  var figs=opts.figs||POS.map(function(){
+    var u=Math.random();
+    if(u<0.15) return {drawn:false,acc:false,loc:false};
+    return {drawn:true, acc:Math.random()<0.6, loc:Math.random()<0.65};
+  });
+  // make sure every case has at least one independent-point figure to ask about
+  var kinds=figs.map(function(f){return f.drawn&&(f.acc!==f.loc);});
+  if(!opts.figs && kinds.indexOf(true)<0){ figs[rnd(6)]={drawn:true,acc:true,loc:false}; }
+  var ask=opts.ask!=null?opts.ask:(function(){var c=[];figs.forEach(function(f,i){if(f.drawn&&f.acc!==f.loc)c.push(i);});return pick(c);})();
+  var total=figs.reduce(function(s,f){return s+pts(f);},0);
+  var c={mode:'trial', p:p, figs:figs, ask:ask, total:total, trial:opts.trial||pick(TRIALS)};
+  c.title=p.full+', age '+p.age;
+  c.setup='The '+c.trial+' is drawn. The scorer has compared each drawing with the written criteria and with the six positions on the study page. A dash means no drawing for that figure.';
+  var f=figs[ask];
+  var why;
+  if(f.acc&&!f.loc) why='The drawing meets the accuracy criteria, so it receives the accuracy point. It is not in its own position, so it does not receive the location point. One point.';
+  else why='The drawing is in its own position, so it receives the location point. It does not meet the accuracy criteria, so it does not receive the accuracy point. One point.';
+  c.steps=[
+    {id:'fig', type:'choice', q:'How many points does the '+POS[ask].toLowerCase()+' figure receive?', hi:ask,
+     opts:[['2',0,'Two points need both decisions to be yes. One of them is no here, and the points are awarded independently.'],
+           ['1',1,why],
+           ['0',0,'A zero needs both decisions to be no, or no drawing at all. One decision is yes here, and the points do not depend on each other.']]},
+    {id:'total', type:'num', q:'Enter the score for this trial.', label:'Trial score', ans:total,
+     why:figs.map(function(f,i){return POS[i]+' '+pts(f);}).join(', ')+'. Sum '+total+' of 12.'}
+  ];
+  return c;
+}
+function trialDiag(c,v){
+  var both=c.figs.filter(function(f){return f.drawn&&f.acc&&f.loc;}).length*2;
+  var accOnly=c.figs.reduce(function(s,f){return s+(f.drawn&&f.acc?(f.loc?2:1):0);},0);
+  var drawn=c.figs.filter(function(f){return f.drawn;}).length;
+  var acc=c.figs.filter(function(f){return f.drawn&&f.acc;}).length;
+  if(v>12) return 'A trial cannot exceed 12, six figures at up to 2 points each.';
+  if(v===both) return 'That counts only figures with both points. A figure with one yes still receives 1 point.';
+  if(v===accOnly&&accOnly!==c.total) return 'That gives the location point only when the accuracy point is also given. The location point stands on its own.';
+  if(v===drawn) return 'That counts drawings, one per figure drawn. Each figure is worth up to 2 points.';
+  if(v===acc) return 'That counts only the accuracy points. Add the location points as well.';
+  return 'Add the points figure by figure, 1 for each yes, then sum the six.';
+}
+
+// ---------- summary mode ----------
+function makeSummary(o){
+  o=o||{};
+  var p=person();
+  var t1=o.t1!=null?o.t1:2+rnd(6);
+  var t2=o.t2!=null?o.t2:Math.min(12,t1+rnd(5));
+  var t3=o.t3!=null?o.t3:(Math.random()<0.35?Math.max(0,t2-1-rnd(2)):Math.min(12,t2+rnd(3)));
+  if(o.t3==null && Math.max(t2,t3)===0){t2=1;}
+  var best=Math.max(t2,t3);
+  var dr=o.dr!=null?o.dr:Math.max(0,Math.min(12,best-rnd(4)));
+  var hits=o.hits!=null?o.hits:3+rnd(4);
+  var fa=o.fa!=null?o.fa:rnd(3);
+  var c={mode:'summary', p:p, t1:t1,t2:t2,t3:t3,dr:dr,hits:hits,fa:fa,best:best};
+  c.tr=t1+t2+t3; c.learn=best-t1; c.pr=best>0?Math.round(dr/best*100):0; c.di=hits-fa;
+  c.title=p.full+', age '+p.age;
+  c.setup='Every figure has been scored. Compute the summary scores from the trial scores and the recognition counts.';
+  var bw=t2>=t3?'Trial 2':'Trial 3';
+  c.steps=[
+    {id:'tr', type:'num', q:'Enter Total Recall.', label:'Total Recall', ans:c.tr, why:t1+' plus '+t2+' plus '+t3+' is '+c.tr+'. The delayed trial is not part of Total Recall.'},
+    {id:'learn', type:'num', q:'Enter the Learning score.', label:'Learning', ans:c.learn, why:'The higher of Trial 2 and Trial 3 is '+best+' ('+bw+'). '+best+' minus Trial 1, '+t1+', is '+c.learn+'.'},
+    {id:'pr', type:'num', q:'Enter Percent Retained, rounded to a whole number.', label:'Percent Retained', ans:c.pr, why:'Delayed recall '+dr+' divided by the best learning trial, '+best+', times 100 is '+(best>0?(dr/best*100).toFixed(1):'0')+', rounded to '+c.pr+'.'},
+    {id:'di', type:'num', q:'Enter the Discrimination Index.', label:'Discrimination Index', ans:c.di, why:hits+' hits minus '+fa+' false alarms is '+c.di+'.'}
+  ];
+  return c;
+}
+function sumDiag(c,id,v){
+  if(id==='tr'){
+    if(v===c.tr+c.dr) return 'That includes the delayed trial. Total Recall adds the three learning trials only.';
+    if(v===c.t2+c.t3||v===c.t1+c.t2) return 'That adds only two trials. Total Recall adds Trials 1, 2, and 3.';
+    return 'Add Trials 1, 2, and 3.';
+  }
+  if(id==='learn'){
+    if(c.t2>c.t3 && v===c.t3-c.t1) return 'That uses Trial 3. Learning uses the higher of Trial 2 and Trial 3, and here Trial 2 is higher.';
+    if(v===c.t1-c.best) return 'The subtraction is reversed. Take Trial 1 away from the best of Trials 2 and 3.';
+    if(v===c.tr) return 'That is Total Recall. Learning is a gain, the best of Trials 2 and 3 minus Trial 1.';
+    return 'Take the higher of Trial 2 and Trial 3 and subtract Trial 1.';
+  }
+  if(id==='pr'){
+    if(c.t2>c.t3 && c.t3>0 && v===Math.round(c.dr/c.t3*100)) return 'That divides by Trial 3. Percent Retained divides by the higher of Trial 2 and Trial 3, and here Trial 2 is higher.';
+    if(c.tr>0 && v===Math.round(c.dr/c.tr*100)) return 'That divides by Total Recall. Divide delayed recall by the best single learning trial.';
+    if(c.dr>0 && v===Math.round(c.best/c.dr*100)) return 'The division is upside down. Delayed recall goes on top.';
+    if(c.t1>0 && v===Math.round(c.dr/c.t1*100)) return 'That divides by Trial 1. Divide by the higher of Trial 2 and Trial 3.';
+    return 'Divide delayed recall by the higher of Trial 2 and Trial 3, then multiply by 100.';
+  }
+  if(id==='di'){
+    if(v===c.hits+c.fa) return 'That adds the false alarms. The index subtracts them, so a person who says yes to everything scores 0.';
+    if(v===c.hits) return 'That is the hit count alone. Subtract the false alarms.';
+    if(v===c.fa-c.hits) return 'The subtraction is reversed. Hits minus false alarms.';
+    return 'Subtract the false alarms from the hits.';
+  }
+  return '';
+}
+
+// ---------- render ----------
+var $=function(id){return document.getElementById(id);};
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function renderCase(){
+  var c=S.c;
+  $('cTitle').textContent=c.title; $('cSetup').textContent=c.setup;
+  var h='';
+  if(c.mode==='trial'){
+    var hi=(c.steps[S.step].id==='fig')?c.ask:-1;
+    h='<tr><th scope="col">Figure position</th><th scope="col">Meets accuracy criteria</th><th scope="col">In its own position</th></tr>';
+    c.figs.forEach(function(f,i){ h+='<tr'+(i===hi?' class="hi"':'')+'><td>'+POS[i]+'</td><td>'+(f.drawn?yn(f.acc):'-')+'</td><td>'+(f.drawn?yn(f.loc):'-')+'</td></tr>'; });
+  } else {
+    h='<tr><th scope="col">Record</th><th scope="col">Score</th></tr>'+
+      [['Trial 1',c.t1],['Trial 2',c.t2],['Trial 3',c.t3],['Delayed recall',c.dr],['Recognition hits (of 6)',c.hits],['Recognition false alarms (of 6)',c.fa]]
+      .map(function(r){return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>';}).join('');
+  }
+  $('rec').innerHTML=h;
+}
+function renderStep(){
+  var c=S.c, st=c.steps[S.step];
+  S.attempted=false;
+  renderCase();
+  $('q').textContent=st.q;
+  $('fb').className='fb hidden'; $('fb').textContent='';
+  $('next').classList.add('hidden');
+  if(st.type==='choice'){
+    $('numrow').classList.add('hidden');
+    var o=$('opts'); o.innerHTML='';
+    st.opts.forEach(function(op){
+      var b=document.createElement('button'); b.type='button'; b.textContent=op[0];
+      b.addEventListener('click',function(){answer(op[1]===1,op[1]===1?st.opts.filter(function(x){return x[1]===1;})[0][2]:op[2],b);});
+      o.appendChild(b);
+    });
+  } else {
+    $('opts').innerHTML='';
+    $('numrow').classList.remove('hidden');
+    $('numLabel').textContent=st.label; $('num').value='';
+  }
+  $('next').textContent=(S.step===c.steps.length-1)?'New case':'Next step';
+  status(); report();
+}
+function answer(ok,text,btn){
+  var st=S.c.steps[S.step];
+  if(!S.attempted){S.attempted=true; S.tries++; if(ok) S.first++;}
+  var f=$('fb');
+  f.className='fb'+(ok?' ok':''); f.textContent=(ok?'Right. ':'Not this one. ')+text;
+  if(btn){ btn.classList.add(ok?'right':'wrong'); if(ok) Array.prototype.forEach.call($('opts').children,function(b){b.disabled=true;}); }
+  if(ok) $('next').classList.remove('hidden');
+  status(); report();
+}
+function checkNum(){
+  var st=S.c.steps[S.step]; var raw=$('num').value.trim();
+  if(raw===''||isNaN(Number(raw))){ var f=$('fb'); f.className='fb'; f.textContent='Not this one. Enter a whole number.'; report(); return; }
+  var v=Math.round(Number(raw));
+  if(v===st.ans){ answer(true,st.why); }
+  else answer(false, S.c.mode==='trial'?trialDiag(S.c,v):sumDiag(S.c,st.id,v));
+}
+function status(){ $('status').textContent=S.tries?('Correct on the first try in '+S.first+' of '+S.tries+' steps.'):''; }
+function newCase(opts){
+  S.c=(S.mode==='trial')?makeTrial(opts):makeSummary(opts); S.step=0; renderStep();
+}
+function setMode(m){
+  S.mode=(m==='summary')?'summary':'trial';
+  Array.prototype.forEach.call($('modes').children,function(b){b.classList.toggle('on',b.getAttribute('data-mode')===S.mode); b.setAttribute('aria-pressed',b.getAttribute('data-mode')===S.mode?'true':'false');});
+  newCase();
+}
+$('check').addEventListener('click',checkNum);
+$('num').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); checkNum(); } });
+$('next').addEventListener('click',function(){ if(S.step<S.c.steps.length-1){S.step++; renderStep();} else newCase(); });
+Array.prototype.forEach.call($('modes').children,function(b){ b.addEventListener('click',function(){ location.hash='mode='+b.getAttribute('data-mode'); setMode(b.getAttribute('data-mode')); }); });
+
+function report(){ try{ parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:document.documentElement.scrollHeight}),'*'); }catch(e){} }
+window.addEventListener('load',report); window.addEventListener('resize',report);
+function fromHash(){
+  var h={}; location.hash.replace(/^#/,'').split('&').forEach(function(kv){var p=kv.split('='); if(p[0]) h[p[0]]=decodeURIComponent(p[1]||'');});
+  setMode(h.mode);
+}
+window.addEventListener('hashchange',fromHash);
+window.__tool={
+  newCase:function(o){newCase(o);},
+  state:function(){ var c=S.c, st=c.steps[S.step];
+    return {mode:S.mode, step:S.step, nSteps:c.steps.length, stepId:st.id, stepType:st.type,
+      correct:st.type==='choice'?st.opts.filter(function(o){return o[1]===1;})[0][0]:st.ans,
+      wrong:st.type==='choice'?st.opts.filter(function(o){return o[1]!==1;}).map(function(o){return o[0];}):[],
+      figs:c.figs||null, ask:c.ask, t1:c.t1,t2:c.t2,t3:c.t3,dr:c.dr,hits:c.hits,fa:c.fa, first:S.first, tries:S.tries}; }
+};
+fromHash();
+})();
+</script>
+</body>
+</html>

@@ -142,7 +142,7 @@ function breakdown(resp, which){ var parts=[]; resp.forEach(function(r,i){ if(wh
 function itemsOf(resp,val){ var o=[]; resp.forEach(function(r,i){ if(r===val) o.push(i+1); }); return o; }
 
 // ---------- results lines ----------
-function aidedSentence(c){ return 'Aided pass (battery wording, not banded) '+c.as.t+'/40 (emotional '+c.as.e+', social '+c.as.s+').'; }
+function aidedSentence(c){ return 'Aided pass (track wording, not banded) '+c.as.t+'/40 (emotional '+c.as.e+', social '+c.as.s+').'; }
 function lineCorrect(c){ var L='Unaided total '+c.us.t+'/40 (emotional '+c.us.e+', social '+c.us.s+'), '+bandPhrase(c.set,c.us.t)+'.'; if(c.aid==='wear') L+=' '+aidedSentence(c); return L+' '+AIDTXT[c.aid]; }
 function lineVariants(c){
   var head='Unaided total '+c.us.t+'/40 (emotional '+c.us.e+', social '+c.us.s+')';
@@ -156,7 +156,7 @@ function lineVariants(c){
     [head+', '+bandOf(c.set,c.us.t)[2].toLowerCase()+' band.'+aidS+tail,0,'The band source and range are missing. Published band sets disagree, and a total of 10 falls in a referral band of McCabe (2019) but in the little-or-no-limitation band of the Swedish set. Every report names the band set it used.']
   ];
   if(c.aid==='wear'){
-    wrong.push([head+', '+bandPhrase(c.set,c.us.t)+'. Aided pass '+c.as.t+'/40 (emotional '+c.as.e+', social '+c.as.s+'), '+bandPhrase(c.set,c.as.t)+'.'+tail,0,'The aided total has been placed in a band. The aided pass is a battery variable recorded separately and never banded.']);
+    wrong.push([head+', '+bandPhrase(c.set,c.us.t)+'. Aided pass '+c.as.t+'/40 (emotional '+c.as.e+', social '+c.as.s+'), '+bandPhrase(c.set,c.as.t)+'.'+tail,0,'The aided total has been placed in a band. The aided pass is recorded separately and never banded.']);
     shuffle(wrong); wrong=wrong.slice(0,3);
   }
   return out.concat(wrong);
@@ -208,8 +208,8 @@ function makeScore(opts){
   if(aid==='wear'){
     st.push({id:'aT',type:'num',q:'Enter the aided total from the second pass.',label:'Aided total',ans:c.as.t,why:breakdown(c.aresp,'T')+'. Emotional '+c.as.e+' plus social '+c.as.s+' is '+c.as.t+'.'+(c.as.t>=c.us.t?' The aided total is not always lower than the unaided total, and you record it as given.':''),aided:true});
     st.push({id:'aBand',type:'choice',q:'Does the aided total of '+c.as.t+' get a band?',opts:[
-      ['No. The aided total is recorded separately and is not placed in a band.',1,'The aided pass uses battery wording that is not part of the published instrument. Its total is a battery variable, recorded on its own and never banded.'],
-      ['Yes. Use the same band set as the unaided total.',0,'The bands were published for the unaided screen. The aided total is a battery variable that is not placed in a band.'],
+      ['No. The aided total is recorded separately and is not placed in a band.',1,'The aided pass uses track wording that is not part of the published instrument. Its total is recorded on its own and never banded.'],
+      ['Yes. Use the same band set as the unaided total.',0,'The bands were published for the unaided screen. The aided total is not placed in a band.'],
       ['Yes, and when it is lower it replaces the unaided total in the report.',0,'The aided total never replaces the unaided total, and it is not banded.']]});
   } else {
     var whyNo=aid==='none'?'The aided pass is given only to examinees who wear hearing aids in daily life, and '+p.short+' does not own aids.':'Owning aids is not enough. The aided pass is given only to examinees who wear them in daily life, and '+p.short+' does not.';
@@ -265,7 +265,7 @@ function makeErr(key){
     c.cline='Unaided total '+c.us.t+'/40 (emotional '+c.us.e+', social '+c.us.s+'), '+bandPhrase('mccabe',c.us.t)+'. Aided pass '+c.as.t+'/40 (emotional '+c.as.e+', social '+c.as.s+'), '+bandPhrase('mccabe',c.as.t)+'. '+AIDTXT.wear;
     c.coll=[['Emotional subtotal',c.us.e],['Social subtotal',c.us.s],['Unaided total',c.us.t],['Aided total',c.as.t]];
     st.push({id:'what',type:'choice',q:'The numbers are right. What is wrong with the results line?',opts:[
-      ['The aided total is given a band. It is recorded separately and is not placed in a band.',1,'The aided pass uses battery wording outside the published instrument. Its total is a battery variable and carries no band.'],
+      ['The aided total is given a band. It is recorded separately and is not placed in a band.',1,'The aided pass uses track wording outside the published instrument. Its total carries no band.'],
       ['The unaided total should not have a band.',0,'The unaided total is reported against a named band set. That part of the line is right.'],
       ['The band source is missing.',0,'The line names McCabe (2019) as its band set. The error is the band attached to the aided total.'],
       ['The aided subtotals should be left out.',0,'The model results line on the Canvas page gives the aided subtotals beside the aided total. The error is the band.']]});
@@ -342,7 +342,7 @@ var ADMIN=[
    ['The aided pass is given only after a positive unaided screen.',0,'The screen result does not decide it. Daily wear does.']]}]},
  {k:'a6',title:'Aids in place during the first pass',setup:'Mr. Victor Hall wears his hearing aids daily, and they are in place as you begin.',
   steps:[{id:'d',type:'choice',q:'How does Mr. Hall answer the first pass?',opts:[
-   ['For how he hears without the aids, as the published instruction asks.',1,'The published instruction asks an aid user to answer as he hears without the aid. The aided pass, with the battery wording, comes second.'],
+   ['For how he hears without the aids, as the published instruction asks.',1,'The published instruction asks an aid user to answer as he hears without the aid. The aided pass, with the track wording, comes second.'],
    ['For how he hears with the aids in, since they are in place.',0,'The first pass uses the published instruction, which asks for hearing without the aid.'],
    ['However he prefers, as long as you note which.',0,'The instruction fixes the frame of reference. Without the aid for the first pass, with the aids for the second.']]}]},
  {k:'a7',title:'What does this item mean?',setup:'Ms. Alice Turner asks what you mean by one of the items.',
