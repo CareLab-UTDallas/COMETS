@@ -57,6 +57,13 @@
   .secondary{background:#eef4f1; color:var(--green); border:1px solid #cfe0d7;}
   .status{font-size:13px; color:var(--muted);}
   .hidden{display:none !important;}
+  /* Long regions scroll inside a bordered panel so the 50-digit record and its feedback cannot make the page very tall. */
+  .panel{max-height:460px; overflow-y:auto; border:1px solid #b9cfc3; border-radius:6px;}
+  @media (max-width:640px){ .panel{padding:4px;} }
+  .panel:focus-visible{outline:3px solid var(--accent); outline-offset:2px;}
+  .panel .rec thead th{position:sticky; top:0; z-index:1; box-shadow:0 1px 0 #cfe0d7;}
+  .fbpanel{max-height:400px; margin:6px 0 0; padding:4px 8px 4px 0; background:transparent; border-color:#f0d9c2;}
+  .fbpanel ul{margin:0;}
   .small{font-size:12px; color:var(--muted); margin:8px 0 0;}
   button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent); outline-offset:2px;}
   /* record */
@@ -121,7 +128,7 @@
     <h2 id="cTitle"></h2>
     <p class="setup" id="cSetup"></p>
     <p class="legend">Mark each item. ✓ correct and credited. ✗ a response that is not credited. Miss for no response. D marks a dyad. Times are seconds from the first digit.</p>
-    <table class="rec" id="rec"></table>
+    <div class="panel" id="recPanel" tabindex="0" role="region" aria-label="Response record, scrollable"><table class="rec" id="rec"></table></div>
   </div>
 
   <div class="card">
@@ -379,6 +386,7 @@ function renderRec(){
     if(it.pauseAfter) h+='<tr class="pause"><td class="wide" colspan="8">The examiner paused the recording here and then pressed play again. Times stay on the recording\'s clock.</td></tr>';
   });
   el("rec").innerHTML=h+'</tbody>';
+  el("recPanel").scrollTop=0;
 }
 
 el("rec").addEventListener("click",function(e){
@@ -432,7 +440,7 @@ function check(){
   if(!checked){ stats.marks[0]+=markRight; stats.marks[1]+=rec.items.length; stats.nums[0]+=numRight; stats.nums[1]+=5; checked=true; }
   var fb=el("fb");
   if(!issues.length){ fb.className="fb ok"; fb.innerHTML="<strong>All marks and numbers match the key.</strong> "+key.correct+" of "+P+" correct, "+key.attempted+" attempted, "+key.dyads+" dyads."; doneProf[cfg.profile]=true; chips(); }
-  else { fb.className="fb"; fb.innerHTML="<strong>"+issues.length+(issues.length===1?" difference.":" differences.")+"</strong> "+markRight+" of "+rec.items.length+" items fully right. Fix the rows shaded in orange and check again.<ul>"+issues.map(function(x){return "<li>"+esc(x)+"</li>";}).join("")+"</ul>"; }
+  else { fb.className="fb"; fb.innerHTML="<strong>"+issues.length+(issues.length===1?" difference.":" differences.")+"</strong> "+markRight+" of "+rec.items.length+" items fully right. Fix the rows shaded in orange and check again.<div class=\"panel fbpanel\" tabindex=\"0\" role=\"region\" aria-label=\"Differences from the key, scrollable\"><ul>"+issues.map(function(x){return "<li>"+esc(x)+"</li>";}).join("")+"</ul></div>"; }
   if(!qShown){ qShown=true; qi=0; showQ(); }
   status(); report();
   return {issues:issues.length, markRight:markRight, numRight:numRight};

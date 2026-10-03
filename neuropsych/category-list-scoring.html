@@ -64,6 +64,11 @@
   .source{font-size:12px; color:var(--muted); margin:12px 0 0; border-top:1px solid var(--line); padding-top:8px;}
   .source p{margin:0 0 4px;}
   .hidden{display:none !important;}
+  /* The trial table and the feedback scroll inside bordered panels so the full key cannot make the page very tall. */
+  .panel{max-height:460px; overflow-y:auto; border:1px solid #b9cfc3; border-radius:6px;}
+  .panel:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .panel thead th{position:sticky; top:0; z-index:1; box-shadow:0 1px 0 #cfe0d7;}
+  .fb.panel{max-height:420px; border-color:#b9cfc3; border-radius:8px;}
 </style>
 </head>
 <body>
@@ -84,7 +89,7 @@
 
     <h3>1. Code and count each recall trial</h3>
     <p class="note">P marks the single prompt. A struck-through word was self-cueing, confirmed by asking, and is not scored. Singular and plural are the same word. A repeated intrusion counts as both a repetition and an intrusion. On the cued trials, count across all four categories together.</p>
-    <div class="tablewrap"><table>
+    <div class="tablewrap panel" id="trialPanel" tabindex="0" role="region" aria-label="Recall trials, scrollable"><table>
       <thead><tr><th>Trial</th><th>What the examinee said, in order</th><th>Correct</th><th>Repetitions</th><th>Intrusions</th></tr></thead>
       <tbody id="trials"></tbody>
     </table></div>
@@ -95,7 +100,7 @@
     <h3>3. Semantic clustering, learning trials</h3>
     <p class="note">Count a cluster each time a correct word immediately follows another correct word from the same category. A repetition or intrusion between them breaks the pair. Expected clustering for a trial is (correct &minus; 1) / 5, and the chance-adjusted score is observed minus expected. Average the chance-adjusted scores over the trials with at least 2 correct words, and give the average to one decimal place.</p>
     <div class="sumgrid" id="clus"></div>
-    <div class="fb hidden" id="fb" aria-live="polite"></div>
+    <div class="fb panel hidden" id="fb" aria-live="polite" tabindex="0" role="region" aria-label="Feedback, scrollable"></div>
   </div>
 
   <div class="nav">
@@ -253,7 +258,7 @@ function go(k){ cur=k; var cs=CASES[k];
   TRIALS.forEach(function(tr){ el('said-'+tr[0]).innerHTML=sayHtml(cs.said[tr[0]]); });
   allInputs().forEach(function(i){ i.value=st[k].v[i.id]||''; i.classList.remove('ok','no'); });
   document.querySelectorAll('.key').forEach(function(s){s.textContent='';});
-  el('fb').classList.add('hidden'); el('fb').innerHTML='';
+  el('fb').classList.add('hidden'); el('fb').innerHTML=''; el('trialPanel').scrollTop=0;
   Array.prototype.forEach.call(el('tabs').children,function(b,j){ b.classList.toggle('on',j===k); b.setAttribute('aria-selected',j===k?'true':'false'); b.classList.toggle('done',st[j].checked); });
   report(); }
 function pairs(K){ var out=[];
@@ -278,7 +283,7 @@ function check(showAll){ save(); var cs=CASES[cur], K=keyFor(cs), wrong=[], righ
   h+='</ul><p>Intrusions on Trials 1 to 5 total '+K.s.t15int+'. Free recall intrusions add the second list and both free recalls, '+K.s.frint+'. Cued recall intrusions total '+K.s.crint+', so total intrusions are '+K.s.totint+'. A repeated intrusion is in both the intrusion and repetition totals. Repetitions across every trial total '+K.s.rep+'.</p>';
   h+='<p>Clustering by trial, observed, expected, and chance adjusted. '+LEARN.map(function(k,i){ var c=K.cl[k]; return 'Trial '+(i+1)+' '+(c.ca===null?'not scorable, fewer than 2 correct':c.obs+', '+c.exp.toFixed(1)+', '+c.ca.toFixed(1)); }).join('. ')+'. The average over scorable trials is '+(K.cl.avg===null?'not scorable':K.cl.avg.toFixed(1))+'.</p>';
   if(!showAll && wrong.length) h+='<p>Recheck '+wrong.map(function(p){return esc(p[2]);}).join(', ')+'. A word said under a cue for the wrong category the first time is still correct, a crossed-out self-cueing word is not scored, and a plural repeats its singular.</p>';
-  el('fb').innerHTML=h; el('fb').classList.remove('hidden');
+  el('fb').innerHTML=h; el('fb').classList.remove('hidden'); el('fb').scrollTop=0;
   Array.prototype.forEach.call(el('tabs').children,function(b,j){ b.classList.toggle('done',st[j].checked); });
   report(); }
 function report(){ try{ parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:document.documentElement.scrollHeight}),'*'); }catch(e){} }

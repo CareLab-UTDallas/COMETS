@@ -57,6 +57,12 @@
   .source{font-size:12px; color:var(--muted); margin:12px 0 0; border-top:1px solid var(--line); padding-top:8px;}
   .source p{margin:0 0 4px;}
   .hidden{display:none !important;}
+  /* The trial table, the summary scores, and the feedback scroll inside bordered panels so the full protocol cannot make the page very tall. */
+  .panel{max-height:440px; overflow-y:auto; border:1px solid #b9cfc3; border-radius:6px;}
+  .panel:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .panel thead th{position:sticky; top:0; z-index:1; box-shadow:0 1px 0 #cfe0d7;}
+  .fb.panel{max-height:420px; border-color:#b9cfc3; border-radius:8px;}
+  .sumgrid.panel{max-height:420px; padding:6px 8px; background:#fff;}
 </style>
 </head>
 <body>
@@ -75,7 +81,7 @@
     </div>
     <h3>1. Score each recall trial</h3>
     <p class="note">A repetition is a correct word said again in the same trial. An intrusion is any word not on the list being recalled, including a word from the other list.</p>
-    <div style="overflow-x:auto;"><table>
+    <div class="panel" id="trialPanel" style="overflow-x:auto;" tabindex="0" role="region" aria-label="Recall trials, scrollable"><table>
       <thead><tr><th>Trial</th><th>What the examinee said, in order</th><th>Correct</th><th>Repetitions</th><th>Intrusions</th></tr></thead>
       <tbody id="trials"></tbody>
     </table></div>
@@ -90,8 +96,8 @@
     </div>
     <h3>3. Summary scores</h3>
     <p class="note">Give percentages to one decimal place and memory efficiency to two. A negative interference value means fewer words on the later trial.</p>
-    <div class="sumgrid" id="sums"></div>
-    <div class="fb hidden" id="fb"></div>
+    <div class="sumgrid panel" id="sums" tabindex="0" role="region" aria-label="Summary scores, scrollable"></div>
+    <div class="fb panel hidden" id="fb" tabindex="0" role="region" aria-label="Feedback, scrollable"></div>
   </div>
 
   <div class="nav">
@@ -189,7 +195,7 @@ function go(k){
   el('rec').innerHTML=REC.map(function(w){return '<span class="'+(cs.yes.indexOf(w)>=0?'yes':'')+'">'+w+'</span>';}).join('');
   allInputs().forEach(function(i){ i.value=st[k].v[i.id]||''; i.classList.remove('ok','no'); });
   document.querySelectorAll('.key').forEach(function(s){s.textContent='';});
-  el('fb').classList.add('hidden'); el('status').textContent='';
+  el('fb').classList.add('hidden'); el('status').textContent=''; el('trialPanel').scrollTop=0; el('sums').scrollTop=0;
   Array.prototype.forEach.call(el('tabs').children,function(b,j){ b.classList.toggle('on',j===k); b.classList.toggle('done',st[j].checked); });
   if(st[k].checked) check(false);
   report();
@@ -211,7 +217,7 @@ function check(showAll){
   var h='<h3>'+(blank?'Checked the numbers you entered':'Checked')+'</h3><p><span class="tag '+(right===n?'ok':'no')+'">'+right+' of '+n+'</span>'+(blank?blank+' left blank. ':'')+'Green matches the key. Any orange box shows the key beside it.</p>';
   if(notes.length) h+='<p>Where the trials hold repetitions or intrusions:</p><ul>'+notes.join('')+'</ul>';
   h+='<p>Recognition. '+K.hits+' hits and '+K.fp+' false positive'+(K.fp===1?'':'s')+(cs.yes.indexOf('parrot')>=0?', including parrot, a List B word':'')+'. Delay '+K.delay+' minutes'+(K.delay>=20&&K.delay<=30?', inside the protocol window of 20 to 30 minutes':', outside the protocol window of 20 to 30 minutes')+'.</p>';
-  el('fb').innerHTML=h; el('fb').classList.remove('hidden');
+  el('fb').innerHTML=h; el('fb').classList.remove('hidden'); el('fb').scrollTop=0;
   el('status').textContent=''; Array.prototype.forEach.call(el('tabs').children,function(b,j){ b.classList.toggle('done',st[j].checked); });
   report();
 }

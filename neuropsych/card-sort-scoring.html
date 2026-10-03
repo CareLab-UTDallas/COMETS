@@ -15,8 +15,9 @@
   .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
   .warn{font-size:13px; color:#7a3d00; background:#fff3e6; border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px; margin:0 0 10px;}
   /* Key cards. The strip at the top of the response table sticks to the top of the window while the page scrolls.
-     Inside a Canvas iframe that is resized to its full height the page itself never scrolls, so sticky has no effect there;
-     a compact copy of the strip is then repeated every 8 response rows (tr.keyrow, shown only when framed). */
+     Inside a Canvas iframe the page itself does not scroll, so sticky has no effect there. When framed, the response
+     table scrolls inside a bordered panel of bounded height, so a long generated sequence cannot make the iframe very tall;
+     the strip stays just above the panel, and a compact copy is repeated every 8 response rows (tr.keyrow, shown only when framed). */
   .keybar{position:sticky; top:0; z-index:5; background:var(--card); margin:0 -4px 8px; padding:6px 4px; border-bottom:1px solid var(--line);}
   .kc{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; font-size:13px; line-height:1.3;}
   .kc span{border:1px solid var(--line); border-radius:6px; padding:3px 6px; background:#fff; color:var(--ink);}
@@ -37,6 +38,9 @@
   .setup{font-size:13px; color:var(--teach); background:#f7faf8; border-left:3px solid var(--green); border-radius:6px; padding:6px 10px; margin:0 0 10px;}
   .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:0 0 12px;}
   .scroll{overflow-x:auto;}
+  body.framed .scroll{max-height:480px; overflow-y:auto; border:1px solid #b9cfc3; border-radius:6px;}
+  body.framed .scroll thead th{position:sticky; top:0; z-index:2; box-shadow:0 1px 0 #cfe0d7;}
+  .scroll:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
   table{border-collapse:collapse; width:100%; font-size:14px; background:#fff;}
   th,td{border:1px solid #cfe0d7; padding:4px 6px; text-align:left; vertical-align:top;}
   th{background:#eef4f1; color:var(--green); font-weight:600;}
@@ -81,7 +85,7 @@
   <div class="card">
     <h2>Responses</h2>
     <div class="keybar" id="keybar"><p class="keycap">Key cards, left to right from the examinee's side</p><div class="kc" aria-label="Key cards, left to right from the examinee's side"><span><b>Key 1</b> 1 red triangle</span><span><b>Key 2</b> 2 green stars</span><span><b>Key 3</b> 3 yellow crosses</span><span><b>Key 4</b> 4 blue circles</span></div></div>
-    <div class="scroll"><table id="tbl"><thead><tr><th>#</th><th>Response card</th><th>Placed under</th><th>Matches</th><th>Correct?</th><th>Perseverative?</th></tr></thead><tbody></tbody></table></div>
+    <div class="scroll" tabindex="0" role="region" aria-label="Responses table, scrollable"><table id="tbl"><thead><tr><th>#</th><th>Response card</th><th>Placed under</th><th>Matches</th><th>Correct?</th><th>Perseverative?</th></tr></thead><tbody></tbody></table></div>
   </div>
   <div class="card">
     <h2>Totals</h2>
@@ -285,7 +289,7 @@ function load(c, trials){
   cur = c; ans = W.score(trials); shown = false;
   marks = ans.rows.map(function(){ return {m:{C:false,F:false,N:false,O:false}, corr:null, p:false}; });
   $('setup').textContent = c.who + ' ' + ans.rows.length + ' responses.';
-  var tb = $('tbl').tBodies[0]; tb.innerHTML = '';
+  var tb = $('tbl').tBodies[0]; tb.innerHTML = ''; $('tbl').parentNode.scrollTop = 0;
   ans.rows.forEach(function(r, i){
     if (i > 0 && i % 8 === 0) { var kr = document.createElement('tr'); kr.className = 'keyrow'; kr.setAttribute('aria-hidden', 'true'); kr.innerHTML = '<td colspan="6"><div class="kc">' + KC + '</div></td>'; tb.appendChild(kr); }
     var tr = document.createElement('tr'); tr.id = 'r' + i; tr.className = 'resp';

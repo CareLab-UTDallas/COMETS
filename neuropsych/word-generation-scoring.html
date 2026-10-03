@@ -58,6 +58,9 @@
   .status{font-size:13px; color:var(--muted);}
   .tally{font-size:13px; color:var(--muted); margin:8px 0 0;}
   .hidden{display:none !important;}
+  /* The response list scrolls inside a bordered panel so a long trial with its feedback cannot make the page very tall. */
+  .panel{max-height:500px; overflow-y:auto; border:1px solid #b9cfc3; border-radius:6px; padding:0 10px 4px;}
+  .panel:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
 </style>
 </head>
 <body>
@@ -74,7 +77,7 @@
     <h2 id="title"></h2>
     <p class="note" id="context"></p>
     <div class="key" id="key"></div>
-    <div id="list"></div>
+    <div id="list" class="panel" tabindex="0" role="region" aria-label="Responses, scrollable"></div>
     <div class="tot" id="tot"></div>
     <div class="fb hidden" id="fb"></div>
   </div>
@@ -134,7 +137,7 @@ var P=[
 ];
 var DEFWHY={cat:{C:"A credited member of the category, not named earlier in this minute."}, let:{C:"Begins with the letter, is a dictionary word, is not a name or a number, and was not said before in this minute."}};
 
-var pi=0, ti=0, ST={};
+var pi=0, ti=0, ST={}, lastList=null;
 function sk(){ return pi+"-"+ti; }
 function blank(){ var tr=P[pi].trials[ti]; var n=tr.items.filter(function(x){return Array.isArray(x);}).length; return {tags:new Array(n).fill(null), tot:{}, checked:false}; }
 function S(){ if(!ST[sk()]) ST[sk()]=blank(); return ST[sk()]; }
@@ -173,6 +176,7 @@ function render(){
   });
   if(cur!==-1) h+='</div>';
   el('list').innerHTML=h;
+  if(sk()!==lastList){ el('list').scrollTop=0; lastList=sk(); }
   Array.prototype.forEach.call(el('list').querySelectorAll('.tags button'),function(b){ b.addEventListener('click',function(){ var st=S(); st.tags[+b.getAttribute('data-i')]=b.getAttribute('data-t'); st.checked=false; el('status').textContent=''; render(); }); });
   var th='<h3>Totals for the record form</h3>';
   fields(tr).forEach(function(f){ var v=s.tot[f[0]]; th+='<div class="fld"><label for="f-'+f[0]+'">'+f[1]+'</label><input id="f-'+f[0]+'" type="number" min="0" max="80" inputmode="numeric" value="'+(v===undefined||v===null?'':v)+'"></div>'; });
