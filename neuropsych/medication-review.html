@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Deep links: #case=webb|lyle|pierce|fuller|turner|hall opens that case. Default is the first case. -->
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Review a Medication List</title>
+<style>
+  :root{--bg:#ffffff; --card:#f7faf8; --ink:#17251d; --muted:#41544a; --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b;}
+  *{box-sizing:border-box;}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.55;}
+  .wrap{max-width:820px; margin:0 auto; padding:14px 14px 16px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:22px; margin:0 0 4px;}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
+  .warn{font-size:13px; color:#7a3d00; background:#fff3e6; border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px; margin:0 0 10px;}
+  .chips{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 10px;}
+  .chips button{font:inherit; font-size:13px; cursor:pointer; border:1px solid #cfe0d7; border-radius:20px; background:#eef4f1; color:var(--green); padding:4px 11px;}
+  .chips button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .chips button.done:not(.on){border-color:#9cc3ae; background:#dcebe3;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin:0 0 10px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:18px; margin:0 0 6px;}
+  .setup{font-size:14px; color:var(--teach); margin:0 0 8px;}
+  table{border-collapse:collapse; width:100%; font-size:14px;}
+  th,td{border:1px solid #cfe0d7; padding:5px 8px; text-align:left; vertical-align:top;}
+  th{background:#eef4f1; color:var(--green); font-weight:600;}
+  .pat{font-size:14px; color:var(--teach); margin:8px 0 0; padding-left:20px;}
+  .pat li{margin:0 0 2px;}
+  .steps{font-size:13px; color:var(--muted); margin:0 0 6px;}
+  .q{font-weight:600; margin:0 0 8px;}
+  .opts{display:flex; flex-direction:column; gap:6px;}
+  .opts button{font:inherit; font-size:15px; text-align:left; cursor:pointer; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--ink); padding:8px 12px;}
+  .opts button:hover:not(:disabled){border-color:#9cc3ae;}
+  .opts button:focus-visible,button.b:focus-visible,.chips button:focus-visible{outline:3px solid var(--accent); outline-offset:2px;}
+  .opts button.right{background:#e3f0e9; border-color:var(--green);}
+  .opts button.wrong{background:#fbeee4; border-color:#e3b58f; color:#6b4a2f;}
+  .opts button:disabled{cursor:default;}
+  .fb{margin:10px 0 0; padding:8px 10px; border-radius:6px; font-size:14px; color:var(--teach); background:#fff7ef; border:1px solid #f0d9c2; border-left:4px solid var(--accent);}
+  .fb.ok{background:#f0f7f3; border-color:#cfe0d7; border-left-color:var(--green);}
+  .fb strong{color:#8a4600;}
+  .fb.ok strong{color:var(--green);}
+  .nav{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0 0;}
+  button.b{font:inherit; font-size:15px; cursor:pointer; border-radius:8px; padding:9px 16px;}
+  .primary{background:var(--green); color:#eef4f1; border:1px solid var(--green);}
+  .status{font-size:13px; color:var(--muted);}
+  .hidden{display:none !important;}
+  .small{font-size:12px; color:var(--muted); margin:8px 0 0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Review a medication list before you interpret</h1>
+  <p class="lede">Each invented case gives a medication list, the timing of the last doses, and what happened during testing. Make three decisions. Name the drug classes and their likely effects, flag any concern from the older-adult guidance, and choose the next step. The reasoning appears after every choice.</p>
+  <div class="warn"><strong>Nothing here is saved.</strong> All people and lists are invented. Nothing here is medical advice, and no examinee is ever told to start, stop, or change a medicine.</div>
+  <div class="chips" id="chips" role="group" aria-label="Cases"></div>
+  <div class="card">
+    <h2 id="cTitle"></h2>
+    <p class="setup" id="cSetup"></p>
+    <table id="meds"></table>
+    <ul class="pat" id="pat"></ul>
+  </div>
+  <div class="card">
+    <p class="steps" id="steps"></p>
+    <p class="q" id="q"></p>
+    <div class="opts" id="opts"></div>
+    <div class="fb hidden" id="fb" aria-live="polite"></div>
+    <div class="nav">
+      <button class="b primary hidden" id="next" type="button">Next decision</button>
+      <span class="status" id="status" aria-live="polite"></span>
+    </div>
+  </div>
+  <p class="small">The rules are paraphrased from the sources cited on the Canvas page, including the 2023 AGS Beers Criteria and the NICE delirium guideline. Your supervisor and the prescriber make every real decision.</p>
+</div>
+<script>
+// Each option: [text, correct (1 or 0), feedback]. Exactly one correct option per step.
+var CASES = [
+ {k:"webb", name:"Ms. Margaret Webb, 78",
+  setup:"Referred for forgetfulness. She brought her bottles to the interview.",
+  meds:[["Antimuscarinic for an overactive bladder","Started 4 months ago","This morning"],["Over-the-counter sleep aid containing a first-generation antihistamine","Nightly for years","Last night"],["Amitriptyline, low dose, for nerve pain","2 years","Last night"]],
+  pat:["Delayed recall on a word list is low.","Trail Making is slow.","The global screening total is within the normal range."],
+  steps:[
+   {q:"Which description of the classes and their likely effects fits?", opts:[
+     ["All three are anticholinergic. The class is linked to Declarative Memory and Attention, with slower scanning and weaker executive functioning.",1,"All three block acetylcholine. Antimuscarinics do so by definition, and first-generation antihistamines and amitriptyline are on the Beers list of strongly anticholinergic drugs. The class predicts weaker delayed recall and slower scanning, which is the pattern here."],
+     ["Two are sedative-hypnotics that act at GABA receptors, so the main effect is on working memory.",0,"None of the three acts mainly at GABA receptors. That mechanism belongs to benzodiazepines and Z-drugs. The sleep aid here works through a first-generation antihistamine, which is anticholinergic."],
+     ["Only the amitriptyline matters. Antidepressants improve delayed recall, so it should raise her score.",0,"The trials showing better delayed recall were in major depressive disorder. Amitriptyline is a tricyclic with strong anticholinergic activity, and the other two medicines are anticholinergic as well."]]},
+   {q:"Which concern from the older-adult guidance applies?", opts:[
+     ["The Beers Criteria advise avoiding first-generation antihistamines and strongly anticholinergic antidepressants, and combining anticholinergic drugs carries increased risk of cognitive decline. The burden adds up across all three.",1,"Right. Each medicine adds to the anticholinergic burden. On the ACB scale a total of 3 or more is considered clinically relevant, and scoring the list is a pharmacy task. Your job is to bring the complete list to supervision."],
+     ["No concern, because each dose is low.",0,"Anticholinergic effects add up across medicines, which is why burden scales exist. A low dose of each does not remove the combined burden or the Beers entries."],
+     ["The benzodiazepine entry applies because she takes a sleep aid.",0,"The sleep aid here is a first-generation antihistamine, not a benzodiazepine. The Beers entry that applies is the one for first-generation antihistamines, which are highly anticholinergic with a risk of confusion."]]},
+   {q:"What is the next step?", opts:[
+     ["Report the scores as obtained, record each medicine with its purpose, dose, start date, and last dose, and bring the list to your supervisor.",1,"Right. The list is a confound to be weighed, not a cause you can name. Your supervisor decides whether to raise it with the prescriber."],
+     ["Suggest that she stop the sleep aid for two weeks and come back for a retest.",0,"Never suggest that an examinee start, stop, or change a medicine. That decision belongs to the prescriber, reached through your supervisor."],
+     ["Write in the report that her scores reflect her medications.",0,"That names a cause the data have not shown. The same pattern could reflect an early neurodegenerative process, low mood, or poor sleep. Record the facts and leave the weighing to supervision."]]}
+  ]},
+ {k:"lyle", name:"Mr. Edward Lyle, 83",
+  setup:"Referred for memory concerns. His daughter drove him and stayed for the interview.",
+  meds:[["A benzodiazepine at bedtime","6 years","Last night"],["A Z-drug sleeping pill","Started 3 days ago at urgent care","Last night"],["Opioid for back pain, stable dose","1 year","This morning"]],
+  pat:["Alert and cooperative for the first 20 minutes.","By 40 minutes he is drowsy, asks for instructions again, and loses his place.","His daughter says he has been confused since the day the new pill started."],
+  steps:[
+   {q:"Which description of the classes and their likely effects fits?", opts:[
+     ["The benzodiazepine and the Z-drug increase activity at GABA receptors, and the opioid can produce drowsiness and mental confusion.",1,"Right. Most central nervous system depressants act at GABA receptors, the Z-drugs act at the same receptor, and opioids can produce drowsiness and confusion. Here they are taken together."],
+     ["All three are anticholinergic.",0,"None of the three is described on the course page as anticholinergic. Two act at GABA receptors and one at opioid receptors."],
+     ["The opioid is the only one that affects cognition, since the sleeping pills wear off overnight.",0,"Long-term benzodiazepine use is linked to working memory and processing speed deficits, and the Z-drug was taken last night. All three can affect today's session."]]},
+   {q:"Which concern from the older-adult guidance applies?", opts:[
+     ["The Beers Criteria advise avoiding benzodiazepines and Z-drugs in older adults, and both are on the list of drugs to avoid in delirium.",1,"Right. All benzodiazepines increase the risk of cognitive impairment and delirium in older adults, and Z-drugs have similar adverse events. Both appear in the Table 3 delirium entry."],
+     ["None, because the benzodiazepine is a long-standing prescription.",0,"How long a medicine has been taken does not remove the Beers entry. The Criteria advise avoiding benzodiazepines in adults 65 and older."],
+     ["The anticholinergic combination entry.",0,"That entry concerns anticholinergic drugs taken together. These medicines act at GABA and opioid receptors. The entries that apply are the benzodiazepine and Z-drug entries."]]},
+   {q:"What is the next step?", opts:[
+     ["Stop testing and tell your supervisor the same day.",1,"Right. An acute change after a new sedating medicine, with attention that fluctuates during the session, is the kind of recent change that may indicate delirium. Delirium is assessed by a competent practitioner, not by test scores. Record what you saw and when."],
+     ["Finish the battery and note the drowsiness in the observations.",0,"A battery given during a possible delirium describes the delirium, not his baseline. The standard of care is to stop and tell your supervisor the same day."],
+     ["Reschedule for next month and say nothing until then.",0,"Rescheduling may come later, but an acute change with fluctuation is a medical concern your supervisor needs to hear about the same day."]]}
+  ]},
+ {k:"pierce", name:"Ms. Helen Pierce, 62",
+  setup:"Referred for word-finding complaints at work.",
+  meds:[["Topiramate","Started 5 weeks ago, dose raised last week","This morning"]],
+  pat:["Letter fluency is well below her other verbal scores.","She pauses before many answers on confrontation naming.","Timed tests are slow. Memory scores are average."],
+  steps:[
+   {q:"Which description of the class and its likely effects fits?", opts:[
+     ["An antiepileptic. The main effects are on attention, vigilance, and psychomotor speed, and topiramate is linked to language problems.",1,"Right. Topiramate carries the greatest risk among the newer antiepileptic drugs, and its effects include mental slowing and language problems. Its cognitive effects depend on dose."],
+     ["An anticholinergic, so delayed recall should be the lowest score.",0,"Topiramate is taught as an antiepileptic, which can affect cognition by suppressing neuronal excitability or enhancing inhibitory transmission. Her memory scores are average, and the low scores are in language and speed."],
+     ["A stimulant, which should improve her scores.",0,"Topiramate is an antiepileptic, not a stimulant. Antiepileptics can slow performance."]]},
+   {q:"Which concern from the older-adult guidance applies?", opts:[
+     ["The Beers Criteria cover adults 65 and older, so they do not apply at 62. The concern is topiramate's link to language problems and the recent dose increase.",1,"Right. Age matters for which guidance applies. The relevant evidence here is the class evidence on antiepileptic drugs and dose."],
+     ["The Beers Criteria advise avoiding topiramate.",0,"The Beers Criteria apply to adults 65 and older, and no Beers entry for antiepileptic drugs is taught on the course page."],
+     ["Her anticholinergic burden is 3 or more.",0,"She takes one medicine, and it is not taught as anticholinergic. The burden concept does not apply here."]]},
+   {q:"What is the next step?", opts:[
+     ["Record the start date, the dose change, and the time of the last dose beside the scores, and tell your supervisor, who may weigh a retest once the dose is stable.",1,"Right. A recent start or dose change is noted beside every score the class could affect, and whether to retest is your supervisor's decision."],
+     ["Report the low letter fluency as evidence of a language disorder.",0,"The medicine is a candidate explanation that has not been weighed. Report the score as obtained with the medication facts beside it, and leave the interpretation to supervision."],
+     ["Leave letter fluency out of the report because the medicine affected it.",0,"Scores are reported as obtained. Leaving one out hides information your supervisor needs."]]}
+  ]},
+ {k:"fuller", name:"Mr. James Fuller, 70",
+  setup:"Referred after his wife noticed he repeats questions.",
+  meds:[["Prednisone, high-dose course, a glucocorticoid","Started 9 days ago, ends in 5 days","This morning"]],
+  pat:["Memory scores are lower than his education and work history predict.","Attention and reasoning are average, and attention holds steady through the session.","His wife says he has slept poorly and been irritable since the course began."],
+  steps:[
+   {q:"Which description of the class and its likely effects fits?", opts:[
+     ["A corticosteroid. Glucocorticoids can change mood, cognition, memory, and behavior during treatment or withdrawal.",1,"Right. Most patients experience less severe but distressing changes in mood, cognition, memory, or behavior during treatment or withdrawal, and risk varies with dose and age."],
+     ["An anticholinergic, which explains the memory pattern by blocking acetylcholine.",0,"Prednisone is taught as a glucocorticoid, not an anticholinergic. The memory change fits the glucocorticoid evidence."],
+     ["A benzodiazepine-like sedative, which explains the poor sleep.",0,"Prednisone is a glucocorticoid. Poor sleep and irritability fit the mood and behavior changes reported with glucocorticoids."]]},
+   {q:"Which concern from the older-adult guidance applies?", opts:[
+     ["The Beers Criteria list corticosteroids among drugs to avoid in delirium. His attention holds steady, so that entry is a reason to watch for change, and the main concern is the timing of the course.",1,"Right. The delirium entry would apply if an acute change or fluctuation appeared. For now the issue is that testing falls in the middle of a course that can affect memory."],
+     ["His anticholinergic burden is clinically relevant.",0,"Prednisone is not taught as anticholinergic, and he takes nothing else."],
+     ["None. Steroids have no cognitive effects.",0,"Severe neuropsychiatric reactions, including delirium and confusion, occur, and milder changes in memory and mood are common during treatment and withdrawal."]]},
+   {q:"What is the next step?", opts:[
+     ["Record the course dates and dose, tell your supervisor, who may weigh retesting after the course and its withdrawal period, and report today's scores as obtained.",1,"Right. Today's scores were obtained during the course. Whether to retest later is your supervisor's decision."],
+     ["Interpret the memory scores as a decline from baseline.",0,"The scores were obtained during a course that can lower memory. That confound must be weighed before any reading of decline."],
+     ["Ask him to stop the prednisone early so testing can be repeated sooner.",0,"Never suggest that an examinee start, stop, or change a medicine. That decision belongs to the prescriber."]]}
+  ]},
+ {k:"turner", name:"Ms. Alice Turner, 67",
+  setup:"Referred for a baseline evaluation. Her mood has been stable for years.",
+  meds:[["Lithium, a mood stabilizer, stable dose","12 years","This morning"]],
+  pat:["The learning total across the word-list trials is slightly below her other scores.","Delayed recall is in line with the rest of the profile.","Executive and visual memory scores are average."],
+  steps:[
+   {q:"Which description of the class and its likely effects fits?", opts:[
+     ["A mood stabilizer with a small effect on immediate verbal learning and memory. Delayed verbal memory, visual memory, and executive function were not significantly affected in the meta-analysis.",1,"Right. The meta-analysis found small effects and concluded that lithium appears to have only few and minor negative effects on cognition."],
+     ["A strongly anticholinergic medicine, so delayed recall should be the lowest score.",0,"Lithium is not taught as anticholinergic, and her delayed recall is in line with the profile."],
+     ["A medicine with large effects across every domain.",0,"The pooled effects were small and limited mainly to immediate verbal learning and memory and creativity."]]},
+   {q:"Which concern from the older-adult guidance applies?", opts:[
+     ["Neither the anticholinergic nor the benzodiazepine guidance taught on the course page applies. The relevant evidence is the small lithium effect.",1,"Right. Not every medicine on a list raises a Beers or burden concern. Match each medicine to the evidence that actually covers it."],
+     ["Her anticholinergic burden is 3 or more.",0,"She takes one medicine, and it is not taught as anticholinergic."],
+     ["The Beers Criteria advise avoiding lithium in dementia.",0,"No such entry is taught on the course page. Use only the entries you have learned and checked."]]},
+   {q:"What is the next step?", opts:[
+     ["Proceed as usual, record the lithium with dose, duration, and last dose, and let it enter interpretation as one candidate explanation among several.",1,"Right. Long-term stable use usually means testing proceeds. A small average effect cannot explain a large deficit by default."],
+     ["Write that the low learning total is caused by lithium.",0,"That names a cause the data have not shown. Record the facts and leave the weighing to supervision."],
+     ["Reschedule until she has been off lithium for a month.",0,"Never suggest stopping a medicine. Long-term stable use is recorded, and testing usually proceeds."]]}
+  ]},
+ {k:"hall", name:"Mr. Victor Hall, 74",
+  setup:"You learn the following during the interview, before any test is given.",
+  meds:[["Alcohol, about 5 drinks most evenings","About 20 years","2 days ago. He stopped so he would do well today"],["No prescribed medicines","",""]],
+  pat:["No tests have been given yet.","He says he stopped drinking abruptly on Sunday."],
+  steps:[
+   {q:"Which description of the substance and its likely effects fits?", opts:[
+     ["Alcohol affects cognition diffusely. In the first month of abstinence, impairment is moderate across most domains studied.",1,"Right. The meta-analysis found moderate impairment across 11 of 12 domains in the first month of abstinence and small effects after more than a year."],
+     ["Two days without alcohol means the effects are gone.",0,"Effects do not end on the day use ends. The first month of abstinence carries moderate impairment across most domains."],
+     ["Alcohol affects only memory, through the hippocampus.",0,"Blackouts do involve the hippocampus, but the meta-analytic evidence shows diffuse effects across many domains."]]},
+   {q:"Which concern from the older-adult guidance applies?", opts:[
+     ["No Beers or anticholinergic entry taught on the course page covers this. The concern is recent abrupt stopping, which is both a confound and a medical risk.",1,"Right. Not every concern comes from the Beers list. Recent withdrawal is the issue here."],
+     ["The benzodiazepine entry, because alcohol acts like a sedative.",0,"The benzodiazepine entry covers benzodiazepines. The concern here is recent withdrawal from heavy drinking."],
+     ["His anticholinergic burden is 3 or more.",0,"He takes no medicines, so no burden score applies."]]},
+   {q:"What is the next step?", opts:[
+     ["Tell your supervisor the same day before testing goes further, record the drinking pattern and the date he stopped, and let your supervisor decide whether to proceed or reschedule.",1,"Right. Stopping heavy drinking abruptly in the past few days is a reason to tell your supervisor the same day. The risk is medical, and the timing is a confound for any scores."],
+     ["Give the full battery and add a note about the drinking.",0,"Recent withdrawal raises a medical question your supervisor needs to hear before testing goes further, and scores obtained now would carry the confound."],
+     ["Suggest he have a drink to settle his nerves before you start.",0,"Never advise an examinee about taking any substance. Tell your supervisor."]]}
+  ]}
+];
+function el(id){ return document.getElementById(id); }
+function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+var cur=0, step=0, firstTry={}, tried=false, order=[];
+function chips(){
+  var c=el('chips'); c.innerHTML='';
+  CASES.forEach(function(cs,i){ var b=document.createElement('button'); b.type='button'; b.textContent=cs.name.replace(/, \d+$/,''); b.setAttribute('data-k',cs.k);
+    b.onclick=function(){ load(i); }; c.appendChild(b); });
+}
+function load(i){
+  cur=i; step=0; var c=CASES[i];
+  el('cTitle').textContent=c.name; el('cSetup').textContent=c.setup;
+  var t='<tr><th>Medicine or substance</th><th>How long</th><th>Last dose or use</th></tr>';
+  c.meds.forEach(function(m){ t+='<tr><td>'+m[0]+'</td><td>'+m[1]+'</td><td>'+m[2]+'</td></tr>'; });
+  el('meds').innerHTML=t;
+  el('pat').innerHTML=c.pat.map(function(x){ return '<li>'+x+'</li>'; }).join('');
+  render();
+}
+function render(){
+  var c=CASES[cur], s=c.steps[step]; tried=false;
+  Array.prototype.forEach.call(el('chips').children,function(b,j){ b.classList.toggle('on',j===cur); b.classList.toggle('done',!!firstTry[CASES[j].k+'-done']); b.setAttribute('aria-pressed', j===cur ? 'true':'false'); });
+  el('steps').textContent='Decision '+(step+1)+' of 3. '+['Classes and likely effects','Older-adult guidance','Next step'][step];
+  el('q').textContent=s.q;
+  order=shuffle(s.opts.map(function(_,i){ return i; }));
+  var o=el('opts'); o.innerHTML='';
+  order.forEach(function(idx){ var b=document.createElement('button'); b.type='button'; b.textContent=s.opts[idx][0]; b.setAttribute('data-i',idx); b.setAttribute('data-ok',s.opts[idx][1]); b.onclick=function(){ choose(idx,b); }; o.appendChild(b); });
+  el('fb').className='fb hidden'; el('fb').innerHTML=''; el('next').classList.add('hidden'); el('status').textContent=''; report();
+}
+function tally(){ var n=0,t=0; Object.keys(firstTry).forEach(function(k){ if(!/-done$/.test(k)){ t++; if(firstTry[k]) n++; } }); return [n,t]; }
+function choose(idx,b){
+  var c=CASES[cur], s=c.steps[step], op=s.opts[idx], key=c.k+'-'+step;
+  if(!tried){ firstTry[key]=!!op[1]; tried=true; }
+  var fb=el('fb');
+  if(op[1]){
+    Array.prototype.forEach.call(el('opts').children,function(x){ x.disabled=true; });
+    b.classList.add('right'); fb.className='fb ok'; fb.innerHTML='<strong>Yes.</strong> '+op[2];
+    var last=step===c.steps.length-1;
+    if(last){ firstTry[c.k+'-done']=true; }
+    var nx=el('next'); nx.classList.remove('hidden');
+    nx.textContent= last ? (cur<CASES.length-1 ? 'Next case' : 'Start again') : 'Next decision';
+    var r=tally(); el('status').textContent='Correct on the first try in '+r[0]+' of '+r[1]+' decisions so far.';
+    nx.focus();
+  } else {
+    b.classList.add('wrong'); b.disabled=true; fb.className='fb'; fb.innerHTML='<strong>Not this one.</strong> '+op[2];
+  }
+  report();
+}
+el('next').onclick=function(){
+  var c=CASES[cur];
+  if(step<c.steps.length-1){ step++; render(); }
+  else { load(cur<CASES.length-1 ? cur+1 : 0); }
+};
+function report(){ try{ parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:document.documentElement.scrollHeight}),'*'); }catch(e){} }
+window.addEventListener('load',report); window.addEventListener('resize',report);
+function fromHash(){ var m=/(?:^|[#&])case=([A-Za-z]+)/.exec(location.hash||''); if(!m) return 0; var k=m[1].toLowerCase(); for(var i=0;i<CASES.length;i++){ if(CASES[i].k===k) return i; } return 0; }
+window.addEventListener('hashchange',function(){ load(fromHash()); });
+window.__tool={cases:CASES, state:function(){ var r=tally(); return {cur:cur, caseKey:CASES[cur].k, step:step, firstTry:r, done:Object.keys(firstTry).filter(function(k){return /-done$/.test(k);}).length}; }};
+chips(); load(fromHash());
+</script>
+</body>
+</html>
