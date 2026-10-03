@@ -128,7 +128,9 @@
 // Medical Mimics (Foundations 4). Stepwise case reveal. Every medical fact is
 // drawn from sources verified for the F4 reading addition "When the Body
 // Imitates the Mind" (see drafts/f4-verification.md):
-//   DSM-5 (APA, 2013) pp. 146, 161, 181, 209, 214, 217, 231
+//   DSM-5 / DSM-5-TR (APA, 2013, 2022) for major depressive episode Criterion C,
+//   verified unchanged (r15 DSM-TR-VERIFIED.md). DSM-5 wording (APA, 2013) for the
+//   panic, panic attack, and due-to-another-medical-condition material. No page numbers.
 //   StatPearls: Hyperthyroidism (Mathew, Kaur, & Rawla, 2023), Thyrotoxicosis
 //   (Blick, Nguyen, & Jialal, 2025), Hypothyroidism (Patil et al., 2024),
 //   Hypoglycemia (Mathew & Thoppil, 2022)
@@ -156,7 +158,7 @@ var CASES = [
         { t:"Reassure her that panic is uncomfortable but not dangerous.",
           fb:"The reading ties that reassurance to a clinician having assessed the symptoms as panic. Nobody has done that yet, and unexplained physical symptoms warrant medical evaluation first." }
       ],
-      src:"Mathew et al. (2023), StatPearls: Hyperthyroidism. DSM-5, p. 217." },
+      src:"Mathew et al. (2023), StatPearls: Hyperthyroidism. DSM-5 wording (APA, 2013)." },
     { stage:"History",
       text:"Nadia has lost weight over the same three months without trying. She feels hot in rooms where other people are comfortable. She has never had problems with anxiety before this year, and she drinks one coffee a day.",
       q:"Which explanation remains possible at this point?",
@@ -170,7 +172,7 @@ var CASES = [
         { t:"Caffeine alone explains it, so cutting back is all she needs.",
           fb:"Asking about caffeine was right, but caffeine does not account for the weight loss or the heat intolerance. Stopping here would leave the most important question unasked." }
       ],
-      src:"Mathew et al. (2023). DSM-5, pp. 209 and 217." },
+      src:"Mathew et al. (2023). DSM-5 wording (APA, 2013)." },
     { stage:"A detail",
       text:"During the session you notice a fine tremor in her hands while they rest in her lap. She mentions that her heart feels fast even when she is sitting still and calm.",
       q:"What do you do now?",
@@ -198,7 +200,7 @@ var CASES = [
         { t:"Diagnose panic disorder anyway, since she had repeated attacks.",
           fb:"Panic disorder requires that the attacks not be attributable to another medical condition, and DSM-5 gives hyperthyroidism as its example." }
       ],
-      src:"Mathew et al. (2023). DSM-5, pp. 209, 214, and 231." }
+      src:"Mathew et al. (2023). DSM-5 wording (APA, 2013)." }
   ]
 },
 {
@@ -231,7 +233,7 @@ var CASES = [
         { t:"Ordinary aging, so nothing needs to be checked.",
           fb:"Age is not an explanation. A year of fatigue, slowed thinking, and physical change deserves a medical look at any age." }
       ],
-      src:"DSM-5, pp. 161 and 181. Patil et al. (2024)." },
+      src:"DSM-5 / DSM-5-TR (APA, 2013, 2022) for the major depressive episode. DSM-5 wording (APA, 2013) for the medical-condition text. Patil et al. (2024)." },
     { stage:"A detail",
       text:"His daughter mentions that his voice has grown hoarse. Gerald adds that his hair seems thinner than it used to be.",
       q:"What do you do now?",
@@ -259,7 +261,7 @@ var CASES = [
         { t:"Stop asking about mood until his thyroid levels are normal.",
           fb:"Mood and safety still need monitoring while medical treatment proceeds." }
       ],
-      src:"Patil et al. (2024). DSM-5, pp. 161 and 181." }
+      src:"Patil et al. (2024). DSM-5 / DSM-5-TR (APA, 2013, 2022) for the major depressive episode. DSM-5 wording (APA, 2013) for the medical-condition text." }
   ]
 },
 {
@@ -278,7 +280,7 @@ var CASES = [
         { t:"Teach him paced breathing to use at the next attack.",
           fb:"Breathing skills can help with panic, but if the episodes come from low blood sugar, the answer is medical, and a breathing exercise would not address it." }
       ],
-      src:"Mathew & Thoppil (2022), StatPearls: Hypoglycemia. DSM-5, p. 214." },
+      src:"Mathew & Thoppil (2022), StatPearls: Hypoglycemia. DSM-5 wording (APA, 2013)." },
     { stage:"History",
       text:"Tomás has diabetes and takes insulin. The episodes happen mostly on days he skips breakfast, and they ease within minutes after he eats. He has not told his doctor, because he assumed it was stress.",
       q:"Which explanation remains possible at this point?",
@@ -292,7 +294,7 @@ var CASES = [
         { t:"Hypoglycemia is unlikely because he is young.",
           fb:"Age does not rule it out. His insulin use and the timing of the episodes are what matter." }
       ],
-      src:"Mathew & Thoppil (2022). DSM-5, pp. 209 and 231." },
+      src:"Mathew & Thoppil (2022). DSM-5 wording (APA, 2013)." },
     { stage:"A detail",
       text:"He adds that on weekends he sometimes drinks without eating much, and one of the worst episodes came the morning after.",
       q:"What do you do now?",
@@ -339,7 +341,7 @@ var CASES = [
         { t:"Ask only about her fear of suffocating.",
           fb:"Her fear matters, but asking only about it skips whether anyone has checked her heart and lungs." }
       ],
-      src:"Dezube (2026), MSD Manual: Hyperventilation Syndrome. DSM-5, p. 214." },
+      src:"Dezube (2026), MSD Manual: Hyperventilation Syndrome. DSM-5 wording (APA, 2013)." },
     { stage:"History",
       text:"After her first episode Aisha went to urgent care. The physician checked her oxygen level, ran an ECG and a chest radiograph, found nothing serious, and told her she was hyperventilating. She has had more episodes since and now avoids crowded buses.",
       q:"Which explanation remains possible at this point?",
@@ -381,7 +383,7 @@ var CASES = [
         { t:"Refer her to a pulmonologist yourself.",
           fb:"Specialist referrals are the physician's call. Your part is coordination with her physician." }
       ],
-      src:"Dezube (2026). DSM-5, p. 209." }
+      src:"Dezube (2026). DSM-5 wording (APA, 2013)." }
   ]
 },
 {
@@ -428,7 +430,7 @@ var CASES = [
         { t:"Decide that a first episode this late must be dementia.",
           fb:"That swaps one assumption for another. A physician should evaluate the medical possibilities." }
       ],
-      src:"DSM-5, p. 181." },
+      src:"DSM-5 wording (APA, 2013)." },
     { stage:"Exam or lab finding", lab:true,
       text:"Her physician finds a suppressed TSH with elevated thyroid hormone and begins treatment for hyperthyroidism.",
       q:"What does this finding mean for your work with Ruth?",
@@ -442,7 +444,7 @@ var CASES = [
         { t:"Diagnose major depressive disorder, since she has the symptoms.",
           fb:"A major depressive episode requires that it not be attributable to the physiological effects of another medical condition." }
       ],
-      src:"Mathew et al. (2023). Blick et al. (2025). DSM-5, p. 161." }
+      src:"Mathew et al. (2023). Blick et al. (2025). DSM-5 / DSM-5-TR (APA, 2013, 2022)." }
   ]
 }
 ];
