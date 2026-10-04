@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<!--
+  Risk Classification (COMETS, interview/risk-classification.html)
+  Deep links:
+    #case=N     open invented case N (1 to 18)
+    #mode=ideation   only the ideation question on each case
+    #mode=behavior   only the behavior question on each case
+    (default)   both questions on each case, cases in random order
+  Every case is invented. No form items, item text, or form layout appears here.
+  Category definitions are paraphrased from the sources cited on the Canvas page.
+  Cases 7 and 12 are "clarify before you rate" cases (key "clarify").
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Risk Classification</title>
+<style>
+  :root{--bg:#ffffff; --card:#f7faf8; --ink:#17251d; --muted:#41544a; --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b; --ok:#2f6b4f; --okbg:#e8f3ec; --no:#9a3412; --nobg:#fbeee6;}
+  *{box-sizing:border-box;}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.55;}
+  .wrap{max-width:820px; margin:0 auto; padding:14px 14px 16px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:22px; margin:0 0 4px;}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
+  .warn{font-size:13px; color:#7a3d00; background:#fff3e6; border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px; margin:0 0 10px;}
+  .tabs{display:flex; flex-wrap:wrap; gap:4px; margin:0 0 8px;}
+  .tabs button{font:inherit; font-size:14px; cursor:pointer; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--green); padding:5px 10px;}
+  .tabs button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:0 0 10px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:18px; margin:0 0 6px;}
+  details.rules{font-size:13px; color:var(--teach); background:#fff; border:1px solid var(--line); border-radius:6px; padding:8px 10px; margin:0 0 10px;}
+  details.rules summary{cursor:pointer; color:var(--green); font-weight:600;}
+  details.rules p{margin:6px 0 0;}
+  .vignette{background:#fff; border:1px solid var(--line); border-left:4px solid var(--green); border-radius:6px; padding:10px 12px; margin:0 0 6px; font-size:15px;}
+  .frame{font-size:13px; color:var(--muted); margin:0 0 4px;}
+  .q{margin:10px 0 0; padding:10px 0 0; border-top:1px solid var(--line);}
+  .q p.stem{margin:0 0 6px; font-weight:600; color:var(--green); font-size:15px;}
+  .opts{display:flex; flex-wrap:wrap; gap:6px;}
+  .opts button{font:inherit; font-size:14px; cursor:pointer; border:1px solid #cfe0d7; border-radius:8px; background:#fff; color:var(--ink); padding:6px 10px; text-align:left;}
+  .opts button.ok{border-color:var(--ok); background:var(--okbg);}
+  .opts button.no{border-color:var(--no); background:var(--nobg);}
+  .opts button:disabled{cursor:default;}
+  .fb{margin:8px 0 0; border-radius:8px; border:1px solid var(--line); background:#fff; padding:8px 10px; font-size:14px; color:var(--teach);}
+  .fb.ok{border-color:#9cc3ae; background:var(--okbg);}
+  .fb.no{border-color:#e3b9a0; background:var(--nobg);}
+  .fb:empty{display:none;}
+  .nav{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0 0;}
+  button.b{font:inherit; font-size:15px; cursor:pointer; border-radius:8px; padding:9px 16px;}
+  .primary{background:var(--green); color:#eef4f1; border:1px solid var(--green);}
+  button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .status{font-size:13px; color:var(--muted);}
+  .source{font-size:12px; color:var(--muted); margin:12px 0 0; border-top:1px solid var(--line); padding-top:8px;}
+  .source p{margin:0 0 4px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Risk classification</h1>
+  <p class="lede">Each case is a short invented description of what a client told an interviewer. Classify the most severe type of suicidal ideation and the behavior category for the time frame given, or choose to clarify first when the description leaves the rating open, then read the reason. Keep the Canvas page open beside you.</p>
+  <div class="warn"><strong>Nothing here is saved.</strong> Every client is invented. If you are having thoughts of suicide yourself, call or text 988, and in an emergency call 911.</div>
+  <div class="tabs" id="tabs" role="tablist" aria-label="Practice sets"></div>
+  <div class="card">
+    <h2 id="title"></h2>
+    <details class="rules"><summary>The definitions, paraphrased</summary>
+      <p><strong>Ideation, most severe type.</strong> 1, a wish to be dead or to sleep and not wake up, with no thoughts of killing oneself. 2, general thoughts of killing oneself, with no method, no intent, and no plan. 3, a method in mind but no worked-out plan and no intention of acting. 4, some intention of acting, without a specific plan. 5, the details of a plan fully or partly worked out, with some intent. Rate the highest type present. Types are never added.</p>
+      <p><strong>Clarify before rating.</strong> When a description leaves out the detail a definition turns on, ask before you rate. If it stays unclear, record what was said and raise it with your supervisor.</p>
+      <p><strong>Behavior.</strong> Actual attempt, a potentially self-injurious act with at least some wish to die, with or without injury. Intent may be inferred when the person thought the act could be lethal. Interrupted attempt, stopped by someone or something outside the person before the act began. Once any part of the act begins, it is an actual attempt. Aborted or self-interrupted attempt, the person takes steps and stops themselves before any self-destructive act. Preparatory act, anything beyond a thought or a statement that prepares for an attempt, such as gathering a means or preparing for death. Non-suicidal self-injury, self-injury done for other reasons with no intention of dying.</p>
+    </details>
+    <div id="case"></div>
+    <div id="qs"></div>
+  </div>
+  <div class="nav">
+    <button class="b primary" id="next" type="button">Next case</button>
+    <span class="status" id="prog"></span>
+    <span class="status" id="acc" aria-live="polite"></span>
+  </div>
+  <div class="source">
+    <p><strong>Sources.</strong> Definitions are paraphrased from the sources cited on the Canvas page. Use the form and the course page during a real administration, and follow the Asking About Risk procedure after any positive answer.</p>
+    <p>The tool holds no form items and no form content. Each case has one behavior category so that the reason stays clear. Real interviews can have several.</p>
+  </div>
+</div>
+<script>
+function el(id){ return document.getElementById(id); }
+function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+
+var IDEA=[["0","None"],["1","Type 1"],["2","Type 2"],["3","Type 3"],["4","Type 4"],["5","Type 5"],["clarify","Clarify before rating"]];
+var BEHV=[["actual","Actual attempt"],["interrupted","Interrupted attempt"],["aborted","Aborted or self-interrupted"],["preparatory","Preparatory act"],["nssi","Non-suicidal self-injury"],["none","No behavior"],["clarify","Clarify before rating"]];
+var IDEF={
+ "0":"None means the client denies both a wish to be dead and any thoughts of killing themself in the time frame.",
+ "1":"Type 1 is a wish to be dead or to sleep and not wake up, with no thoughts of killing oneself.",
+ "2":"Type 2 is general thoughts of killing oneself, with no method in mind, no intent, and no plan.",
+ "3":"Type 3 has a method in mind, but no worked-out plan and no intention of acting.",
+ "4":"Type 4 has some intention of acting, without a specific plan.",
+ "5":"Type 5 has the details of a plan fully or partly worked out, together with some intent.",
+ "clarify":"Clarify first when the description leaves out a detail the definition turns on."
+};
+var BDEF={
+ actual:"An actual attempt is a potentially self-injurious act with at least some wish to die. No injury is needed, only the potential for it.",
+ interrupted:"An interrupted attempt is stopped by someone or something outside the person before any part of the act begins.",
+ aborted:"An aborted or self-interrupted attempt is one where the person takes steps toward an attempt and stops themselves before any self-destructive act.",
+ preparatory:"A preparatory act goes beyond a thought or a statement to prepare for an attempt, such as gathering a means or preparing for death.",
+ nssi:"Non-suicidal self-injury is self-injury done for other reasons, such as relieving stress, with no intention of dying.",
+ none:"No behavior means nothing was done, begun, or prepared in the time frame.",
+ clarify:"Clarify first when the description leaves out a detail the definition turns on."
+};
+// Each case: text, ideation key, behavior key, and the reason for each key.
+var CASES=[
+ {t:"Over the past month she has often wished she could go to sleep and not wake up. Asked directly, she says she has not had thoughts of killing herself. Asked about behavior, she says she has not done, started, or prepared anything.",
+  i:"1",b:"none",wi:"She wishes she could sleep and not wake up and denies thoughts of killing herself, which is type 1.",wb:"She denies doing, starting, or preparing anything, so there is no behavior to classify."},
+ {t:"He says he has thought, \"I could just kill myself,\" a few times this month. He has not thought about how, has no intention of acting, and has made no plan. He has done nothing toward it.",
+  i:"2",b:"none",wi:"He has thoughts of killing himself with no method, no intent, and no plan, which is type 2.",wb:"He has done nothing toward an attempt, so there is no behavior."},
+ {t:"She has thought about overdosing on a medicine she keeps at home, but she has never worked out when or where and says she would never act on it. She denies doing or preparing anything.",
+  i:"3",b:"none",wi:"A method is in mind, nothing is worked out, and she denies any intent, which is type 3. The words \"I would never act on it\" keep it out of type 4.",wb:"Thinking of a method is ideation, not behavior. Nothing was done or prepared."},
+ {t:"He has had thoughts of killing himself most days this month and says that part of him might act on them. He has not decided how or when. He denies doing or preparing anything.",
+  i:"4",b:"none",wi:"He reports some intention of acting with no specific plan, which is type 4.",wb:"Nothing was done, begun, or prepared, so there is no behavior."},
+ {t:"In the past month she has thought of killing herself and has worked out how and when, and she says she intends to. Last week she wrote goodbye letters to her family and gave her cat to a neighbor.",
+  i:"5",b:"preparatory",wi:"She has a worked-out plan and some intent, which is type 5.",wb:"Writing goodbye letters and giving away a pet prepare for death. They go beyond thought, and no act toward self-injury began, so they are preparatory acts."},
+ {t:"He says his thoughts of killing himself this month have come with some intention of acting, though he never worked out details. Six weeks ago, wanting to die, he swallowed a quantity of a medicine he believed could kill him. He had no injury and needed no care.",
+  i:"4",b:"actual",wi:"Some intention of acting without a worked-out plan is type 4.",wb:"He acted with a wish to die, and the act had the potential for harm. No injury is needed for an actual attempt."},
+ {t:"In the past month she has had general thoughts of killing herself, with no method, intent, or plan. Two months ago she took a large amount of a medicine. She says she \"just wanted everything to stop for a while.\" She has not said whether she wanted to die or whether she thought it could kill her.",
+  i:"2",b:"clarify",wi:"General thoughts with no method, intent, or plan are type 2.",wb:"The missing detail is intent. Ask whether she had any wish to die and whether she thought at the time that it could kill her. If either answer is yes, it is an actual attempt, because intent need not be complete and may be inferred when the person thought the act could be lethal. If she had no wish to die and did it only to stop the feelings for a while, it is non-suicidal self-injurious behavior. If she denies intent but the act was highly dangerous, whether to infer intent is a judgment to raise with your supervisor."},
+ {t:"Last week he had decided how and when to end his life and intended to do it. He had the means in front of him and was about to begin when his roommate walked in. The roommate's arrival stopped him before he did anything.",
+  i:"5",b:"interrupted",wi:"A worked-out plan with intent is type 5.",wb:"An outside circumstance, his roommate walking in, stopped it before any part of the act began, which is an interrupted attempt."},
+ {t:"Two weeks ago she had decided how she would end her life and intended to. She had begun to take the pills when her sister came in and took the rest away.",
+  i:"5",b:"actual",wi:"A worked-out plan with intent is type 5.",wb:"Once any part of the act has begun, it is an actual attempt, even when someone else stops it partway. It is not an interrupted attempt."},
+ {t:"In the past month he has had thoughts of killing himself with some intention of acting, but no specific plan. Two months ago he picked up a bottle of medicine intending to take it, then thought of his daughter and put it back himself before taking any.",
+  i:"4",b:"aborted",wi:"In the past month he reports some intention of acting without a specific plan, which is type 4. The night two months ago falls outside the ideation time frame.",wb:"He took a step toward an attempt and stopped himself before any self-destructive act, which is an aborted or self-interrupted attempt."},
+ {t:"Earlier this month she had chosen a place and a time to end her life and intended to. She drove to the place, sat for an hour, and decided on her own to drive home before doing anything.",
+  i:"5",b:"aborted",wi:"She had worked out where and when and had intent, which is type 5.",wb:"She stopped herself before any self-destructive act. No one else intervened, so it is aborted or self-interrupted, not interrupted."},
+ {t:"This month he has had thoughts of killing himself, with a method in mind, and says he intends to act. Asked about a plan, he says, \"I've thought about it some,\" and the interview moves on before he says what he has worked out. He denies doing, starting, or preparing anything.",
+  i:"clarify",b:"none",wi:"The missing detail is the plan. Ask what, if anything, he has worked out, such as when, where, or how. If nothing beyond the method is worked out, intent without a specific plan is type 4. If any details are fully or partly worked out, with his stated intent, it is type 5. If his answer still leaves it unclear, record his words and raise the rating with your supervisor.",wb:"He denies doing, starting, or preparing anything, so there is no behavior. Thinking about a plan is ideation, not behavior."},
+ {t:"She has injured herself on purpose several times this month when stress builds up, to feel better. She says she had no wish to die and denies any wish to be dead or thoughts of killing herself.",
+  i:"0",b:"nssi",wi:"She denies both a wish to be dead and thoughts of killing herself, so there is no ideation.",wb:"Self-injury done to feel better with no intention of dying is non-suicidal self-injury, rated apart from suicidal behavior."},
+ {t:"He denies any wish to be dead or thoughts of suicide in the past month. Asked about behavior anyway, he says that two months ago, when he could not see a way out, he wrote a goodbye note and gave away his tools.",
+  i:"0",b:"preparatory",wi:"He denies ideation for the past month, so the recent ideation score is none.",wb:"Writing a note and giving away belongings prepare for death. The behavior questions are asked even when ideation is denied, which is how this came to light."},
+ {t:"He says he has wished he were dead and has also had the thought \"maybe I should just kill myself.\" He has not thought about how and has no intention of acting. He has done nothing toward it.",
+  i:"2",b:"none",wi:"Both type 1 and type 2 are present. The rating is the highest type present, type 2. Types are never added.",wb:"He has done nothing toward an attempt, so there is no behavior."},
+ {t:"She denies any wish to be dead, any thoughts of killing herself, and anything done, started, or prepared, now or in the past.",
+  i:"0",b:"none",wi:"She denies both a wish to be dead and thoughts of killing herself.",wb:"She denies any behavior. You still asked every behavior question before recording none."},
+ {t:"In the past month she has had thoughts of killing herself with some intention of acting, without a plan. Two months ago, wanting to die, she drove far too fast on a dark road hoping to crash. No one was hurt.",
+  i:"4",b:"actual",wi:"In the past month she reports some intention of acting without a specific plan, which is type 4. The drive two months ago falls outside the ideation time frame.",wb:"The act had the potential for harm and was done with a wish to die. No injury is needed, so it is an actual attempt."},
+ {t:"He has thought about getting a gun to kill himself but says he would never do it. He has not looked for one, bought anything, or prepared anything.",
+  i:"3",b:"none",wi:"A method is in mind with no plan and no intent, which is type 3.",wb:"A thought about getting a means is not a preparatory act. A preparatory act goes beyond thought, and nothing was done here."}
+];
+var MODES=[["both","Ideation and behavior"],["ideation","Ideation only"],["behavior","Behavior only"]];
+var mode="both", order=[], pos=0, cur=null, first=0, firstOk=0, answered={};
+
+function tally(qid, ok){
+  if(answered[qid]) return; answered[qid]=true; first++; if(ok) firstOk++;
+  el('acc').textContent="First-try accuracy this session: "+firstOk+" of "+first+".";
+}
+function addChoice(qid, stem, opts, key, why){
+  var box=document.createElement('div'); box.className='q';
+  box.innerHTML='<p class="stem">'+stem+'</p><div class="opts"></div><div class="fb" aria-live="polite"></div>';
+  var o=box.querySelector('.opts'), fb=box.querySelector('.fb');
+  opts.forEach(function(op){
+    var b=document.createElement('button'); b.type='button'; b.textContent=op[1]; b.dataset.v=op[0];
+    b.addEventListener('click',function(){
+      var ok=op[0]===key; tally(qid, ok);
+      b.className=ok?'ok':'no';
+      fb.className='fb '+(ok?'ok':'no');
+      fb.innerHTML=(ok?'<strong>Correct.</strong> ':'<strong>Not this one.</strong> ')+why(op[0]);
+      if(ok) o.querySelectorAll('button').forEach(function(x){ x.disabled=true; });
+      report();
+    });
+    o.appendChild(b);
+  });
+  el('qs').appendChild(box);
+}
+function render(){
+  answered={}; el('qs').innerHTML='';
+  var c=CASES[cur];
+  el('title').textContent="Case "+(cur+1)+" of "+CASES.length;
+  el('case').innerHTML='<p class="frame">Ideation in the past month. Behavior in the past three months. An invented client.</p><div class="vignette"></div>';
+  el('case').querySelector('.vignette').textContent=c.t;
+  if(mode!=="behavior"){
+    addChoice("i","Most severe ideation type",IDEA,c.i,function(v){
+      if(v===c.i) return c.wi;
+      if(c.i==="clarify") return "The description does not settle this yet. "+c.wi;
+      if(v==="clarify") return "This description already gives the detail the definition needs. Rate it. Look again at what the client said about thoughts, method, intent, and plan.";
+      return IDEF[v]+" "+(parseInt(v,10)<parseInt(c.i,10)?"The description has a more severe feature than that. ":"The description lacks the feature that type requires. ")+"Look again at what the client said about thoughts, method, intent, and plan.";
+    });
+  }
+  if(mode!=="ideation"){
+    addChoice("b","Behavior category",BEHV,c.b,function(v){
+      if(v===c.b) return c.wb;
+      if(c.b==="clarify") return "The description does not settle this yet. "+c.wb;
+      if(v==="clarify") return "This description already gives the detail the definition needs. Rate it. Ask whether anything was done or prepared, whether any part of the act began, who stopped it, and whether there was any wish to die.";
+      return BDEF[v]+" Ask whether anything was done or prepared, whether any part of the act began, who stopped it, and whether there was any wish to die.";
+    });
+  }
+  el('prog').textContent=(cur+1)+" / "+CASES.length;
+  report();
+}
+function buildTabs(){
+  var t=el('tabs'); t.innerHTML='';
+  MODES.forEach(function(m){ var b=document.createElement('button'); b.type='button'; b.textContent=m[1]; b.setAttribute('role','tab'); b.dataset.mode=m[0];
+    if(m[0]===mode){ b.className='on'; b.setAttribute('aria-selected','true'); } else b.setAttribute('aria-selected','false');
+    b.addEventListener('click',function(){ mode=m[0]; buildTabs(); render(); }); t.appendChild(b); });
+}
+function newOrder(){ order=shuffle(CASES.map(function(_,i){ return i; })); pos=0; }
+function next(){ pos++; if(pos>=order.length) newOrder(); cur=order[pos]; render(); }
+el('next').addEventListener('click',next);
+function report(){ try{ parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:document.documentElement.scrollHeight}),'*'); }catch(e){} }
+window.addEventListener('load',report); window.addEventListener('resize',report);
+window.__tool={CASES:CASES, go:function(i){ cur=i; render(); }, setMode:function(m){ mode=m; buildTabs(); render(); }, state:function(){ return {mode:mode, cur:cur, acc:el('acc').textContent}; }};
+function fromHash(){
+  var h=location.hash||"", m=/mode=(both|ideation|behavior)/.exec(h), c=/case=(\d+)/.exec(h);
+  mode=m?m[1]:"both"; buildTabs(); newOrder();
+  if(c){ var n=parseInt(c[1],10)-1; if(n>=0&&n<CASES.length){ cur=n; pos=order.indexOf(n); render(); return; } }
+  cur=order[0]; render();
+}
+window.addEventListener("hashchange",fromHash); fromHash();
+el('acc').textContent='No answers yet this session.';
+</script>
+</body>
+</html>
