@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<!--
+  Reliable and Clinically Significant Change (COMETS, self-report/symptom-change-calculator.html)
+  Deep links:
+    #mode=practice   decide change, reliable change, and the end-score threshold on invented totals
+    #mode=derive     compute the standard error and the reliable change value from an invented SD and reliability
+    #mode=calc       enter two invented totals and see every decision with its reason
+  Every client and score is invented. No items, item text, or form content appears here.
+  Thresholds (18-point reliable change, end score of 28 or lower) are the published values taught on the Canvas page.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reliable and Clinically Significant Change</title>
+<style>
+  :root{--bg:#ffffff; --card:#f7faf8; --ink:#17251d; --muted:#41544a; --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b; --ok:#2f6b4f; --okbg:#e8f3ec; --no:#9a3412; --nobg:#fbeee6;}
+  *{box-sizing:border-box;}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.55;}
+  .wrap{max-width:820px; margin:0 auto; padding:14px 14px 16px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:22px; margin:0 0 4px;}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
+  .warn{font-size:13px; color:#7a3d00; background:#fff3e6; border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px; margin:0 0 10px;}
+  .tabs{display:flex; flex-wrap:wrap; gap:4px; margin:0 0 8px;}
+  .tabs button{font:inherit; font-size:14px; cursor:pointer; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--green); padding:5px 10px;}
+  .tabs button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:0 0 10px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:18px; margin:0 0 6px;}
+  .note{font-size:13px; color:var(--muted); margin:0 0 8px;}
+  .rules{font-size:13px; color:var(--teach); background:#fff; border:1px solid var(--line); border-radius:6px; padding:8px 10px; margin:0 0 10px;}
+  .rules p{margin:0 0 4px;}
+  .tablewrap{overflow-x:auto;}
+  table{border-collapse:collapse; width:100%; font-size:14px; background:#fff; margin:0 0 10px;}
+  th,td{border:1px solid #cfe0d7; padding:5px 6px; text-align:left; vertical-align:top;}
+  th{background:#eef4f1; color:var(--green); font-weight:600;}
+  .q{margin:10px 0 0; padding:10px 0 0; border-top:1px solid var(--line);}
+  .q p.stem{margin:0 0 6px; font-weight:600; color:var(--green); font-size:15px;}
+  .opts{display:flex; flex-wrap:wrap; gap:6px;}
+  .opts button{font:inherit; font-size:14px; cursor:pointer; border:1px solid #cfe0d7; border-radius:8px; background:#fff; color:var(--ink); padding:6px 10px; text-align:left;}
+  .opts button.ok{border-color:var(--ok); background:var(--okbg);}
+  .opts button.no{border-color:var(--no); background:var(--nobg);}
+  .opts button:disabled{cursor:default;}
+  input[type=number]{width:90px; font:inherit; font-size:15px; padding:4px 6px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink);}
+  label.in{display:inline-block; margin:0 12px 6px 0; font-size:14px; color:var(--teach);}
+  .fb{margin:8px 0 0; border-radius:8px; border:1px solid var(--line); background:#fff; padding:8px 10px; font-size:14px; color:var(--teach);}
+  .fb.ok{border-color:#9cc3ae; background:var(--okbg);}
+  .fb.no{border-color:#e3b9a0; background:var(--nobg);}
+  .fb:empty{display:none;}
+  .nav{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0 0;}
+  button.b{font:inherit; font-size:15px; cursor:pointer; border-radius:8px; padding:9px 16px;}
+  .primary{background:var(--green); color:#eef4f1; border:1px solid var(--green);}
+  .secondary{background:#eef4f1; color:var(--green); border:1px solid #cfe0d7;}
+  button:focus-visible, input:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .status{font-size:13px; color:var(--muted);}
+  .source{font-size:12px; color:var(--muted); margin:12px 0 0; border-top:1px solid var(--line); padding-top:8px;}
+  .source p{margin:0 0 4px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Reliable and clinically significant change</h1>
+  <p class="lede">Each case gives invented totals on a 20-item trauma symptom checklist rated 0 to 4, so totals run from 0 to 80 and a lower total means fewer symptoms. You decide whether a change is larger than measurement error and whether the end score crosses the published threshold. Keep the Canvas page open beside you.</p>
+  <div class="warn"><strong>Nothing here is saved.</strong> These are practice totals, not patient records. The SD and reliability values in the arithmetic cases are invented.</div>
+  <div class="tabs" id="tabs" role="tablist" aria-label="Practice sets"></div>
+  <div class="card">
+    <h2 id="title"></h2>
+    <div class="rules" id="rules"></div>
+    <div id="case"></div>
+    <div id="qs"></div>
+  </div>
+  <div class="nav">
+    <button class="b primary" id="next" type="button">Next case</button>
+    <span class="status" id="acc" aria-live="polite"></span>
+  </div>
+  <div class="source">
+    <p><strong>Sources.</strong> Rules are paraphrased from the sources cited on the Canvas page. The two thresholds are published values from a study of treatment-seeking men, and the Canvas page explains their limits.</p>
+    <p>The tool holds no items and no form content.</p>
+  </div>
+</div>
+<script>
+function el(id){ return document.getElementById(id); }
+function ri(a,b){ return a+Math.floor(Math.random()*(b-a+1)); }
+function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+
+var RC=18, CSC=28;
+var MODES=[["practice","Decide the change"],["derive","Work the arithmetic"],["calc","Calculator"]];
+var RULES={
+ practice:"<p>Change score = end total minus start total. A negative change is improvement.</p><p>Reliable change: a change of 18 points or more in either direction is larger than measurement error alone would be expected to produce. A drop of 18 or more is reliable improvement, and a rise of 18 or more is reliable worsening.</p><p>Clinically significant change: an end score of 28 or lower is closer to people without the disorder than to people with it. The threshold describes a move from above 28 to 28 or lower, so it does not apply when the start total was already 28 or lower.</p><p>The two are separate indicators. Report each one, and write reliable improvement and clinically significant change, never recovered.</p>",
+ derive:"<p>Standard error of measurement: SE = SD &times; &radic;(1 &minus; r), where SD is the spread of start totals in the treatment sample and r is the test&ndash;retest reliability.</p><p>Standard error of the difference between two totals: S<sub>diff</sub> = &radic;2 &times; SE.</p><p>Reliable change value = 1.96 &times; S<sub>diff</sub>, rounded up to the next whole point, since totals are whole numbers.</p>",
+ calc:"<p>Enter any two invented totals from 0 to 80. The tool applies the 18-point reliable change value and the end score of 28 or lower, and shows each reason.</p>"
+};
+var mode="practice", cur=null, first=0, firstOk=0, answered={};
+var CLIENTS=["Client A","Client B","Client C","Client D","Client E","Client F"];
+
+function decide(t1,t2){
+  var ch=t2-t1, rel=Math.abs(ch)>=RC?(ch<0?"better":"worse"):"none";
+  var csc=t1<=CSC?"na":(t2<=CSC?"met":"not");
+  return {ch:ch, rel:rel, csc:csc};
+}
+function genPractice(){
+  var t1, t2, r=Math.random();
+  if(r<0.2){ t1=ri(40,70); t2=t1-ri(RC,40); }                 // reliable, often crosses
+  else if(r<0.4){ t1=ri(46,72); t2=t1-ri(RC,RC+8); if(t2<=CSC) t2=CSC+ri(1,6); } // reliable, above threshold
+  else if(r<0.55){ t1=ri(30,45); t2=ri(18,CSC); }             // crosses without reliable change, sometimes
+  else if(r<0.7){ t1=ri(33,70); t2=t1-pick([RC-1,RC,RC+1]); } // boundary
+  else if(r<0.8){ t1=ri(10,CSC); t2=Math.max(0,t1-ri(0,12)); } // starts at or below threshold
+  else if(r<0.9){ t1=ri(20,55); t2=t1+ri(RC,25); }            // reliable worsening
+  else { t1=ri(32,70); t2=t1-ri(1,RC-1); }                    // small change
+  t1=Math.max(0,Math.min(80,t1)); t2=Math.max(0,Math.min(80,t2));
+  var d=decide(t1,t2);
+  return {type:"practice", who:pick(CLIENTS), t1:t1, t2:t2, ch:d.ch, rel:d.rel, csc:d.csc};
+}
+function genDerive(){
+  for(;;){
+    var sd=ri(90,180)/10, r=pick([.75,.78,.80,.82,.84,.86,.88,.90]);
+    var se=Math.round(sd*Math.sqrt(1-r)*100)/100, sdiff=Math.round(Math.SQRT2*se*100)/100, raw=1.96*sdiff;
+    if(Math.abs(raw-Math.round(raw))<0.06) continue;           // avoid cases that hinge on rounding of intermediate steps
+    return {type:"derive", sd:sd, r:r, se:se, sdiff:sdiff, raw:raw, rc:Math.ceil(raw)};
+  }
+}
+function genCalc(){ return {type:"calc"}; }
+var GEN={practice:genPractice, derive:genDerive, calc:genCalc};
+
+function tally(qid, ok){
+  if(answered[qid]) return; answered[qid]=true; first++; if(ok) firstOk++;
+  el('acc').textContent="First-try accuracy this session: "+firstOk+" of "+first+".";
+}
+function addChoice(qid, stem, opts, key, why){
+  var box=document.createElement('div'); box.className='q';
+  box.innerHTML='<p class="stem">'+stem+'</p><div class="opts"></div><div class="fb" aria-live="polite"></div>';
+  var o=box.querySelector('.opts'), fb=box.querySelector('.fb');
+  opts.forEach(function(op){
+    var b=document.createElement('button'); b.type='button'; b.innerHTML=op[1]; b.dataset.v=op[0];
+    b.addEventListener('click',function(){
+      var ok=op[0]===key; tally(qid, ok);
+      b.className=ok?'ok':'no';
+      fb.className='fb '+(ok?'ok':'no');
+      fb.innerHTML=(ok?'<strong>Correct.</strong> ':'<strong>Not this one.</strong> ')+why(op[0]);
+      if(ok) o.querySelectorAll('button').forEach(function(x){ x.disabled=true; });
+      report();
+    });
+    o.appendChild(b);
+  });
+  el('qs').appendChild(box);
+}
+function addNumber(qid, stem, check, why, step){
+  var box=document.createElement('div'); box.className='q';
+  box.innerHTML='<p class="stem">'+stem+'</p><label class="in">Your answer <input type="number" step="'+(step||1)+'"></label><button type="button" class="b secondary">Check</button><div class="fb" aria-live="polite"></div>';
+  var inp=box.querySelector('input'), btn=box.querySelector('button'), fb=box.querySelector('.fb');
+  btn.addEventListener('click',function(){
+    if(inp.value===''){ fb.className='fb no'; fb.innerHTML='Enter a number first.'; report(); return; }
+    var v=parseFloat(inp.value), ok=check(v); tally(qid, ok);
+    fb.className='fb '+(ok?'ok':'no');
+    fb.innerHTML=(ok?'<strong>Correct.</strong> ':'<strong>Not this one.</strong> ')+why(v);
+    report();
+  });
+  el('qs').appendChild(box);
+}
+function relText(c){
+  var a=Math.abs(c.ch);
+  if(c.rel==="none") return "The change is "+c.ch+", and "+a+" is smaller than "+RC+", so it is within what measurement error could produce.";
+  return "The change is "+c.ch+", and "+a+" is at least "+RC+", so it is reliable "+(c.ch<0?"improvement.":"worsening.");
+}
+function cscText(c){
+  if(c.csc==="na") return "The start total of "+c.t1+" was already "+CSC+" or lower, so there is no move across the threshold to judge.";
+  if(c.csc==="met") return "The start total of "+c.t1+" was above "+CSC+" and the end total of "+c.t2+" is "+CSC+" or lower, so the end score meets the threshold.";
+  return "The end total of "+c.t2+" is above "+CSC+", so the threshold is not met.";
+}
+function render(){
+  answered={}; el('qs').innerHTML=''; el('case').innerHTML='';
+  el('rules').innerHTML=RULES[mode];
+  var c=cur;
+  if(c.type==="practice"){
+    el('title').textContent="Is the change reliable, and does the end score cross the threshold?";
+    el('case').innerHTML='<p class="note">'+c.who+', invented, completed the checklist with the same past-month form at the start and end of treatment.</p><div class="tablewrap"><table><tr><th>Start total</th><th>End total</th></tr><tr><td>'+c.t1+'</td><td>'+c.t2+'</td></tr></table></div>';
+    addNumber("p1","Change score (end minus start)",function(v){ return v===c.ch; },function(v){ return c.t2+" minus "+c.t1+" is "+c.ch+(v===c.ch?".":", not "+v+".")+" Keep the sign, since it carries the direction."; });
+    addChoice("p2","Reliable change?",[["better","Reliable improvement"],["worse","Reliable worsening"],["none","Not reliable"]],c.rel,function(){ return relText(c); });
+    addChoice("p3","End score threshold (28 or lower)?",[["met","Met"],["not","Not met"],["na","Does not apply"]],c.csc,function(){ return cscText(c); });
+    var key = c.rel==="better" && c.csc==="met" ? "both" : c.rel==="better" ? "rel" : c.csc==="met" ? "csc" : "neither";
+    addChoice("p4","Which summary fits the write-up?",shuffle([["both","Reliable improvement and clinically significant change"],["rel","Reliable improvement, end score still above 28"],["csc","End score of 28 or lower, change not reliable"],["neither","Neither threshold met"],["rec","The client has recovered"]]),key,function(v){
+      if(v==="rec") return "The authors of the thresholds caution against reading them as recovery, which also involves functioning. Write the two indicators instead.";
+      var s=relText(c)+" "+cscText(c);
+      if(c.rel==="worse") s+=" A reliable rise is worsening, so neither improvement indicator is met.";
+      return s;
+    });
+  }
+  if(c.type==="derive"){
+    el('title').textContent="Where does the reliable change value come from?";
+    el('case').innerHTML='<p class="note">An invented treatment sample. Work each step and round SE and S<sub>diff</sub> to two decimals.</p><div class="tablewrap"><table><tr><th>SD of start totals</th><th>Test&ndash;retest r</th></tr><tr><td>'+c.sd.toFixed(1)+'</td><td>'+c.r.toFixed(2)+'</td></tr></table></div>';
+    addNumber("d1","Standard error of measurement (SE)",function(v){ return Math.abs(v-c.se)<=0.02; },function(v){ return c.sd.toFixed(1)+" &times; &radic;(1 &minus; "+c.r.toFixed(2)+") = "+c.se.toFixed(2)+"."+(Math.abs(v-c.se)<=0.02?"":" Check that you took the square root of 1 minus r, not of r."); },"0.01");
+    addNumber("d2","Standard error of the difference (S<sub>diff</sub>)",function(v){ return Math.abs(v-c.sdiff)<=0.03; },function(){ return "&radic;2 &times; "+c.se.toFixed(2)+" = "+c.sdiff.toFixed(2)+". Two scores each carry error, which is why the difference has the larger standard error."; },"0.01");
+    addNumber("d3","Reliable change value in whole points",function(v){ return v===c.rc; },function(v){ return "1.96 &times; "+c.sdiff.toFixed(2)+" = "+c.raw.toFixed(2)+", rounded up to "+c.rc+"."+(v===Math.round(c.raw)&&v!==c.rc?" Rounding to the nearest point would accept a change slightly smaller than the 95% value.":""); });
+    addChoice("d4","A higher test&ndash;retest r would make the reliable change value",[["smaller","Smaller"],["larger","Larger"],["same","No different"]],"smaller",function(){ return "A higher r shrinks 1 &minus; r, so SE, S<sub>diff</sub>, and the change needed all shrink. A more reliable measure detects a smaller real change."; });
+  }
+  if(c.type==="calc"){
+    el('title').textContent="Check your own invented totals";
+    var box=document.createElement('div');
+    box.innerHTML='<label class="in">Start total <input id="ct1" type="number" min="0" max="80" step="1"></label><label class="in">End total <input id="ct2" type="number" min="0" max="80" step="1"></label><button type="button" class="b secondary" id="cgo">Show the decisions</button><div class="fb" id="cfb" aria-live="polite"></div>';
+    el('case').appendChild(box);
+    el('cgo').addEventListener('click',function(){
+      var a=el('ct1').value, b=el('ct2').value, fb=el('cfb');
+      var t1=parseInt(a,10), t2=parseInt(b,10);
+      if(a===''||b===''||!(t1>=0&&t1<=80&&t2>=0&&t2<=80)||String(t1)!==a.trim()||String(t2)!==b.trim()){ fb.className='fb no'; fb.innerHTML='Enter two whole-number totals from 0 to 80.'; report(); return; }
+      var d=decide(t1,t2), c2={t1:t1,t2:t2,ch:d.ch,rel:d.rel,csc:d.csc};
+      fb.className='fb ok';
+      fb.innerHTML='<strong>Change score.</strong> '+d.ch+'.<br><strong>Reliable change.</strong> '+relText(c2)+'<br><strong>End score threshold.</strong> '+cscText(c2);
+      window.__tool.last=c2; report();
+    });
+  }
+  report();
+}
+function buildTabs(){
+  var t=el('tabs'); t.innerHTML='';
+  MODES.forEach(function(m){ var b=document.createElement('button'); b.type='button'; b.textContent=m[1]; b.setAttribute('role','tab'); b.dataset.mode=m[0];
+    if(m[0]===mode){ b.className='on'; b.setAttribute('aria-selected','true'); } else b.setAttribute('aria-selected','false');
+    b.addEventListener('click',function(){ go(m[0]); }); t.appendChild(b); });
+}
+function go(m, c){ mode=m; buildTabs(); cur=c||GEN[m](); el('next').style.display=(m==="calc")?"none":""; render(); }
+el('next').addEventListener('click',function(){ go(mode); });
+function report(){ try{ parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:document.documentElement.scrollHeight}),'*'); }catch(e){} }
+window.addEventListener('load',report); window.addEventListener('resize',report);
+window.__tool={GEN:GEN, go:go, decide:decide, RC:RC, CSC:CSC, last:null, state:function(){ return {mode:mode, cur:cur, acc:el('acc').textContent}; }};
+function fromHash(){ var m=/mode=([a-z]+)/.exec(location.hash||""); go(m&&GEN[m[1]]?m[1]:"practice"); }
+window.addEventListener("hashchange",fromHash); fromHash();
+el('acc').textContent='No answers yet this session.';
+</script>
+</body>
+</html>
