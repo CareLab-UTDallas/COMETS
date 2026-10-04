@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<!--
+  Hand Score a Keyed True-False Form (COMETS, validity/keyed-item-scoring.html)
+  Deep links:
+    #mode=score    score an invented 30-item form against an invented practice key, then make the screening decision
+    #mode=blanks   apply the blank-item rules before scoring
+    #mode=audit    find a miskeyed item in a classmate's scoring sheet (one item counted twice, one never counted)
+  Every item number, key, response, and cutoff is invented. No item text or published scoring key appears here.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hand Score a Keyed True-False Form</title>
+<style>
+  :root{--bg:#ffffff; --card:#f7faf8; --ink:#17251d; --muted:#41544a; --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b; --ok:#2f6b4f; --okbg:#e8f3ec; --no:#9a3412; --nobg:#fbeee6;}
+  *{box-sizing:border-box;}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.55;}
+  .wrap{max-width:820px; margin:0 auto; padding:14px 14px 16px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:22px; margin:0 0 4px;}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
+  .warn{font-size:13px; color:#7a3d00; background:#fff3e6; border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px; margin:0 0 10px;}
+  .tabs{display:flex; flex-wrap:wrap; gap:4px; margin:0 0 8px;}
+  .tabs button{font:inherit; font-size:14px; cursor:pointer; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--green); padding:5px 10px;}
+  .tabs button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:0 0 10px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:18px; margin:0 0 6px;}
+  .note{font-size:13px; color:var(--muted); margin:0 0 8px;}
+  .rules{font-size:13px; color:var(--teach); background:#fff; border:1px solid var(--line); border-radius:6px; padding:8px 10px; margin:0 0 10px;}
+  .rules p{margin:0 0 4px;}
+  .tablewrap{overflow-x:auto;}
+  table{border-collapse:collapse; width:100%; font-size:14px; background:#fff; margin:0 0 10px;}
+  th,td{border:1px solid #cfe0d7; padding:5px 6px; text-align:left; vertical-align:top;}
+  th{background:#eef4f1; color:var(--green); font-weight:600;}
+  .q{margin:10px 0 0; padding:10px 0 0; border-top:1px solid var(--line);}
+  .q p.stem{margin:0 0 6px; font-weight:600; color:var(--green); font-size:15px;}
+  .opts{display:flex; flex-wrap:wrap; gap:6px;}
+  .opts button{font:inherit; font-size:14px; cursor:pointer; border:1px solid #cfe0d7; border-radius:8px; background:#fff; color:var(--ink); padding:6px 10px; text-align:left;}
+  .opts button.ok{border-color:var(--ok); background:var(--okbg);}
+  .opts button.no{border-color:var(--no); background:var(--nobg);}
+  .opts button:disabled{cursor:default;}
+  input[type=number]{width:80px; font:inherit; font-size:15px; padding:4px 6px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink);}
+  .fb{margin:8px 0 0; border-radius:8px; border:1px solid var(--line); background:#fff; padding:8px 10px; font-size:14px; color:var(--teach);}
+  .fb.ok{border-color:#9cc3ae; background:var(--okbg);}
+  .fb.no{border-color:#e3b9a0; background:var(--nobg);}
+  .fb:empty{display:none;}
+  .nav{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0 0;}
+  button.b{font:inherit; font-size:15px; cursor:pointer; border-radius:8px; padding:9px 16px;}
+  .primary{background:var(--green); color:#eef4f1; border:1px solid var(--green);}
+  .secondary{background:#eef4f1; color:var(--green); border:1px solid #cfe0d7;}
+  button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .status{font-size:13px; color:var(--muted);}
+  .source{font-size:12px; color:var(--muted); margin:12px 0 0; border-top:1px solid var(--line); padding-top:8px;}
+  .source p{margin:0 0 4px;}
+  table.resp td{white-space:nowrap; font-size:13px;}
+  table.resp th{font-size:13px;}
+  .num{color:var(--muted); font-size:12px;}
+  .qn{padding-top:8px; margin-top:8px;}
+  .qn p.stem{display:inline-block; margin:0 8px 0 0;}
+  .qn .note{display:none;}
+  .qn button.b{padding:5px 12px; font-size:14px;}
+  .q{margin:8px 0 0; padding:8px 0 0;}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <h1>Hand score a keyed true-false form</h1>
+  <p class="lede">Each case is an invented 30-item true-false form with three scales and its own invented practice key. You turn each response into an item score, total the scales, apply the blank-item rules, and make the screening decision. A third set asks you to find the error in a classmate's scoring sheet. Keep the Canvas page open beside you.</p>
+  <div class="warn"><strong>Nothing here is saved.</strong> The item numbers, the key, and the cutoffs are invented for practice and change with every case. They are not the key or the cutoffs of any published test. Score a real form only from the key taught on the Canvas page.</div>
+  <div class="tabs" id="tabs" role="tablist" aria-label="Practice sets"></div>
+  <div class="card">
+    <h2 id="title"></h2>
+    <div class="rules" id="rules"></div>
+    <div id="case"></div>
+    <div id="qs"></div>
+  </div>
+  <div class="nav">
+    <button class="b primary" id="next" type="button">Next case</button>
+    <span class="status" id="acc" aria-live="polite"></span>
+  </div>
+  <div class="source">
+    <p><strong>Sources.</strong> Rules are paraphrased from the sources cited on the Canvas page. Use the manual during a real administration.</p>
+    <p>The tool holds no items, no item text, and no published scoring key. Every response, key, and cutoff is invented.</p>
+  </div>
+</div>
+<script>
+function el(id){ return document.getElementById(id); }
+function ri(a,b){ return a+Math.floor(Math.random()*(b-a+1)); }
+function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+
+var N=30, SCALES=["A","B","C"], SCALE_CUT=3, TOTAL_CUT=8, SCALE_BLANK_MAX=3, FORM_BLANK_MAX=6;
+var MODES=[["score","Score a form"],["blanks","Blank items"],["audit","Check a scoring sheet"]];
+var KEYRULE="<p>Each item scores 1 when the response matches the keyed direction and 0 when it does not. Most items are keyed True. Items marked F in the key are keyed False, so a False response scores 1 and a True response scores 0.</p>";
+var CUTRULE="<p>Practice cutoffs (invented). A scale is above its cutoff when its raw score is more than "+SCALE_CUT+". The total is above its cutoff when it is more than "+TOTAL_CUT+". A total above the cutoff is a positive screen, a reason for further evaluation and never a conclusion.</p>";
+var RULES={
+ score: KEYRULE+CUTRULE,
+ blanks: KEYRULE+"<p>A blank scores 0 when a scale has three or fewer blanks. A scale with more than three blanks cannot be scored, and because the total is the sum of the scales, the total cannot be scored either. This form uses the manual's scale rule. Its overall limit is proportional to its 30 items. With more than six blanks in all, the form is not scored.</p>"+CUTRULE,
+ audit: KEYRULE+"<p>A classmate summed each scale by listing the item numbers it counted. Check every list against the key. Each item belongs to exactly one scale, so an item listed under the wrong scale is counted twice, and the item it replaced is never counted.</p>"
+};
+var mode="score", cur=null, first=0, firstOk=0, answered={};
+
+/* ---------- invented key and responses ---------- */
+function makeKey(){
+  var nums=shuffle(Array.from({length:N},function(_,i){return i+1;}));
+  var key={}, members={A:[],B:[],C:[]};
+  SCALES.forEach(function(s,si){
+    var its=nums.slice(si*10,si*10+10).sort(function(a,b){return a-b;});
+    var nf=ri(2,3), fset=shuffle(its).slice(0,nf);
+    its.forEach(function(n){ key[n]={s:s, k:fset.indexOf(n)>=0?"F":"T"}; });
+    members[s]=its;
+  });
+  return {key:key, members:members};
+}
+function makeResponses(key, pScale){
+  var r={};
+  for(var n=1;n<=N;n++){
+    var kd=key[n].k, p=pScale[key[n].s];
+    var hit=Math.random()<p;
+    r[n]=hit?kd:(kd==="T"?"F":"T");
+  }
+  return r;
+}
+function itemScore(key, resp, n){ var v=resp[n]; if(v===null) return 0; return v===key[n].k?1:0; }
+function scaleScore(key, members, resp, s){ return members[s].reduce(function(a,n){ return a+itemScore(key,resp,n); },0); }
+function blanksOn(members, resp, s){ return members[s].filter(function(n){ return resp[n]===null; }).length; }
+
+function genScore(){
+  var K=makeKey();
+  var lvl=pick([[.15,.2,.25],[.25,.35,.3],[.4,.3,.5],[.6,.45,.55],[.2,.5,.2]]);
+  var p={A:lvl[0],B:lvl[1],C:lvl[2]};
+  var resp=makeResponses(K.key,p);
+  var sc={}; SCALES.forEach(function(s){ sc[s]=scaleScore(K.key,K.members,resp,s); });
+  var tot=sc.A+sc.B+sc.C;
+  return {type:"score", key:K.key, members:K.members, resp:resp, sc:sc, total:tot};
+}
+function genBlanks(){
+  var c=genScore(); c.type="blanks";
+  var pattern=pick(["few","few","scale4","many","none1"]);
+  var nb={A:0,B:0,C:0};
+  if(pattern==="few"){ nb={A:ri(0,2),B:ri(0,3),C:ri(0,1)}; }
+  if(pattern==="none1"){ nb[pick(SCALES)]=1; }
+  if(pattern==="scale4"){ var s=pick(SCALES); nb[s]=4; }
+  if(pattern==="many"){ nb={A:ri(2,3),B:ri(2,3),C:ri(2,3)}; if(nb.A+nb.B+nb.C<=FORM_BLANK_MAX) nb.C=3, nb.A=3, nb.B=Math.max(nb.B,1); }
+  SCALES.forEach(function(s){ shuffle(c.members[s]).slice(0,nb[s]).forEach(function(n){ c.resp[n]=null; }); });
+  c.nb={}; SCALES.forEach(function(s){ c.nb[s]=blanksOn(c.members,c.resp,s); });
+  c.nbTotal=c.nb.A+c.nb.B+c.nb.C;
+  c.formOk=c.nbTotal<=FORM_BLANK_MAX;
+  c.can={}; SCALES.forEach(function(s){ c.can[s]=c.formOk && c.nb[s]<=SCALE_BLANK_MAX; });
+  c.totalOk=c.formOk && SCALES.every(function(s){ return c.can[s]; });
+  SCALES.forEach(function(s){ c.sc[s]=scaleScore(c.key,c.members,c.resp,s); });
+  c.total=c.sc.A+c.sc.B+c.sc.C;
+  return c;
+}
+function genAudit(){
+  var c=genScore(); c.type="audit";
+  var s=pick(SCALES), others=SCALES.filter(function(x){return x!==s;});
+  var dropped=pick(c.members[s]);
+  var src=pick(others), wrong=pick(c.members[src]);
+  var listed={}; SCALES.forEach(function(x){ listed[x]=c.members[x].slice(); });
+  listed[s]=listed[s].map(function(n){ return n===dropped?wrong:n; }).sort(function(a,b){return a-b;});
+  function sumList(lst, scaleForKey){ return lst.reduce(function(a,n){ return a+itemScore(c.key,c.resp,n); },0); }
+  c.bad=s; c.dropped=dropped; c.wrong=wrong; c.src=src; c.listed=listed;
+  c.sheet={}; SCALES.forEach(function(x){ c.sheet[x]=sumList(listed[x]); });
+  c.sheetTotal=c.sheet.A+c.sheet.B+c.sheet.C;
+  return c;
+}
+var GEN={score:genScore, blanks:genBlanks, audit:genAudit};
+
+/* ---------- rendering ---------- */
+function tally(qid, ok){
+  if(answered[qid]) return; answered[qid]=true; first++; if(ok) firstOk++;
+  el('acc').textContent="First-try accuracy this session: "+firstOk+" of "+first+".";
+}
+function addChoice(qid, stem, opts, key, why){
+  var box=document.createElement('div'); box.className='q'; box.dataset.q=qid;
+  box.innerHTML='<p class="stem">'+stem+'</p><div class="opts"></div><div class="fb" aria-live="polite"></div>';
+  var o=box.querySelector('.opts'), fb=box.querySelector('.fb');
+  opts.forEach(function(op){
+    var b=document.createElement('button'); b.type='button'; b.innerHTML=op[1]; b.dataset.v=op[0];
+    b.addEventListener('click',function(){
+      var ok=op[0]===key; tally(qid, ok);
+      b.className=ok?'ok':'no';
+      fb.className='fb '+(ok?'ok':'no');
+      fb.innerHTML=(ok?'<strong>Correct.</strong> ':'<strong>Not this one.</strong> ')+why(op[0]);
+      if(ok) o.querySelectorAll('button').forEach(function(x){ x.disabled=true; });
+      report();
+    });
+    o.appendChild(b);
+  });
+  el('qs').appendChild(box);
+}
+function addNumber(qid, stem, key, why){
+  var box=document.createElement('div'); box.className='q qn'; box.dataset.q=qid;
+  box.innerHTML='<p class="stem">'+stem+'</p> <label><span class="note">Your answer </span><input type="number" step="1" min="0" aria-label="'+stem.replace(/<[^>]+>/g,'').replace(/"/g,'')+'"></label> <button type="button" class="b secondary">Check</button><div class="fb" aria-live="polite"></div>';
+  var inp=box.querySelector('input'), btn=box.querySelector('button'), fb=box.querySelector('.fb');
+  btn.addEventListener('click',function(){
+    if(inp.value===''){ fb.className='fb no'; fb.innerHTML='Enter a number first.'; report(); return; }
+    var v=parseInt(inp.value,10), ok=v===key; tally(qid, ok);
+    fb.className='fb '+(ok?'ok':'no');
+    fb.innerHTML=(ok?'<strong>Correct.</strong> ':'<strong>Not this one.</strong> ')+why(v);
+    report();
+  });
+  el('qs').appendChild(box);
+}
+function keyTable(c){
+  var h='<div class="tablewrap"><table><tr><th>Scale</th><th>Items on the practice key (F = keyed False)</th></tr>';
+  SCALES.forEach(function(s){
+    h+='<tr><td>Scale '+s+'</td><td>'+c.members[s].map(function(n){ return n+(c.key[n].k==="F"?'<strong> F</strong>':''); }).join(', ')+'</td></tr>';
+  });
+  return h+'</table></div>';
+}
+function respTable(c){
+  var h='<div class="tablewrap"><table class="resp"><tr><th>Item</th>';
+  var rows=[[1,10],[11,20],[21,30]], out='';
+  rows.forEach(function(r){
+    out+='<tr><th>'+r[0]+'&ndash;'+r[1]+'</th>';
+    for(var n=r[0];n<=r[1];n++){ var v=c.resp[n]; out+='<td><span class="num">'+n+'</span> '+(v===null?'<em>blank</em>':v)+'</td>'; }
+    out+='</tr>';
+  });
+  return '<p class="note">The examinee\'s responses, by item number.</p><div class="tablewrap"><table class="resp">'+out+'</table></div>';
+}
+function listItems(c,s){ return c.members[s].map(function(n){ var v=c.resp[n]; return n+' ('+(v===null?'blank':v)+(v===null?'':', keyed '+c.key[n].k)+(itemScore(c.key,c.resp,n)?' = 1':' = 0')+')'; }).join(', '); }
+function scoredItems(c,s){ var a=c.members[s].filter(function(n){ return itemScore(c.key,c.resp,n)===1; }); return a.length?a.join(', '):'none'; }
+function decisionQ(qid, total){
+  var above=total>TOTAL_CUT;
+  addChoice(qid,"What does the total support?",
+    shuffle([["refer","Above the cutoff. The screen is positive, so refer for further evaluation."],
+     ["label","Above the cutoff. Report that the examinee feigned symptoms."],
+     ["none","At or below the cutoff. This score alone does not call for referral."],
+     ["invalid","At or below the cutoff. Report the protocol as invalid."]]),
+    above?"refer":"none",
+    function(v){
+      var base="The total is "+total+", which is "+(above?"more than ":"not more than ")+TOTAL_CUT+". ";
+      if(v==="label") return base+"A screen identifies who needs a fuller evaluation. One score above a screening cutoff never shows that a person feigned anything.";
+      if(v==="invalid") return base+"A total at or below the cutoff is not an invalid protocol. Validity is lost only through blanks, under the blank rules.";
+      if(v==="refer") return above?base+"A positive screen calls for further evaluation and a conversation with your supervisor, never a conclusion.":base+"It is not above the cutoff, so the screen is negative.";
+      return above?base+"It is above the cutoff, so the screen is positive.":base+"A negative screen does not prove the report is accurate. Other data, such as a mismatch between the report and what you observe, can still call for referral.";
+    });
+}
+function render(){
+  answered={}; el('qs').innerHTML='';
+  el('rules').innerHTML=RULES[mode];
+  var c=cur;
+  if(c.type==="score"){
+    el('title').textContent="Score the form and make the screening decision";
+    el('case').innerHTML=keyTable(c)+respTable(c);
+    SCALES.forEach(function(s){
+      addNumber("s"+s,"Raw score on Scale "+s+"?",c.sc[s],function(v){
+        return "Items scored 1 on Scale "+s+": "+scoredItems(c,s)+". That makes "+c.sc[s]+(v===c.sc[s]?".":". Check each keyed-False item, since a False response there scores 1.");
+      });
+    });
+    addNumber("tot","Total raw score?",c.total,function(){ return "The total is the sum of the three scales, "+c.sc.A+" + "+c.sc.B+" + "+c.sc.C+" = "+c.total+"."; });
+    var above=SCALES.filter(function(s){ return c.sc[s]>SCALE_CUT; });
+    var keyv=above.length?above.join(""):"none";
+    var opts=[["none","None"],["A","A only"],["B","B only"],["C","C only"],["AB","A and B"],["AC","A and C"],["BC","B and C"],["ABC","All three"]];
+    addChoice("sc","Which scales are above their cutoff (more than "+SCALE_CUT+")?",opts,keyv,function(){
+      return SCALES.map(function(s){ return "Scale "+s+" = "+c.sc[s]+(c.sc[s]>SCALE_CUT?" (above)":" (not above)"); }).join(". ")+". A scale elevation describes the kind of symptoms endorsed. The decision rests on the total.";
+    });
+    decisionQ("dec",c.total);
+  }
+  if(c.type==="blanks"){
+    el('title').textContent="Apply the blank-item rules";
+    el('case').innerHTML=keyTable(c)+respTable(c);
+    addChoice("form","There are "+(c.nbTotal)+" blank items in all. Can the form be scored?",[["y","Yes"],["n","No"]],c.formOk?"y":"n",function(){
+      return c.formOk?"Six or fewer blanks in all, so the form can be scored, scale by scale.":"More than six blanks in all, so this practice form is not scored. In a real case you would have asked for the missing answers before the person left.";
+    });
+    if(c.formOk){
+      SCALES.forEach(function(s){
+        addChoice("can"+s,"Scale "+s+" has "+c.nb[s]+" blank"+(c.nb[s]===1?"":"s")+". Can it be scored?",[["y","Yes"],["n","No"]],c.can[s]?"y":"n",function(){
+          return c.can[s]?(c.nb[s]?"Three or fewer blanks, so each blank scores 0 and the scale is scored.":"No blanks, so the scale is scored."):"More than three blanks, so the scale cannot be scored.";
+        });
+      });
+      addChoice("cantot","Can the total be scored?",[["y","Yes"],["n","No"]],c.totalOk?"y":"n",function(){
+        return c.totalOk?"Every scale can be scored, so the total can be too.":"The total is the sum of all three scales. One scale cannot be scored, so neither can the total.";
+      });
+      SCALES.forEach(function(s){
+        if(!c.can[s]) return;
+        addNumber("s"+s,"Raw score on Scale "+s+", with blanks scored 0?",c.sc[s],function(){ return "Items scored 1 on Scale "+s+": "+scoredItems(c,s)+". Blanks add nothing, so the scale is "+c.sc[s]+"."; });
+      });
+      if(c.totalOk){
+        addNumber("tot","Total raw score?",c.total,function(){ return c.sc.A+" + "+c.sc.B+" + "+c.sc.C+" = "+c.total+"."; });
+        decisionQ("dec",c.total);
+      }
+    }
+  }
+  if(c.type==="audit"){
+    el('title').textContent="Find the error in a classmate's scoring sheet";
+    var h=keyTable(c)+respTable(c)+'<p class="note">The classmate\'s sheet. Each scale lists the items the classmate counted and the sum reached.</p><div class="tablewrap"><table><tr><th>Scale</th><th>Items counted</th><th>Sum</th></tr>';
+    SCALES.forEach(function(s){ h+='<tr><td>Scale '+s+'</td><td>'+c.listed[s].join(', ')+'</td><td>'+c.sheet[s]+'</td></tr>'; });
+    h+='<tr><td>Total</td><td></td><td>'+c.sheetTotal+'</td></tr></table></div>';
+    el('case').innerHTML=h;
+    addChoice("bad","Which scale's list is wrong?",SCALES.map(function(s){return [s,"Scale "+s];}),c.bad,function(v){
+      return "Scale "+c.bad+" lists item "+c.wrong+", which the key places on Scale "+c.src+", and leaves out item "+c.dropped+", which belongs to Scale "+c.bad+".";
+    });
+    var wopts=shuffle([c.wrong].concat(shuffle(c.listed[c.bad].filter(function(n){return n!==c.wrong;})).slice(0,3)));
+    addChoice("wrong","Which listed item does not belong to Scale "+c.bad+"?",wopts.map(function(n){return [String(n),"Item "+n];}),String(c.wrong),function(){
+      return "Item "+c.wrong+" belongs to Scale "+c.src+" and is already counted there, so this sheet counts it twice.";
+    });
+    var dpool=c.members[c.bad].filter(function(n){return n!==c.dropped;});
+    var dopts=shuffle([c.dropped].concat(shuffle(dpool).slice(0,3)));
+    addChoice("drop","Which Scale "+c.bad+" item was never counted?",dopts.map(function(n){return [String(n),"Item "+n];}),String(c.dropped),function(){
+      return "Item "+c.dropped+" is on the key for Scale "+c.bad+" but missing from the list. Its response was "+c.resp[c.dropped]+" and it is keyed "+c.key[c.dropped].k+", so it scores "+itemScore(c.key,c.resp,c.dropped)+".";
+    });
+    addNumber("fix","Corrected raw score on Scale "+c.bad+"?",c.sc[c.bad],function(){ return "Items scored 1 on Scale "+c.bad+": "+scoredItems(c,c.bad)+". The corrected scale score is "+c.sc[c.bad]+", against "+c.sheet[c.bad]+" on the sheet."; });
+    addNumber("fixtot","Corrected total?",c.total,function(){ return c.sc.A+" + "+c.sc.B+" + "+c.sc.C+" = "+c.total+". The sheet's total of "+c.sheetTotal+" was off by "+Math.abs(c.sheetTotal-c.total)+"."; });
+  }
+  report();
+}
+function go(m){
+  mode=m; cur=GEN[m]();
+  el('tabs').querySelectorAll('button').forEach(function(b){ var on=b.dataset.m===m; b.className=on?'on':''; b.setAttribute('aria-selected',on?'true':'false'); });
+  render();
+}
+MODES.forEach(function(md){
+  var b=document.createElement('button'); b.type='button'; b.dataset.m=md[0]; b.textContent=md[1]; b.setAttribute('role','tab');
+  b.addEventListener('click',function(){ go(md[0]); });
+  el('tabs').appendChild(b);
+});
+el('next').addEventListener('click',function(){ cur=GEN[mode](); render(); });
+function report(){ try{ parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:document.documentElement.scrollHeight}),'*'); }catch(e){} }
+window.addEventListener('load',report); window.addEventListener('resize',report);
+window.__tool={GEN:GEN, go:go, itemScore:itemScore, CUT:{scale:SCALE_CUT,total:TOTAL_CUT,scaleBlank:SCALE_BLANK_MAX,formBlank:FORM_BLANK_MAX}, state:function(){ return {mode:mode, cur:cur, acc:el('acc').textContent}; }};
+function fromHash(){ var m=/mode=([a-z]+)/.exec(location.hash||""); go(m&&GEN[m[1]]?m[1]:"score"); }
+window.addEventListener("hashchange",fromHash); fromHash();
+el('acc').textContent='No answers yet this session.';
+</script>
+</body>
+</html>
