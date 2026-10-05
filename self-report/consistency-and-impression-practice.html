@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Deep links: #case=1..8 opens a fixed case. #mode=random opens a randomized invented profile. -->
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Read a Four-Point Inventory's Response Style</title>
+<style>
+  :root{--bg:#ffffff; --card:#f7faf8; --ink:#17251d; --muted:#41544a; --green:#1e4d3a; --accent:#b35900; --line:#d5e0da; --teach:#33443b;}
+  *{box-sizing:border-box;}
+  html,body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.55;}
+  .wrap{max-width:820px; margin:0 auto; padding:14px 14px 16px;}
+  h1{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:22px; margin:0 0 4px;}
+  .lede{color:var(--muted); font-size:14px; margin:0 0 8px;}
+  .warn{font-size:13px; color:#7a3d00; background:#fff3e6; border-left:4px solid var(--accent); border-radius:6px; padding:6px 10px; margin:0 0 10px;}
+  .chips{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 10px;}
+  .chips button{font:inherit; font-size:13px; cursor:pointer; border:1px solid #cfe0d7; border-radius:20px; background:#eef4f1; color:var(--green); padding:4px 11px;}
+  .chips button.on{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .chips button.done:not(.on){border-color:#9cc3ae; background:#dcebe3;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:0 0 10px;}
+  h2{font-family:Georgia,'Playfair Display',serif; color:var(--green); font-size:18px; margin:0 0 6px;}
+  .setup{font-size:14px; color:var(--teach); margin:0 0 8px;}
+  .tw{overflow-x:auto;}
+  table{border-collapse:collapse; width:100%; font-size:14px;}
+  th,td{border:1px solid #cfe0d7; padding:5px 6px; text-align:center; vertical-align:top;}
+  th{background:#eef4f1; color:var(--green); font-weight:600;}
+  td.hot{background:#fff7ef;}
+  .steps{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 8px; font-size:13px; color:var(--muted);}
+  .steps span{border:1px solid #cfe0d7; border-radius:12px; padding:2px 9px; background:#fff;}
+  .steps span.cur{background:var(--green); color:#eef4f1; border-color:var(--green);}
+  .steps span.ok{background:#dcebe3;}
+  .q{font-weight:600; margin:0 0 8px;}
+  .opts{display:flex; flex-direction:column; gap:6px;}
+  .opts button{font:inherit; font-size:15px; text-align:left; cursor:pointer; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--ink); padding:8px 12px;}
+  .opts button:hover:not(:disabled){border-color:#9cc3ae;}
+  .opts button:focus-visible, button.b:focus-visible, .chips button:focus-visible{outline:3px solid #b35900; outline-offset:2px;}
+  .opts button.right{background:#e3f0e9; border-color:var(--green);}
+  .opts button.wrong{background:#fbeee4; border-color:#e3b58f; color:#6b4a2f;}
+  .opts button:disabled{cursor:default;}
+  .fb{margin:10px 0 0; padding:8px 10px; border-radius:6px; font-size:14px; color:var(--teach); background:#fff7ef; border:1px solid #f0d9c2; border-left:4px solid var(--accent);}
+  .fb.ok{background:#f0f7f3; border-color:#cfe0d7; border-left-color:var(--green);}
+  .fb strong{color:#8a4600;}
+  .fb.ok strong{color:var(--green);}
+  .nav{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0 0;}
+  button.b{font:inherit; font-size:15px; cursor:pointer; border-radius:8px; padding:9px 16px;}
+  .primary{background:var(--green); color:#eef4f1; border:1px solid var(--green);}
+  .secondary{background:#eef4f1; color:var(--green); border:1px solid #cfe0d7;}
+  .status{font-size:13px; color:var(--muted);}
+  .hidden{display:none !important;}
+  .small{font-size:12px; color:var(--muted); margin:8px 0 0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Read a four-point inventory's response style</h1>
+  <p class="lede">Each case is an invented validity profile from a 344-item inventory answered on a four-point scale, with the count of omitted items, T scores for four validity scales, and raw scores for four supplemental indexes. Work through the decision in order, one question at a time. The reasoning appears after every choice, so a wrong answer teaches as much as a right one.</p>
+  <div class="warn"><strong>Nothing here is saved.</strong> The profiles are invented and contain no test items. Practice as often as you like.</div>
+  <div class="chips" id="chips"></div>
+  <div class="card">
+    <h2 id="cTitle"></h2>
+    <p class="setup" id="cSetup"></p>
+    <div class="tw"><table id="prof"></table></div>
+  </div>
+  <div class="card">
+    <div class="steps" id="steps"></div>
+    <p class="q" id="q" aria-live="polite"></p>
+    <div class="opts" id="opts"></div>
+    <div class="fb hidden" id="fb" aria-live="polite"></div>
+    <div class="nav">
+      <button class="b primary hidden" id="next" type="button">Next question</button>
+      <button class="b secondary" id="newc" type="button">New random profile</button>
+      <span class="status" id="status"></span>
+    </div>
+  </div>
+  <p class="small">Rules are paraphrased from the publisher's manual (2nd ed., pp. 13, 27 to 32), as cited on the Canvas page. Use the manual and the full computer report during a real interpretation.</p>
+</div>
+<script>
+var SC=["ICN","INF","NIM","PIM"], IX=["MAL","RDF","DEF","CDF"];
+// Fixed cases. miss: omitted items after review. t: validity T scores. x: supplemental index raw scores.
+var FIXED=[
+ {k:"1", title:"Case 1. A clean profile", setup:"Outpatient intake. All answers were checked before the person left.", miss:0, t:{ICN:52,INF:48,NIM:55,PIM:47}, x:{MAL:0,RDF:-1.2,DEF:2,CDF:140}},
+ {k:"2", title:"Case 2. Too many blanks", setup:"The answer sheet came back by courier from another site, and the person cannot be reached.", miss:23, t:{ICN:58,INF:55,NIM:60,PIM:45}, x:{MAL:1,RDF:-0.8,DEF:2,CDF:139}},
+ {k:"3", title:"Case 3. Inconsistent answering", setup:"Inpatient unit. The person finished in 25 minutes.", miss:3, t:{ICN:77,INF:69,NIM:88,PIM:38}, x:{MAL:2,RDF:0.4,DEF:0,CDF:128}},
+ {k:"4", title:"Case 4. Some unusual answers", setup:"Outpatient intake. The person lives in a shelter.", miss:0, t:{ICN:57,INF:66,NIM:62,PIM:44}, x:{MAL:0,RDF:-1.5,DEF:1,CDF:137}},
+ {k:"5", title:"Case 5. A negative self-presentation", setup:"Personal injury evaluation.", miss:1, t:{ICN:60,INF:57,NIM:95,PIM:31}, x:{MAL:4,RDF:1.9,DEF:0,CDF:126}},
+ {k:"6", title:"Case 6. Exaggeration short of invalid", setup:"Outpatient intake after a recent loss.", miss:0, t:{ICN:55,INF:52,NIM:79,PIM:36}, x:{MAL:1,RDF:-0.3,DEF:0,CDF:131}},
+ {k:"7", title:"Case 7. A favorable self-presentation", setup:"Child custody evaluation.", miss:0, t:{ICN:50,INF:46,NIM:44,PIM:69}, x:{MAL:0,RDF:-2.4,DEF:7,CDF:171}},
+ {k:"8", title:"Case 8. Mild positive impression", setup:"Pre-surgical evaluation.", miss:2, t:{ICN:48,INF:50,NIM:46,PIM:61}, x:{MAL:0,RDF:-1.9,DEF:4,CDF:152}}
+];
+function missKey(c){ return c.miss>17?"stop":(c.miss>=1?"some":"none"); }
+function consKey(c){ if(c.t.ICN>=73||c.t.INF>=75) return "invalid"; if(c.t.ICN>=64||c.t.INF>=60) return "caution"; return "ok"; }
+function nimKey(c){ var n=c.t.NIM; return n>=92?"invalid":(n>=84?"cry":(n>=73?"exag":"none")); }
+function pimKey(c){ var p=c.t.PIM; return p>=68?"questionable":(p>=57?"caution":"none"); }
+function ixKey(c){ var neg=(c.x.MAL>=3||c.x.RDF>0), pos=(c.x.DEF>=6||c.x.CDF>=168); return neg&&pos?"both":(neg?"neg":(pos?"pos":"none")); }
+function stepsFor(c){
+  var S=[], mk=missKey(c);
+  S.push({name:"Omitted items", q:"Start with the omitted items ("+c.miss+" of 344, after any review with the person). What does the count mean?",
+    opts:[{k:"none",t:"No concern. Every item was answered."},
+          {k:"some",t:"The profile can be read, but any scale or subscale with more than 20% of its items blank is not interpreted."},
+          {k:"stop",t:"Do not interpret the profile."}],
+    ans:mk,
+    why:{none:"With every item answered, no scale loses items (pp. 13, 27).",
+         some:"Up to 17 omitted items still allows the profile to be read. Check each scale and subscale, because one with more than 20% of its items blank is not interpreted, and blanks count 0 elsewhere (p. 27). Had the person still been present with 18 or more blanks, you would have asked for them to be completed (p. 13).",
+         stop:"More than 17 omitted items, more than 5% of the test, means the profile should not be interpreted (p. 27). Next time, count blanks before the person leaves, since 18 or more can be completed then (p. 13)."}});
+  if(mk==="stop"){
+    S.push({name:"Decision", q:"The validity and clinical scales are all printed on the report. What does the write-up say?",
+      opts:[{k:"stop",t:"The profile cannot be interpreted because too many items were omitted. No scale is interpreted."},
+            {k:"some",t:"Interpret the scales that have fewer than 20% of their items blank."},
+            {k:"prorate",t:"Estimate the missing answers from the person's other answers and interpret the whole profile."}],
+      ans:"stop",
+      why:{stop:"The omission rule applies to the whole profile before any scale is read (p. 27). Tell your supervisor, and arrange for the person to complete the missing items if possible.",
+           some:"Not this one. The 20% rule is for profiles that pass the overall rule. With more than 17 omitted, the profile as a whole is not interpreted (p. 27).",
+           prorate:"Not this one. The manual gives no rule for estimating missing answers. Blanks score 0, and past 17 the profile is not interpreted (p. 27)."}});
+    return S;
+  }
+  var ck=consKey(c);
+  S.push({name:"Consistency", q:"Read ICN ("+c.t.ICN+"T) and INF ("+c.t.INF+"T). What do they say?",
+    opts:[{k:"ok",t:"No concern. The person answered consistently and attended to the items."},
+          {k:"caution",t:"Some inconsistent or unusual answering. Go on, inquire about it, and hold later hypotheses with caution."},
+          {k:"invalid",t:"The results are best assumed invalid. Stop and look for the cause."}],
+    ans:ck,
+    why:{ok:"ICN is below 64T and INF below 60T, the ranges that show consistent answering and attention to item content (pp. 28 to 29).",
+         caution:"ICN from 64T to 72T shows some inconsistency, and INF from 60T to 74T shows some unusual answers. Review later hypotheses with caution, and inquire about the INF answers before the clinical scales are read (pp. 28 to 29). An unusual life situation can raise INF without carelessness (p. 78).",
+         invalid:"ICN at 73T or more, or INF at 75T or more, means the results are best assumed invalid and no clinical interpretation is recommended (pp. 28 to 29). A completely random completion averages about 73T on ICN and 86T on INF."}});
+  if(ck==="invalid"){
+    S.push({name:"Decision", q:"NIM and the clinical scales are printed on the report. What do you do with them?",
+      opts:[{k:"stop",t:"Report the results as invalid, check the scoring and the answer sheet, and interpret no clinical scale."},
+            {k:"nim",t:"Report a negative self-presentation if NIM is high, since NIM is a separate scale."},
+            {k:"read",t:"Interpret the clinical scales with a caution, since only one validity scale is high."}],
+      ans:"stop",
+      why:{stop:"Look for the cause, which can be carelessness, reading or language problems, confusion, a scoring error, or not following the directions (pp. 28 to 29). Check the keying first. The write-up reports the results as invalid, and readministration is a supervision decision.",
+           nim:"Not this one. Random answering raises NIM on its own, to about 96T on average (p. 30), so NIM cannot be read until inconsistent answering is ruled out.",
+           read:"Not this one. At these levels no clinical interpretation is recommended, whatever the other scales show (pp. 28 to 29)."}});
+    return S;
+  }
+  var nk=nimKey(c);
+  S.push({name:"Negative impression", q:"Read NIM ("+c.t.NIM+"T). What does it say?",
+    opts:[{k:"none",t:"Little or no distortion in a negative direction."},
+          {k:"exag",t:"Some exaggeration of complaints. Interpret the clinical scales with caution."},
+          {k:"cry",t:"Distortion is increasingly likely, possibly a cry for help or an extremely negative view of oneself. Interpret with marked caution."},
+          {k:"invalid",t:"An especially negative self-presentation. The results are best assumed invalid."}],
+    ans:nk,
+    why:{none:"NIM below 73T shows little distortion in a negative direction (p. 30).",
+         exag:"NIM from 73T to 83T suggests an element of exaggeration, so hypotheses from the clinical scales are held with caution (p. 30).",
+         cry:"From 84T to 91T the likelihood of distortion increases. The manual names a cry for help or an extremely negative evaluation of oneself, and some deliberate distortion may also be present (p. 30).",
+         invalid:"At 92T or more the person portrayed themself in an especially negative way. The results are best assumed invalid, and the other scales show what the person wanted to report, not what the person necessarily experiences (p. 30). NIM is not a malingering scale by itself (p. 29)."}});
+  if(nk==="invalid"){
+    S.push({name:"Decision", q:"What does the write-up say?",
+      opts:[{k:"stop",t:"The protocol is invalid because of an especially negative self-presentation, and the clinical scales are not interpreted as experienced symptoms."},
+            {k:"mal",t:"The person was malingering."},
+            {k:"free",t:"The person has no genuine problems."}],
+      ans:"stop",
+      why:{stop:"Report the response style and its consequence. Careless answering, an extremely negative self-presentation, and malingering can all produce this score (p. 30). MAL, RDF, the history, and the interview bear on which applies, and that conclusion belongs to supervision.",
+           mal:"Not this one. NIM is not a malingering scale per se, and people with severe, genuine problems can raise it (p. 29).",
+           free:"Not this one. A distorted protocol cannot show that problems are absent. It shows only that the scores cannot be taken at face value (p. 29)."}});
+    return S;
+  }
+  var pk=pimKey(c);
+  S.push({name:"Positive impression", q:"Read PIM ("+c.t.PIM+"T). What does it say?",
+    opts:[{k:"none",t:"No attempt to present an unrealistically favorable impression."},
+          {k:"caution",t:"Portrayed as relatively free of common shortcomings. The profile likely understates problems."},
+          {k:"questionable",t:"Portrayed as exceptionally free of common shortcomings. The validity of the clinical profile is questionable."}],
+    ans:pk,
+    why:{none:"PIM below 57T shows no attempt at an unrealistically favorable impression. Below 44T is strongly indicative of candid responding (p. 31).",
+         caution:"PIM from 57T to 67T suggests the person presented as relatively free of the shortcomings most people admit. The profile likely underrepresents the extent of problems (p. 31).",
+         questionable:"PIM at 68T or more makes the validity of the clinical profile questionable, and extreme caution is recommended (p. 31). Scales that are not raised cannot be read as showing no problem."}});
+  var xk=ixKey(c);
+  S.push({name:"Supplemental indexes", q:"Read the indexes. MAL "+c.x.MAL+", RDF "+c.x.RDF+", DEF "+c.x.DEF+", CDF "+c.x.CDF+" (raw scores). What do they add?",
+    opts:[{k:"none",t:"Nothing. None reaches its reference point."},
+          {k:"neg",t:"Questions about negative distortion or malingering, to weigh with NIM and the history."},
+          {k:"pos",t:"Questions about defensiveness, to weigh with PIM."},
+          {k:"both",t:"Questions in both directions."}],
+    ans:xk,
+    why:{none:"MAL below 3, RDF at or below 0, DEF below 6, and CDF below 168 raise no question. DEF below 6 still does not rule defensiveness out (pp. 31 to 32).",
+         neg:"MAL of 3 or more (84T) raises questions of malingering, and RDF above 0 (59T) suggests it (p. 31). Weigh them with NIM, the history, and the interview. They describe the profile, not intent.",
+         pos:"DEF of 6 or more (70T) suggests overt defensiveness, and CDF of 168 or more (70T) an overt attempt to present in a distorted way (p. 32). Weigh them with PIM.",
+         both:"Indexes point both ways, a pattern that calls for supervision. Malingerers can also raise CDF (p. 32), so read the whole profile and the history together."}});
+  var fin=(ck==="caution"||nk!=="none"||pk!=="none"||xk!=="none"||mk==="some")?"caveat":"clean";
+  S.push({name:"Decision", q:"Putting it together, what does the protocol support?",
+    opts:[{k:"clean",t:"Interpret the clinical scales with no validity caveat."},
+          {k:"caveat",t:"Interpret the clinical scales, opening the write-up with each validity caveat you found."},
+          {k:"stop",t:"Interpret nothing. The protocol is invalid."}],
+    ans:fin,
+    why:{clean:"No step raised a concern. The write-up still opens with validity, stating that the answers were complete, consistent, and free of distortion (pp. 26 to 27).",
+         caveat:"The protocol can be read, but at least one step raised a concern. Open with each caveat and what it means for the scales, and keep every interpretation tentative (p. 27).",
+         stop:"Not this one. No step reached an invalidating level. Only more than 17 omitted items, ICN at 73T or more, INF at 75T or more, or NIM at 92T or more makes the results best assumed invalid. PIM at 68T or more makes the clinical profile questionable, a strong caveat (pp. 27 to 31)."}});
+  return S;
+}
+function ri(a,b){ return a+Math.floor(Math.random()*(b-a+1)); }
+function rr(a,b){ return Math.round((a+Math.random()*(b-a))*10)/10; }
+function randomCase(){
+  var pat=["clean","miss","stopmiss","cons","inv","nim","pim","ix"][ri(0,7)];
+  var c={k:"R", title:"Random profile", setup:"An invented profile.", miss:0,
+    t:{ICN:ri(40,62),INF:ri(40,58),NIM:ri(41,70),PIM:ri(35,55)}, x:{MAL:ri(0,2),RDF:rr(-3,-0.1),DEF:ri(0,5),CDF:ri(120,165)}};
+  if(pat==="miss") c.miss=ri(1,17);
+  if(pat==="stopmiss") c.miss=ri(18,40);
+  if(pat==="cons"){ if(Math.random()<0.5) c.t.ICN=ri(64,72); else c.t.INF=ri(60,74); }
+  if(pat==="inv"){ if(Math.random()<0.5) c.t.ICN=ri(73,90); else c.t.INF=ri(75,100); c.t.NIM=ri(60,100); }
+  if(pat==="nim"){ c.t.NIM=ri(73,110); c.t.PIM=ri(25,45); if(Math.random()<0.5){c.x.MAL=ri(3,5); c.x.RDF=rr(0.1,2.5);} }
+  if(pat==="pim"){ c.t.PIM=ri(57,75); if(Math.random()<0.5){c.x.DEF=ri(6,8); c.x.CDF=ri(168,180);} }
+  if(pat==="ix"){ if(Math.random()<0.5) c.x.MAL=ri(3,5); else c.x.CDF=ri(168,180); if(Math.random()<0.3){ c.x.MAL=ri(3,4); c.x.DEF=ri(6,7);} }
+  return c;
+}
+var cur=null, ci=0, step=0, steps=[], tried=false, firstRight=0, answered=0, done={};
+var el=function(id){return document.getElementById(id);};
+function renderChips(){
+  var h=""; for(var i=0;i<FIXED.length;i++){ h+='<button type="button" data-i="'+i+'" class="'+(i===ci&&cur.k!=="R"?"on ":"")+(done[FIXED[i].k]?"done":"")+'">Case '+FIXED[i].k+'</button>'; }
+  h+='<button type="button" data-i="R" class="'+(cur&&cur.k==="R"?"on":"")+'">Random</button>';
+  el('chips').innerHTML=h;
+  Array.prototype.forEach.call(el('chips').querySelectorAll('button'),function(b){ b.onclick=function(){ var i=b.getAttribute('data-i'); if(i==="R") loadCase(randomCase()); else { ci=+i; loadCase(FIXED[ci]); } }; });
+}
+function hot(s,v){ var th={ICN:64,INF:60,NIM:73,PIM:57}; return v>=th[s]; }
+function hotx(s,v){ return s==="MAL"?v>=3:(s==="RDF"?v>0:(s==="DEF"?v>=6:v>=168)); }
+function loadCase(c){
+  cur=c; step=0; steps=stepsFor(c);
+  el('cTitle').textContent=c.title; el('cSetup').textContent=c.setup+" Validity scales are linear T scores against the community norms. The indexes are raw scores.";
+  var h='<tr><th>Omitted</th>'; SC.forEach(function(s){h+='<th>'+s+'</th>';}); IX.forEach(function(s){h+='<th>'+s+'</th>';}); h+='</tr><tr><td'+(c.miss>=1?' class="hot"':'')+'>'+c.miss+'</td>';
+  SC.forEach(function(s){ h+='<td'+(hot(s,c.t[s])?' class="hot"':'')+'>'+c.t[s]+'</td>'; });
+  IX.forEach(function(s){ h+='<td'+(hotx(s,c.x[s])?' class="hot"':'')+'>'+c.x[s]+'</td>'; }); h+='</tr>';
+  el('prof').innerHTML=h; renderChips(); renderStep();
+}
+function renderSteps(){ var h=""; steps.forEach(function(s,i){ h+='<span class="'+(i===step?"cur":(i<step?"ok":""))+'">'+(i+1)+". "+s.name+'</span>'; }); el('steps').innerHTML=h; }
+function renderStep(){
+  tried=false; var s=steps[step]; renderSteps();
+  el('q').textContent=s.q;
+  var h=""; s.opts.forEach(function(o){ h+='<button type="button" data-k="'+o.k+'">'+o.t+'</button>'; }); el('opts').innerHTML=h;
+  Array.prototype.forEach.call(el('opts').querySelectorAll('button'),function(b){ b.onclick=function(){ choose(b); }; });
+  el('fb').className='fb hidden'; el('fb').innerHTML=''; el('next').classList.add('hidden'); setStatus(); report();
+}
+function choose(b){
+  var s=steps[step], k=b.getAttribute('data-k'), ok=(k===s.ans);
+  if(!tried){ answered++; if(ok) firstRight++; tried=true; }
+  if(ok){ b.classList.add('right'); Array.prototype.forEach.call(el('opts').querySelectorAll('button'),function(x){x.disabled=true;});
+    el('fb').className='fb ok'; el('fb').innerHTML='<strong>Right.</strong> '+s.why[k];
+    if(step<steps.length-1){ el('next').textContent='Next question'; el('next').classList.remove('hidden'); }
+    else { done[cur.k]=true; el('next').textContent=(cur.k==="R")?'Another random profile':'Next case'; el('next').classList.remove('hidden'); renderChips(); }
+  } else { b.classList.add('wrong'); b.disabled=true; el('fb').className='fb'; el('fb').innerHTML='<strong>Not this one.</strong> '+(s.why[k]||'')+' Try again.'; }
+  setStatus(); report();
+}
+el('next').onclick=function(){ if(step<steps.length-1){ step++; renderStep(); } else if(cur.k==="R"){ loadCase(randomCase()); } else { ci=(ci+1)%FIXED.length; loadCase(FIXED[ci]); } };
+el('newc').onclick=function(){ loadCase(randomCase()); };
+function setStatus(){ el('status').textContent=answered?('First-try accuracy this session: '+firstRight+' of '+answered):''; }
+function report(){ try{ parent.postMessage(JSON.stringify({subject:'lti.frameResize',height:document.documentElement.scrollHeight}),'*'); }catch(e){} }
+window.addEventListener('load',report); window.addEventListener('resize',report);
+function fromHash(){ var h=location.hash||''; if(/mode=random/.test(h)) return "R"; var m=/case=(\d+)/.exec(h); if(m){ var i=+m[1]-1; if(i>=0&&i<FIXED.length) return i; } return 0; }
+function openHash(){ var r=fromHash(); if(r==="R") loadCase(randomCase()); else { ci=r; loadCase(FIXED[ci]); } }
+window.addEventListener('hashchange',openHash);
+openHash();
+window.__tool={ cases:FIXED, stepsFor:stepsFor, randomCase:randomCase, loadCase:loadCase,
+  state:function(){ return {case:cur, step:step, steps:steps.map(function(s){return {name:s.name, ans:s.ans, opts:s.opts.map(function(o){return o.k;})};}), firstRight:firstRight, answered:answered}; } };
+</script>
+</body>
+</html>
