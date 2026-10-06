@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Worked Example. Reading Sentence Completions Under a Referral Question</title>
+<style>
+  :root{
+    --bg:#ffffff; --panel:#f7f6f4; --ink:#1f1e1c; --muted:#6f6c66;
+    --line:#e7e4de; --line2:#eceae4;
+    --clinician-bubble:#efe7e0; --patient-bubble:#eceae7;
+    --amber-bg:#fffbef; --amber-line:#e7c98a; --amber-ink:#8a6d2f;
+    --accent:#8a5a25; --accent-ink:#6f4a20;
+    --instr-bg:#eef3fb; --instr-line:#c9d9f0; --instr-ink:#2f4a72;
+    --tab-active:#8a5a25;
+    --chip-bg:#e9e7e2; --chip-ink:#4a4740;
+    --field:#ffffff; --focus:#2f6f4f;
+    --ok-bg:#eef5ee; --ok-line:#bcd6bd; --ok-ink:#3c5c3e;
+    --radius:16px; --r-sm:11px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:940px;margin:0 auto;padding:22px 18px 60px;}
+  .stagebar{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
+  .stage-tab{display:flex;align-items:center;gap:10px;border:1px solid var(--line);
+    background:#fff;color:var(--ink);border-radius:10px;padding:10px 16px;cursor:pointer;
+    font-size:14.5px;transition:.15s;}
+  .stage-tab .n{color:var(--muted);}
+  .stage-tab[aria-selected="true"]{background:var(--tab-active);border-color:var(--tab-active);color:#fff;}
+  .stage-tab[aria-selected="true"] .n{color:#f0dcc6;}
+  .stage-tab:focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+  .arrow{color:var(--muted);}
+  .progress{display:flex;gap:5px;margin-left:auto;align-items:center;}
+  .pdot{width:26px;height:6px;border-radius:3px;background:var(--line);}
+  .pdot.on{background:var(--accent);}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:24px 24px 26px;}
+  h2.sess{margin:0 0 6px;font-size:22px;letter-spacing:-.01em;}
+  .sess-blurb{margin:0 0 14px;color:var(--muted);font-size:15px;max-width:70ch;}
+  .metarow{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-bottom:8px;}
+  .adaptbanner{background:#f1ecfa;border:1px solid #d9cdf0;color:#5b3c8a;border-radius:12px;padding:12px 15px;margin:14px 0 4px;font-size:13.5px;line-height:1.5;display:flex;justify-content:space-between;align-items:flex-start;gap:14px;}
+  .adaptbanner b{font-weight:700;}
+  .adaptbanner .back{flex:0 0 auto;background:none;border:none;color:#5b3c8a;text-decoration:underline;cursor:pointer;font:inherit;font-size:13.5px;padding:0;}
+  .adaptbanner .back:focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+  .pchip{background:#fff;border:1px solid var(--line);border-radius:8px;padding:5px 11px;font-size:13px;}
+  .pchip b{font-weight:600;}
+  .scen{background:var(--chip-bg);color:var(--chip-ink);border-radius:8px;padding:5px 11px;font-size:13px;}
+  .recafter{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:13.5px;margin:6px 0 2px;flex-wrap:wrap;}
+  .recafter a{color:var(--accent);text-decoration:none;cursor:default;}
+  .instr{background:var(--instr-bg);border:1px solid var(--instr-line);color:var(--instr-ink);
+    border-radius:12px;padding:14px 16px;margin:16px 0 20px;font-size:14px;line-height:1.55;}
+  .instr h3{margin:0 0 6px;font-size:14px;font-weight:700;}
+  .instr b{font-weight:700;}
+  .instr .done{font-weight:700;margin-top:6px;}
+  .chat{display:flex;flex-direction:column;gap:16px;}
+  .row{display:flex;gap:12px;}
+  .row.cl{flex-direction:row-reverse;}
+  .avatar{flex:0 0 auto;width:34px;height:34px;border-radius:50%;background:#efe7df;
+    display:grid;place-items:center;margin-top:20px;}
+  .row.pt .avatar{background:#e9e9e6;}
+  .stack{max-width:78%;display:flex;flex-direction:column;gap:8px;}
+  .who{font-size:12.5px;color:var(--muted);}
+  .row.cl .who{text-align:right;}
+  .bubble{border-radius:14px;padding:13px 15px;font-size:15px;line-height:1.5;}
+  .row.cl .bubble{background:var(--clinician-bubble);border-top-right-radius:5px;text-align:left;}
+  .row.pt .bubble{background:var(--patient-bubble);border-top-left-radius:5px;}
+  .bubble ol{margin:0;padding-left:24px;}
+  .bubble li{margin:0 0 4px;}
+  .bubble .stem{color:var(--muted);}
+  .bubble .ref{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent-ink);font-weight:700;margin-bottom:4px;}
+  .tech{background:var(--amber-bg);border:1px solid var(--amber-line);border-radius:10px;
+    padding:10px 13px;font-size:13px;color:var(--amber-ink);line-height:1.5;text-align:left;}
+  .tech b{color:var(--amber-ink);font-weight:700;}
+  .toggle{margin-top:24px;border-top:1px solid var(--line);padding-top:18px;}
+  .toggle h4{margin:0 0 4px;font-size:15px;}
+  .toggle p{margin:0 0 12px;color:var(--muted);font-size:13.5px;max-width:74ch;}
+  .toggle-btns{display:flex;flex-wrap:wrap;gap:9px;}
+  .tbtn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:9px 15px;
+    cursor:pointer;font-size:13.5px;color:var(--ink);transition:.15s;}
+  .tbtn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .tbtn:focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+  .tbtn-link{border:none;background:none;color:var(--muted);cursor:pointer;font:inherit;font-size:13.5px;padding:9px 6px;}
+  .tbtn-link[aria-pressed="true"]{color:var(--ink);font-weight:600;}
+  .tbtn-link:hover{color:var(--ink);}
+  .tbtn-link:focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+  .gapwrap{display:flex;flex-direction:column;gap:8px;}
+  .gap-prompt{font-size:14px;color:var(--ink);background:#fff;border:1px dashed var(--line);border-radius:10px;padding:9px 12px;}
+  .gap-ta{width:100%;min-height:96px;resize:vertical;border:1px solid var(--line);
+    border-radius:12px;padding:12px 14px;font:inherit;font-size:15px;background:var(--field);
+    border-top-right-radius:5px;}
+  .gap-ta:focus{outline:none;border-color:var(--focus);}
+  .gap-ta.locked{background:#f3f1ec;color:#55524c;}
+  .submit{align-self:flex-end;background:var(--accent);color:#fff;border:none;border-radius:10px;
+    padding:10px 18px;font-size:14px;cursor:pointer;}
+  .submit:disabled{opacity:.5;cursor:default;}
+  .submit:focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+  .compare{display:flex;flex-direction:column;gap:10px;margin-top:2px;}
+  .cmp-card{border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.55;text-align:left;}
+  .cmp-expert{background:var(--clinician-bubble);}
+  .cmp-expert .lab{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent-ink);font-weight:700;margin-bottom:4px;}
+  .cmp-tech{background:var(--amber-bg);border:1px solid var(--amber-line);color:var(--amber-ink);}
+  .cmp-tech b{font-weight:700;}
+  .cmp-fb{background:var(--ok-bg);border:1px solid var(--ok-line);color:var(--ok-ink);}
+  .cmp-fb .lab{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:5px;}
+  .cmp-fb p{margin:0 0 7px;}
+  .cmp-fb .k{font-weight:700;}
+  .status{font-size:13px;color:var(--muted);margin-top:14px;}
+  .status b{color:var(--accent-ink);}
+  .hidden{display:none !important;}
+  .done-banner{margin-top:16px;background:var(--ok-bg);border:1px solid var(--ok-line);
+    color:var(--ok-ink);border-radius:12px;padding:14px 16px;font-size:14.5px;}
+  .done-banner b{font-weight:700;}
+  .done-banner p{margin:0 0 8px;}
+  .done-banner p:last-child{margin:0;}
+  .bottom-nav{margin-top:22px;padding-top:18px;border-top:1px solid var(--line);
+    display:flex;justify-content:flex-end;}
+  .bottom-nav.back{justify-content:flex-start;}
+  .nav-btn{display:inline-flex;align-items:center;gap:9px;border:none;cursor:pointer;
+    background:var(--accent);color:#fff;border-radius:10px;padding:12px 20px;font-size:15px;
+    font-weight:600;transition:.15s;}
+  .nav-btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line);font-weight:500;}
+  .nav-btn:hover{filter:brightness(1.05);}
+  .nav-btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px;}
+  @media(max-width:560px){
+    .stack{max-width:88%;}
+    .panel{padding:18px 15px 20px;}
+    h2.sess{font-size:19px;}
+  }
+  @media (prefers-reduced-motion:reduce){ *{transition:none !important;} }
+</style>
+</head>
+<body>
+<!-- COMETS instructions panel -->
+<div style="max-width:900px; margin:16px auto 12px auto; padding:0 12px; box-sizing:border-box;"><details open style="background:#eef4f1; border:1px solid #cfe0d7; border-left:5px solid #b35900; border-radius:8px; padding:12px 16px; font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:15px; line-height:1.55; color:#17251d; text-align:left;"><summary style="cursor:pointer; font-weight:700; color:#1e4d3a; font-size:15px;">Instructions for this activity</summary><div style="margin-top:10px;"><p style="margin:0 0 8px 0; font-size:18px; font-weight:700; color:#1e4d3a; font-family:Georgia,serif;">Worked Example. Reading Sentence Completions Under a Referral Question</p>
+<p style="margin:0 0 8px 0;">About 20 minutes</p>
+<p style="margin:0 0 8px 0;">This builds on the Sentence Completion page, where Ms. Brewster's first eight completions appear. Here the content reading itself is the focus, and the problem is the reader. Every stem and completion is invented for training. None comes from a published form.</p>
+<p style="margin:0 0 8px 0; font-size:18px; font-weight:700; color:#1e4d3a; font-family:Georgia,serif;">Stage 1. Learn from the Expert</p>
+<p style="margin:0 0 8px 0;">Read Ms. Brewster's fourteen completions and watch an experienced reader work through them under the referral question "rule out depression." The reader writes the hypothesis first, marks what fits, marks what cuts against it, and ends with a hypothesis and a way to check it. Read the amber annotations. Then use <strong>Read under a different referral</strong> to see the same completions read under two other questions.</p>
+<p style="margin:0 0 8px 0; font-size:18px; font-weight:700; color:#1e4d3a; font-family:Georgia,serif;">Stage 2. Fill in the Gaps</p>
+<p style="margin:0 0 8px 0;">Select <strong>Next Stage: Fill in the Gaps</strong>. You read a new invented protocol, Mr. Treadwell's, referred for worry and sleep problems, and do the reader's work yourself in two gaps. A third gap shows you the same man's completions written later, when he had something at stake. For each gap, write your reading, select <strong>Submit Response</strong>, and read the Expert Response, Technique, and Feedback.</p>
+<p style="margin:0 0 8px 0;"><strong>You are done</strong> when you have submitted all three gaps and read each comparison.</p>
+<p style="margin:0 0 8px 0;"><em>Read and engage actively. The ideas here return in this module's knowledge checks. Nothing to submit.</em></p><p style="margin:8px 0 0 0; padding-top:8px; border-top:1px solid #cfe0d7;"><strong>What it adds to your clinical thinking.</strong> Confirmation bias and impression management, seen in action on the same page of writing, so that you recognize both when you meet a content reading in a record.</p></div></details></div>
+
+<div class="wrap">
+  <div class="stagebar">
+    <button class="stage-tab" id="tab1" aria-selected="true" onclick="setStage(1)">
+      <svg width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M2 10s3-5.5 8-5.5S18 10 18 10s-3 5.5-8 5.5S2 10 2 10Z" stroke="currentColor" stroke-width="1.5"/><circle cx="10" cy="10" r="2.3" stroke="currentColor" stroke-width="1.5"/></svg>
+      <span><span class="n">Stage 1:</span> Learn from the Expert</span>
+    </button>
+    <span class="arrow" aria-hidden="true">&rarr;</span>
+    <button class="stage-tab" id="tab2" aria-selected="false" onclick="setStage(2)">
+      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 14.5 13.5 5l2 2L6 16.5 3.5 17l.5-2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      <span><span class="n">Stage 2:</span> Fill in the Gaps</span>
+    </button>
+    <span class="progress" aria-hidden="true"><span class="pdot on"></span><span class="pdot" id="pdot2"></span></span>
+  </div>
+
+  <div class="panel">
+    <h2 class="sess" id="sessTitle"></h2>
+    <p class="sess-blurb" id="sessBlurb"></p>
+    <div class="metarow">
+      <span class="pchip" id="pchip"></span>
+      <span class="scen" id="scen"></span>
+    </div>
+    <div class="recafter" id="recafter"></div>
+    <div class="adaptbanner hidden" id="adaptBanner"></div>
+    <div class="instr" id="instr"></div>
+    <div class="chat" id="chat"></div>
+    <div class="toggle hidden" id="toggle">
+      <h4>Read under a different referral</h4>
+      <p>Same person, same fourteen completions. Only the question the reader brings to them changes. Before you click, predict which completions the new reading will lean on.</p>
+      <div class="toggle-btns" id="toggleBtns"></div>
+    </div>
+    <div class="done-banner hidden" id="doneBanner"></div>
+    <div class="status hidden" id="status"></div>
+    <div class="bottom-nav hidden" id="bottomNav"></div>
+  </div>
+</div>
+
+<script>
+// ===========================================================================
+// Worked example. Reading sentence completions under a referral question.
+// All stems, completions, people, and readings are invented for training.
+// No stem from any published sentence completion form appears here.
+// Items 1-8 of Ms. Brewster's protocol match the Sentence Completion page.
+// Lilienfeld, Wood, & Garb (2000), p. 57, quotation verified against the PDF.
+// ===========================================================================
+
+var BREWSTER = [
+  ["When I visit my parents", "we mostly talk about my brother's kids."],
+  ["Coworkers", "are friendly enough, but I keep to myself."],
+  ["Most days I", "feel tired before lunch."],
+  ["I worry that I", "will never get back to how I was before I moved here."],
+  ["The worst part of my week", "is Sunday night."],
+  ["I am happiest", "when I am hiking with my sister."],
+  ["On weekends", "I sleep late and skip things I used to enjoy."],
+  ["Next year", "who knows."],
+  ["My boss", "expects answers before I have had time to think."],
+  ["When someone interrupts me", "I stop talking and wait."],
+  ["At work I", "do my part and leave on time."],
+  ["People who are late", "make me check the clock."],
+  ["I get annoyed when", "plans change at the last minute."],
+  ["What I need most", "is a little more time."]
+];
+
+var TREADWELL_A = [
+  ["At night I", "lie awake going over the next day."],
+  ["My children", "are the best part of every day."],
+  ["I worry about", "money more than I let on."],
+  ["When I am criticized", "I replay it for days."],
+  ["My temper", "has gotten shorter this year."],
+  ["Most people", "mean well."],
+  ["I am at my best", "in the morning, before the calls start."],
+  ["My ex-wife", "and I are still figuring things out."],
+  ["I need help with", "slowing my mind down."],
+  ["What I fear most", "is letting my kids down."],
+  ["Home", "feels quiet on the weeks they are gone."],
+  ["A drink", "helps me unwind some evenings."]
+];
+
+var TREADWELL_B = [
+  ["At night I", "read to my kids and get to bed early."],
+  ["My children", "are the best part of every day."],
+  ["I worry about", "the usual things, like any parent."],
+  ["When I am criticized", "I listen and try to learn from it."],
+  ["My temper", "is even. I rarely raise my voice."],
+  ["Most people", "mean well."],
+  ["I am at my best", "with my kids."],
+  ["My ex-wife", "is a good mother, and we co-parent well."],
+  ["I need help with", "nothing major right now."],
+  ["What I fear most", "is not having enough time with my kids."],
+  ["Home", "is a place my kids feel safe."],
+  ["A drink", "is not something I keep in the house."]
+];
+
+// Stage 1 readings. The protocol never changes. Only the referral does.
+var READINGS = {
+  depression: {
+    label: "Rule out depression",
+    banner: null,
+    steps: [
+      { title: "Before reading",
+        text: "The referral question is to rule out depression. My hypothesis, written before reading, is that Ms. Brewster has a depressed mood with low energy and lost interest since her move.",
+        tech: "Write the hypothesis down before reading for it. A hypothesis written first lets you see later what you went looking for. A hypothesis formed while reading tends to absorb whatever you happen to notice." },
+      { title: "Completions that fit",
+        text: "3 (tired before lunch), 7 (sleeps late, skips things she used to enjoy), 4 (fears she will never get back to how she was), 8 (a flat \"who knows\" about next year), 2 (keeps to herself), and 5 (Sunday night is the worst part of the week).",
+        tech: "List the fits by number, with the words that made each one fit. Six of fourteen completions fit, and that feels like strong support. Notice that the count depends on what you decided to call a fit." },
+      { title: "Completions that cut against it",
+        text: "6 (happiest hiking with her sister), 11 (does her part at work and leaves on time), 13 (gets annoyed when plans change, which takes energy and investment), and 1 (an ordinary family visit). Completion 5 is ambiguous. Sunday night dread can be about the coming work week, not mood.",
+        tech: "This step is the defense against confirmation bias, and it is the step most often skipped. A reader who stops after the fits has gathered support without testing anything. Completions that cut against the hypothesis are evidence too." },
+      { title: "Hypothesis and check",
+        text: "Possible low mood, fatigue, and reduced interest since the move, with intact pleasure in time with her sister and intact work functioning. To check it, ask about mood, interest, sleep, energy, and when each began relative to the move, and give a well-normed depression measure such as the PHQ-9.",
+        tech: "The reading ends as a question, not a finding. It names what was seen, what argues against it, and the specific interview questions and measure that would confirm or disconfirm it." }
+    ]
+  },
+  anger: {
+    label: "Anger and workplace conflict",
+    banner: "Anger and workplace conflict",
+    steps: [
+      { title: "Before reading",
+        text: "Her employer's assistance program asks about anger and conflict at work. My hypothesis, written before reading, is that Ms. Brewster holds in irritation at work and withdraws from coworkers rather than raising problems.",
+        tech: "Same protocol, new question. The reader writes a new hypothesis first, as before. Watch which completions it now pulls forward." },
+      { title: "Completions that fit",
+        text: "9 (the boss expects answers before she has time to think), 10 (stops talking and waits when interrupted), 12 (late people make her check the clock), 13 (annoyed by last-minute changes), 2 (keeps to herself with coworkers), 11 (does her part and leaves on time), 5 (Sunday night, before the work week), and 14 (needs more time).",
+        tech: "Eight of fourteen now fit, more than under the depression question. Completions 2 and 5 counted as evidence of low mood a moment ago. Here they count as evidence of suppressed conflict. The words did not change. The question did." },
+      { title: "Completions that cut against it",
+        text: "6 (happy hiking with her sister), 1 (an ordinary family visit), 3 and 7 (fatigue and lost interest, which point away from work and toward mood or adjustment), and 4 (the move, not work, is the dividing line she names).",
+        tech: "The completions that cut against this reading are largely the ones that supported the first reading. A protocol of open completions can support more than one confident story, and the referral often decides which story the reader finds." },
+      { title: "Hypothesis and check",
+        text: "Possible unspoken frustration with pace and interruptions at work. To check it, ask about specific work incidents, how she handles disagreement, and whether coworkers or her supervisor have raised concerns. Choose any rating measure with your supervisor for the specific question.",
+        tech: "A disciplined reader still ends with a hypothesis and a check. The danger is not this reading. The danger is a report that presents it as a finding without saying that the same completions supported something else." }
+    ]
+  },
+  move: {
+    label: "Adjustment after a move",
+    banner: "Adjustment after a move",
+    steps: [
+      { title: "Before reading",
+        text: "Her primary care physician asks how she is adjusting eight months after relocating for work. My hypothesis, written before reading, is that Ms. Brewster is homesick and has not yet built a life in the new city.",
+        tech: "A third question. Here the history, a recent move, shaped the hypothesis before a single completion was read." },
+      { title: "Completions that fit",
+        text: "4 (never getting back to how she was before the move), 1 (family visits), 6 (happiest with her sister), 2 (keeps to herself with new coworkers), 7 (skips things she used to enjoy), and 8 (uncertain about next year).",
+        tech: "Completion 6, which argued against both earlier readings, is now support. Completion 2 has served three different hypotheses. A completion that fits every reading cannot help choose among them." },
+      { title: "Completions that cut against it",
+        text: "11 (functions at work), 9, 10, 12, and 13 (irritations tied to work, not to missing home), and 3 (fatigue, which needs a medical and sleep history before it is read psychologically).",
+        tech: "Fatigue in completion 3 has now been read as depression and set aside as a work or medical question. Physical explanations deserve a check before any psychological reading." },
+      { title: "Hypothesis and check",
+        text: "Possible difficulty adjusting to the move, with an important support in her sister. To check it, take a history of the move, the supports she left and found, the onset and course of her fatigue, and her own account of what has changed.",
+        tech: "Three referrals produced three plausible readings from one page of writing. None is wrong as a hypothesis. Each becomes an error only when it is written up as what the completions show." }
+    ]
+  }
+};
+var READ_ORDER = ["anger","move"];
+
+// Stage 2. Gaps with expert responses and feedback.
+var GAPS = [
+  { after: "A",
+    prompt: "Gap 1. The referral is worry and trouble sleeping. Write your hypothesis before reading for it, then list the completions that fit, by number, with the words that made each fit.",
+    expert: "Written first, the hypothesis is persistent worry with rumination that disturbs sleep. The fits are 1 (lies awake going over the next day), 3 (worries about money more than he lets on), 4 (replays criticism for days), 9 (wants help slowing his mind down), 10 (fears letting his kids down), and 5 (temper shorter this year).",
+    tech: "Writing the hypothesis first, then marking fits by number with the words that made them fit.",
+    lookFor: "A hypothesis stated before the list, and a list tied to specific completions and words, not a general impression.",
+    why: "A hypothesis written first records what you went looking for. Tying each fit to its words lets a reader, or your supervisor, check whether the completion supports what you claimed.",
+    watchFor: "Writing the hypothesis after reading, counting every negative-sounding completion as a fit, or reading a single completion as a trait." },
+  { after: "A2",
+    prompt: "Gap 2. Now list the completions that cut against your hypothesis or point somewhere else, and restate the hypothesis with how you would check it.",
+    expert: "Completions 2, 6, and 7 cut against it, with warmth, goodwill, and good mornings. Completions 8 and 11 point to a recent separation and alternating custody as context for the worry. Completion 12 raises alcohol use that needs to be asked about directly, not interpreted. Restated, the hypothesis is possible worry and sleep disturbance in the context of a recent separation, with evening drinking to ask about. To check it, ask about onset relative to the separation, sleep, the content and control of worry, quantity and frequency of drinking, and a well-normed anxiety measure such as the GAD-7.",
+    tech: "Listing disconfirming and alternative evidence, then ending with a hypothesis and a check.",
+    lookFor: "Completions that argue against the hypothesis, an alternative explanation the protocol itself suggests, and specific interview questions and a well-normed measure.",
+    why: "Confirmation bias works by gathering support and never testing it. Listing what cuts against the hypothesis, and noticing context such as the separation, keeps the reading a hypothesis instead of a conclusion.",
+    watchFor: "Skipping this step, treating the drinking completion as a personality sign instead of a question to ask, or stating the hypothesis as a finding." },
+  { after: "B",
+    prompt: "Gap 3. Six months later Mr. Treadwell completes the same stems as a parent in a custody evaluation. Compare the two protocols. What changed, and what can you conclude about his adjustment?",
+    expert: "Every completion that suggested worry, rumination, irritability, or drinking is gone or reversed. Completions 2 and 6, which had nothing at stake, are unchanged. I cannot conclude that his adjustment improved. I can conclude that the second protocol shows what he wanted a custody evaluator to see. Nothing on the form tells me which version is closer to the truth, so the stakes of each administration belong in the report beside any reading of it, and the questions raised by the first protocol still need answers from the interview, collateral sources, and well-normed measures.",
+    tech: "Reading the protocol against what the person had at stake when writing it.",
+    lookFor: "Recognition that the changed completions are exactly the ones that bear on custody, that the unchanged ones carried no stakes, and that the form cannot tell you which version is accurate.",
+    why: "Every stem is transparent, so a person can see what each completion will say about them. Lilienfeld, Wood, and Garb (2000) urged experts who present projective techniques in court to be forthright about \"the absence of research evidence that these response sets can be detected\" (p. 57). Self-report inventories such as the MMPI-3 and PAI carry validity scales built for this problem. Sentence completion has nothing comparable. The setting matters in the same way. Who asked for the test, why, and what the person believed would happen with it all shape what ends up on the page.",
+    watchFor: "Reading the second protocol as improvement, averaging the two, or concluding that the first protocol was the true one. Neither is self-evidently true. Both are evidence about context." }
+];
+
+var stage = 1;
+var readKey = "depression";
+var submitted = {};
+
+function el(tag, cls, html){ var e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e; }
+function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+var AV_READER = '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 4h12v12H4z" stroke="#8a5a25" stroke-width="1.4"/><path d="M7 8h6M7 11h6M7 14h3" stroke="#8a5a25" stroke-width="1.4" stroke-linecap="round"/></svg>';
+var AV_PERSON = '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="7" r="3" stroke="#6f6c66" stroke-width="1.4"/><path d="M4 16c0-3 2.7-5 6-5s6 2 6 5" stroke="#6f6c66" stroke-width="1.4" stroke-linecap="round"/></svg>';
+
+function protocolHTML(list, heading){
+  var h = heading ? "<div class='ref'>"+esc(heading)+"</div>" : "";
+  h += "<ol>";
+  list.forEach(function(p){ h += "<li><span class='stem'>"+esc(p[0])+"</span> "+esc(p[1])+"</li>"; });
+  return h + "</ol>";
+}
+
+function personRow(who, html){
+  var row = el("div","row pt");
+  row.appendChild(el("div","avatar",AV_PERSON));
+  var st = el("div","stack");
+  st.appendChild(el("div","who",esc(who)));
+  st.appendChild(el("div","bubble",html));
+  row.appendChild(st);
+  return row;
+}
+
+function readerRow(who, title, text, tech){
+  var row = el("div","row cl");
+  row.appendChild(el("div","avatar",AV_READER));
+  var st = el("div","stack");
+  st.appendChild(el("div","who",esc(who)));
+  st.appendChild(el("div","bubble","<div class='ref'>"+esc(title)+"</div>"+esc(text)));
+  if(tech) st.appendChild(el("div","tech","<b>Technique:</b> "+esc(tech)));
+  row.appendChild(st);
+  return row;
+}
+
+function gapRow(i){
+  var g = GAPS[i];
+  var row = el("div","row cl");
+  row.appendChild(el("div","avatar",AV_READER));
+  var st = el("div","stack");
+  st.appendChild(el("div","who","Reader (Your Turn)"));
+  var wrap = el("div","gapwrap");
+  wrap.appendChild(el("div","gap-prompt",esc(g.prompt)));
+  var done = submitted[i];
+  var ta = el("textarea","gap-ta"+(done?" locked":""));
+  ta.placeholder = "Write your reading here.";
+  ta.setAttribute("aria-label", g.prompt);
+  if(done){ ta.value = done; ta.readOnly = true; }
+  wrap.appendChild(ta);
+  if(!done){
+    var btn = el("button","submit","Submit Response");
+    btn.disabled = true;
+    ta.addEventListener("input", function(){ btn.disabled = ta.value.trim().length===0; });
+    btn.addEventListener("click", function(){ submitted[i] = ta.value.trim(); renderChat(); updateStatus(); resize(); });
+    wrap.appendChild(btn);
+  } else {
+    var box = el("div","compare");
+    box.appendChild(el("div","cmp-card cmp-expert","<div class='lab'>Expert Response</div>"+esc(g.expert)));
+    box.appendChild(el("div","cmp-card cmp-tech","<b>Technique:</b> "+esc(g.tech)));
+    box.appendChild(el("div","cmp-card cmp-fb","<div class='lab'>Feedback</div>"+
+      "<p><span class='k'>What a strong response includes:</span> "+esc(g.lookFor)+"</p>"+
+      "<p><span class='k'>Why:</span> "+esc(g.why)+"</p>"+
+      "<p><span class='k'>Watch for:</span> "+esc(g.watchFor)+"</p>"));
+    wrap.appendChild(box);
+  }
+  st.appendChild(wrap);
+  row.appendChild(st);
+  return row;
+}
+
+function renderHeader(){
+  var t = document.getElementById("sessTitle"), b = document.getElementById("sessBlurb");
+  var pc = document.getElementById("pchip"), sc = document.getElementById("scen");
+  t.textContent = "Reading Sentence Completions Under a Referral Question";
+  if(stage===1){
+    b.textContent = "Confirmation bias in a content reading. One protocol, read by an experienced reader under three different referral questions. Bloom Level 4.";
+    pc.innerHTML = "<b>Person:</b> Ms. Joanne Brewster, 31 (invented)";
+    sc.textContent = "Relocated for work eight months ago. Close to her sister.";
+  } else {
+    b.textContent = "Do the reader's work yourself, then see what a change in stakes does to the same person's completions. Bloom Level 4.";
+    pc.innerHTML = "<b>Person:</b> Mr. Martin Treadwell, 41 (invented)";
+    sc.textContent = "Father of two, recently separated. Referred by his physician for worry and trouble sleeping.";
+  }
+  var ra = document.getElementById("recafter");
+  ra.innerHTML = '<span>Recommended after:</span> <a>Sentence Completion</a>, <a>Projective and Performance-Based Methods</a>';
+  var ab = document.getElementById("adaptBanner");
+  var r = READINGS[readKey];
+  if(stage===1 && r.banner){
+    ab.classList.remove("hidden");
+    ab.innerHTML = '<div><b>Read under a different referral: '+esc(r.banner)+'.</b> Every completion is identical to the original. Only the question the reader brought to the protocol has changed.</div><button class="back" type="button" id="backOrig">Back to original</button>';
+    document.getElementById("backOrig").addEventListener("click", function(){ readKey="depression"; renderAll(); });
+  } else { ab.classList.add("hidden"); ab.innerHTML = ""; }
+}
+
+function renderInstr(){
+  var box = document.getElementById("instr");
+  if(stage===1){
+    box.innerHTML = "<h3>What to do in Stage 1</h3>(1) Read Ms. Brewster's fourteen completions. (2) Read each step of the expert's reading and the <b>amber annotation</b> beneath it, which explains why the step matters. (3) Use <b>Read under a different referral</b> below to see the same completions read twice more. Each time, note which completions changed sides. When you have read all three readings, select <b>Stage 2: Fill in the Gaps</b>.";
+  } else {
+    box.innerHTML = "<h3>What to do in Stage 2</h3>(1) Read Mr. Treadwell's completions and the referral. (2) Write your reading in each gap. (3) Select <b>Submit Response</b> to reveal the expert response and feedback. (4) Read the feedback before moving to the next gap.<div class='done'>You are done when every gap has a submitted response and you have read each comparison.</div>";
+  }
+}
+
+function renderChat(){
+  var chat = document.getElementById("chat");
+  chat.innerHTML = "";
+  if(stage===1){
+    chat.appendChild(personRow("Ms. Brewster's completions (invented stems)", protocolHTML(BREWSTER)));
+    READINGS[readKey].steps.forEach(function(s){
+      chat.appendChild(readerRow("Reader", s.title, s.text, s.tech));
+    });
+  } else {
+    chat.appendChild(personRow("Mr. Treadwell's completions, routine clinic intake (invented stems)", protocolHTML(TREADWELL_A)));
+    chat.appendChild(gapRow(0));
+    if(submitted[0]) chat.appendChild(gapRow(1));
+    if(submitted[1]){
+      chat.appendChild(personRow("Mr. Treadwell's completions, six months later, custody evaluation (same stems)", protocolHTML(TREADWELL_B)));
+      chat.appendChild(gapRow(2));
+    }
+  }
+}
+
+function renderToggle(){
+  var t = document.getElementById("toggle");
+  if(stage!==1){ t.classList.add("hidden"); return; }
+  t.classList.remove("hidden");
+  var box = document.getElementById("toggleBtns");
+  box.innerHTML = "";
+  READ_ORDER.forEach(function(k){
+    var b = el("button","tbtn",esc(READINGS[k].label));
+    b.setAttribute("aria-pressed", String(readKey===k));
+    b.addEventListener("click", function(){ readKey=k; renderAll(); });
+    box.appendChild(b);
+  });
+  var back = el("button","tbtn-link","Back to original");
+  back.setAttribute("aria-pressed", String(readKey==="depression"));
+  back.addEventListener("click", function(){ readKey="depression"; renderAll(); });
+  box.appendChild(back);
+}
+
+function updateStatus(){
+  var status = document.getElementById("status"), banner = document.getElementById("doneBanner");
+  if(stage!==2){ status.classList.add("hidden"); banner.classList.add("hidden"); return; }
+  var done = Object.keys(submitted).length;
+  status.classList.remove("hidden");
+  status.innerHTML = "Gaps completed: <b>"+done+" of "+GAPS.length+"</b>.";
+  if(done===GAPS.length){
+    banner.classList.remove("hidden");
+    banner.innerHTML = "<p><b>Stage 2 complete.</b> You have read one protocol three ways and one person twice.</p>"+
+      "<p>Carry two habits into every record you read. When a report draws themes from completions, ask what question the writer brought to them and whether anything that cut against the themes was reported. When a report gives any self-report or completion finding, ask what the person had at stake when they wrote it.</p>";
+  } else { banner.classList.add("hidden"); }
+}
+
+function renderBottomNav(){
+  var nav = document.getElementById("bottomNav");
+  nav.innerHTML = ""; nav.classList.remove("hidden","back");
+  if(stage===1){
+    var b = el("button","nav-btn",'Next Stage: Fill in the Gaps <svg width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+    b.addEventListener("click", function(){ setStage(2); });
+    nav.appendChild(b);
+  } else {
+    nav.classList.add("back");
+    var b2 = el("button","nav-btn secondary",'<svg width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M16 10H5M9 6l-4 4 4 4" stroke="#1f1e1c" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg> Back to Stage 1');
+    b2.addEventListener("click", function(){ setStage(1); });
+    nav.appendChild(b2);
+  }
+}
+
+function resize(){
+  try{ window.parent.postMessage(JSON.stringify({subject:"lti.frameResize", height: document.documentElement.scrollHeight}), "*"); }catch(e){}
+}
+
+function renderAll(){ renderHeader(); renderInstr(); renderChat(); renderToggle(); updateStatus(); renderBottomNav(); resize(); }
+
+function setStage(s){
+  stage = s;
+  document.getElementById("tab1").setAttribute("aria-selected", String(s===1));
+  document.getElementById("tab2").setAttribute("aria-selected", String(s===2));
+  document.getElementById("pdot2").classList.toggle("on", s===2);
+  if(s===2){ readKey = "depression"; }
+  renderAll();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+renderAll();
+window.addEventListener("load", resize);
+window.addEventListener("resize", resize);
+</script>
+</body>
+</html>
