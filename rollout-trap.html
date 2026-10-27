@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Rollout Trap</title>
+<style>
+:root{--ink:#17251d;--green:#1e4d3a;--soft:#eef4f1;--line:#e3e8e5;--orange:#b35900;--blue:#2e6da4;--paper:#fff}
+@media (prefers-color-scheme: dark){:root{--ink:#e8efe9;--green:#8fc3ab;--soft:#1d2a24;--line:#33443b;--orange:#f0a050;--blue:#7fb0e0;--paper:#111a15}}
+*{box-sizing:border-box}
+body{margin:0;padding:16px;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.5;font-size:16px;max-width:860px}
+h1{font-family:Georgia,serif;font-size:22px;color:var(--green);margin:0 0 6px}
+h2{font-family:Georgia,serif;font-size:18px;color:var(--green);margin:18px 0 8px}
+p{margin:0 0 10px}.note{font-size:14px;opacity:.85}
+.card{background:var(--soft);border-left:6px solid var(--green);border-radius:6px;padding:12px 16px;margin:0 0 14px}
+.modes{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+button{font:inherit;padding:8px 12px;border-radius:6px;border:1px solid var(--green);background:transparent;color:var(--green);cursor:pointer}
+button.sel{background:var(--green);color:var(--paper)}
+button.primary{background:var(--green);color:var(--paper);margin-right:8px}
+label{font-weight:600;font-size:15px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0}
+svg{width:100%;height:auto;display:block}
+table{border-collapse:collapse;width:100%;font-size:15px;margin:8px 0}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{background:var(--soft);color:var(--green)}
+#read{background:var(--soft);border-radius:6px;padding:10px 14px}
+</style>
+</head>
+<body>
+<h1>The Rollout Trap</h1>
+<p class="note">Twelve invented clinics, one invented telehealth program, and an invented true effect that you can see here and that no real analyst ever gets to see. Nothing you do is saved or sent.</p>
+<div class="card">Each clinic has a built-in disadvantage score that lowers first-session attendance whether or not it offers telehealth, and clinics with lower scores also improve faster over time for reasons unrelated to the program. The program truly adds <strong>5 percentage points</strong> of attendance at any clinic that has it. Pick how clinics get the program, estimate the effect from the data, and repeat 300 times to see how the estimates are spread. When a design works, the spread centers on 5.</div>
+<div class="modes" id="modes"></div>
+<div class="row"><label for="noise">Noise in each clinic-period attendance rate (SD, points)</label><input id="noise" type="range" min="1" max="8" step="0.5" value="3"><output id="noiseO">3</output></div>
+<p><button class="primary" id="one">Run once</button><button class="primary" id="many">Run 300 times</button></p>
+<h2>One run</h2>
+<table id="one-t"></table>
+<h2>Spread of estimates across 300 runs</h2>
+<svg id="hist" viewBox="0 0 720 280" role="img" aria-label="Histogram of estimated telehealth effects across 300 simulated rollouts"></svg>
+<p id="read"></p>
+<script>
+(function(){
+var MODES=[
+ {id:"choice",name:"Clinics choose",desc:"Clinics with more resources, and so a lower disadvantage score, are more likely to adopt telehealth first. Analysis compares clinics with and without telehealth in the last period."},
+ {id:"random",name:"Random assignment",desc:"Six clinics are chosen at random to receive telehealth. Analysis compares clinics with and without it in the last period."},
+ {id:"wedge",name:"Stepped wedge, random order",desc:"Four periods. Clinics are put in random order and three clinics switch on in each of periods 2, 3, and 4, with all clinics switched by period 4. Analysis uses clinic and period fixed effects."},
+ {id:"wedgechoice",name:"Stepped wedge, order by choice",desc:"Same four periods, but the clinics with the lowest disadvantage scores go first. Analysis uses clinic and period fixed effects."}
+];
+var mode="choice",N=12,P=4,TRUE=5;
+function el(i){return document.getElementById(i)}
+function norm(){var u=0,v=0;while(u===0)u=Math.random();while(v===0)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function mk(sd){
+  var dis=[];for(var i=0;i<N;i++)dis.push(norm());
+  var trend=[0,1.2,2.4,3.6];
+  return {dis:dis,sd:sd,trend:trend};
+}
+function attend(c,i,t,treat,sd){return 60-4*c.dis[i]+c.trend[t]*(1-0.6*c.dis[i])+(treat?TRUE:0)+norm()*sd}
+function est(m,c){
+  var idx=[];for(var i=0;i<N;i++)idx.push(i);
+  var sd=c.sd;
+  if(m==="choice"||m==="random"){
+    var tr=new Array(N).fill(0);
+    if(m==="random"){shuffle(idx.slice()).slice(0,6).forEach(function(i){tr[i]=1})}
+    else{
+      var score=c.dis.map(function(d,i){return {i:i,s:-d+0.8*norm()}}).sort(function(a,b){return b.s-a.s});
+      score.slice(0,6).forEach(function(o){tr[o.i]=1});
+    }
+    var t1=[],t0=[];
+    for(var i=0;i<N;i++){var y=attend(c,i,P-1,tr[i],sd);(tr[i]?t1:t0).push(y)}
+    var mean=function(a){return a.reduce(function(x,y){return x+y},0)/a.length};
+    return {est:mean(t1)-mean(t0),tr:tr};
+  }
+  var order=m==="wedge"?shuffle(idx.slice()):idx.slice().sort(function(a,b){return c.dis[a]-c.dis[b]});
+  var start=new Array(N);order.forEach(function(ci,k){start[ci]=1+Math.floor(k/3)});
+  var Y=[],T=[];
+  for(var i=0;i<N;i++){Y.push([]);T.push([]);for(var t=0;t<P;t++){var tt=t>=start[i]?1:0;T[i].push(tt);Y[i].push(attend(c,i,t,tt,sd))}}
+  function dm(M){var gm=0,rm=[],cm=[];for(var i=0;i<N;i++){rm.push(0);for(var t=0;t<P;t++){rm[i]+=M[i][t];gm+=M[i][t]}rm[i]/=P}
+    gm/=N*P;for(var t=0;t<P;t++){var s=0;for(var i=0;i<N;i++)s+=M[i][t];cm.push(s/N)}
+    return M.map(function(r,i){return r.map(function(v,t){return v-rm[i]-cm[t]+gm})})}
+  var Td=dm(T),Yd=dm(Y),num=0,den=0;
+  for(var i=0;i<N;i++)for(var t=0;t<P;t++){num+=Td[i][t]*Yd[i][t];den+=Td[i][t]*Td[i][t]}
+  return {est:num/den,tr:start};
+}
+function render(mo){
+  el("modes").innerHTML="";
+  MODES.forEach(function(o){var b=document.createElement("button");b.textContent=o.name;if(o.id===mo)b.className="sel";b.onclick=function(){mode=o.id;render(mode);el("one-t").innerHTML="";el("hist").innerHTML="";el("read").textContent=""};el("modes").appendChild(b)});
+  var d=document.createElement("p");d.className="note";d.style.width="100%";d.textContent=MODES.filter(function(o){return o.id===mo})[0].desc;el("modes").appendChild(d);
+}
+function one(){
+  var c=mk(+el("noise").value),r=est(mode,c);
+  var h='<thead><tr><th>Clinic</th><th>Disadvantage score</th><th>Telehealth status</th></tr></thead><tbody>';
+  for(var i=0;i<N;i++){var tr=r.tr[i];var lab=(mode==="choice"||mode==="random")?(tr?"Has telehealth":"No telehealth"):("Starts period "+(tr+1));h+='<tr><td>Clinic '+(i+1)+'</td><td>'+c.dis[i].toFixed(2)+'</td><td>'+lab+'</td></tr>'}
+  h+='</tbody><tfoot><tr><th colspan="2">Estimated effect this run (points)</th><th>'+r.est.toFixed(1)+'</th></tr></tfoot>';
+  el("one-t").innerHTML=h;
+  el("read").textContent="This run estimates "+r.est.toFixed(1)+" points against a true effect of "+TRUE+". One run cannot tell you whether the design is trustworthy. Run it 300 times.";
+}
+function many(){
+  var sd=+el("noise").value,vals=[];
+  for(var k=0;k<300;k++){vals.push(est(mode,mk(sd)).est)}
+  var lo=-10,hi=20,bins=30,w=(hi-lo)/bins,cnt=new Array(bins).fill(0);
+  vals.forEach(function(v){var b=Math.floor((v-lo)/w);if(b<0)b=0;if(b>=bins)b=bins-1;cnt[b]++});
+  var mx=Math.max.apply(null,cnt),W=720,H=280,ml=40,mr=10,mt=10,mb=40,pw=W-ml-mr,ph=H-mt-mb,s="";
+  for(var g=0;g<=4;g++){var y=mt+ph-ph*g/4;s+='<line x1="'+ml+'" x2="'+(W-mr)+'" y1="'+y+'" y2="'+y+'" stroke="currentColor" stroke-opacity=".12"/><text x="'+(ml-6)+'" y="'+(y+4)+'" font-size="12" text-anchor="end" fill="currentColor">'+Math.round(mx*g/4)+'</text>'}
+  cnt.forEach(function(c,i){var bh=ph*c/mx,x=ml+pw*i/bins;s+='<rect x="'+(x+1)+'" y="'+(mt+ph-bh)+'" width="'+(pw/bins-2)+'" height="'+bh+'" fill="#2e6da4" opacity=".85"/>'});
+  function X(v){return ml+pw*(v-lo)/(hi-lo)}
+  for(var t=lo;t<=hi;t+=5)s+='<text x="'+X(t)+'" y="'+(H-mb+16)+'" font-size="12" text-anchor="middle" fill="currentColor">'+t+'</text>';
+  s+='<line x1="'+X(TRUE)+'" x2="'+X(TRUE)+'" y1="'+mt+'" y2="'+(mt+ph)+'" stroke="#b35900" stroke-width="2.5" stroke-dasharray="6 4"/><text x="'+(X(TRUE)+6)+'" y="'+(mt+14)+'" font-size="12" fill="#b35900">True effect = 5</text>';
+  var m=vals.reduce(function(a,b){return a+b},0)/vals.length,sdv=Math.sqrt(vals.reduce(function(a,b){return a+(b-m)*(b-m)},0)/(vals.length-1));
+  s+='<line x1="'+X(m)+'" x2="'+X(m)+'" y1="'+(mt+ph-8)+'" y2="'+(mt+ph+8)+'" stroke="currentColor" stroke-width="3"/>';
+  s+='<text x="'+(W/2)+'" y="'+(H-4)+'" font-size="12" text-anchor="middle" fill="currentColor">Estimated effect (attendance points). Black tick marks the mean of the 300 estimates.</text>';
+  el("hist").innerHTML=s;
+  var cover=vals.filter(function(v){return Math.abs(v-TRUE)<=2}).length/vals.length;
+  var bias=m-TRUE;
+  el("read").textContent="Across 300 runs the mean estimate was "+m.toFixed(1)+" points, a bias of "+(bias>=0?"+":"")+bias.toFixed(1)+" relative to the true 5, with a spread (SD) of "+sdv.toFixed(1)+". "+Math.round(100*cover)+"% of runs landed within 2 points of the truth. "+(Math.abs(bias)>0.75?"The design is biased. More data would shrink the spread and leave the bias in place.":"The design is roughly unbiased here. Any remaining distance from the truth in a single run is spread, which more clinics or less noise would reduce.");
+}
+el("noise").oninput=function(){el("noiseO").textContent=el("noise").value};
+el("one").onclick=one;el("many").onclick=many;render(mode);
+})();
+</script>
+</body>
+</html>

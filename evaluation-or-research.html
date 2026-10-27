@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evaluation or Research?</title>
+<style>
+:root{--ink:#17251d;--green:#1e4d3a;--soft:#eef4f1;--line:#d5e0da;--orange:#b35900;--paper:#fff;--ok:#1f6b3a;--bad:#a33a1a}
+@media (prefers-color-scheme: dark){:root{--ink:#e8efe9;--green:#8fc3ab;--soft:#1d2a24;--line:#33443b;--orange:#f0a050;--paper:#111a15;--ok:#7fd69a;--bad:#f09070}}
+*{box-sizing:border-box}
+body{margin:0;padding:16px;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.5;font-size:16px;max-width:820px}
+h1{font-family:Georgia,serif;font-size:22px;color:var(--green);margin:0 0 6px}
+h2{font-family:Georgia,serif;font-size:18px;color:var(--green);margin:18px 0 8px}
+p{margin:0 0 10px}.note{font-size:14px;opacity:.85}
+.card{background:var(--soft);border-left:6px solid var(--green);border-radius:6px;padding:12px 16px;margin:0 0 14px}
+.opts{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+button{font:inherit;padding:8px 12px;border-radius:6px;border:1px solid var(--green);background:transparent;color:var(--green);cursor:pointer}
+button.sel{background:var(--green);color:var(--paper)}
+button.primary{background:var(--green);color:var(--paper)}
+.fb{margin-top:8px;padding:8px 12px;border-radius:6px;border:1px solid var(--line)}
+.right{border-color:var(--ok)}.wrong{border-color:var(--bad)}
+table{border-collapse:collapse;width:100%;font-size:15px;margin:8px 0}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:var(--soft);color:var(--green)}
+#prog{font-size:14px;margin:0 0 10px}
+</style>
+</head>
+<body>
+<h1>Evaluation or Research?</h1>
+<p class="note">Eight invented clinic projects. For each, decide whether it is program evaluation, quality improvement, or research, and then read what the design can and cannot claim. Classification of a real project belongs to your institution&rsquo;s IRB. This activity builds the reasoning you bring to that conversation. Nothing you do is saved or sent.</p>
+<div class="card"><strong>Two questions decide it.</strong> Is the work a systematic investigation, and is its primary purpose to develop or contribute to generalizable knowledge? A project that answers a local question for local decisions, with no intent to generalize, is evaluation or quality improvement. A project designed so that its answer should hold beyond this clinic is research, and it needs review before data collection starts. Intent can change midstream, so a plan to publish or present findings as knowledge for other settings changes the classification.</div>
+<p id="prog"></p>
+<div id="stage"></div>
+<h2>What each design can claim</h2>
+<table>
+<thead><tr><th></th><th>Program evaluation</th><th>Quality improvement</th><th>Research</th></tr></thead>
+<tbody>
+<tr><td>Question owner</td><td>The clinic and its funders</td><td>The clinic team</td><td>The investigator and the field</td></tr>
+<tr><td>Typical question</td><td>Did we reach the people we promised to reach?</td><td>Does this change in our workflow improve this measure here?</td><td>Does this approach improve access in settings like ours?</td></tr>
+<tr><td>Comparison</td><td>Targets, prior years, benchmarks</td><td>Before and after, run charts</td><td>Planned comparison with assignment designed to limit bias</td></tr>
+<tr><td>Can claim</td><td>Performance against goals in this program</td><td>A change coincided with improvement here</td><td>A cause, within the limits of the design and sample</td></tr>
+<tr><td>Cannot claim</td><td>That the program caused the outcomes</td><td>That the change would work elsewhere</td><td>Anything outside the population sampled</td></tr>
+<tr><td>Review</td><td>Usually none beyond clinic policy</td><td>Usually none beyond clinic policy</td><td>IRB review before data collection</td></tr>
+</tbody>
+</table>
+<script>
+(function(){
+var S=[
+ {t:"The clinic director wants to know what share of last year&rsquo;s referrals reached a first session, broken out by neighborhood, to report to the county funder.",a:"Evaluation",why:"The question is local, the comparison is a funder target, and nobody intends to generalize. The breakdown by neighborhood still matters, because an overall rate can hide a gap."},
+ {t:"A front-desk team changes the reminder script on Monday. They plot weekly no-show rates for twelve weeks before and twelve weeks after and keep the change if the line improves.",a:"Quality improvement",why:"A change tested in the team&rsquo;s own workflow with a run chart is quality improvement. The design cannot rule out that something else changed at the same time, such as a holiday or a staffing change."},
+ {t:"A clinic randomizes new referrals to telehealth or in-person intake, measures first-session attendance, and plans to submit the results to a journal for clinics in similar counties.",a:"Research",why:"Random assignment, a planned comparison, and an intent to inform other clinics make this research. It needs IRB review before the first referral is randomized."},
+ {t:"A clinic starts by running an evaluation of its wait times. Midway, the team decides to write it up as a paper so that other community clinics can use the finding.",a:"Research",why:"The purpose changed when the team decided the finding should reach beyond the clinic. Data already collected may need IRB review before they can be used this way, so the right move is to ask the IRB before the writing begins."},
+ {t:"A health system compares attendance at its three clinics, one of which adopted telehealth because its staff asked for it, and concludes that telehealth raised attendance by six points.",a:"Evaluation",why:"As described, this is an evaluation of local performance, and the causal claim does not follow. The clinic that chose telehealth probably differs from the others in ways that also affect attendance. The Rollout Trap simulation shows how large that bias can be."},
+ {t:"Graduate trainees analyze de-identified PSEC outcome data to produce a thesis chapter on which neighborhoods are underrepresented among patients who finish treatment.",a:"Research",why:"A thesis chapter exists to contribute generalizable knowledge. Even with de-identified data, a research use of clinic data goes through the IRB, and the determination of exemption is the IRB&rsquo;s to make, not the investigator&rsquo;s."},
+ {t:"A county sends the clinic a yearly report requirement and the clinic builds a dashboard of referral sources, wait times, and no-shows to meet it.",a:"Evaluation",why:"A dashboard built to meet a reporting requirement is routine monitoring tied to local accountability. It becomes more useful, and more risky to interpret, when someone starts reading causes into the trends."},
+ {t:"Eight clinics agree to adopt a new intake workflow in a randomly chosen order, one every three months, and the study team compares attendance across clinics and periods and plans to publish.",a:"Research",why:"This is a stepped wedge design, a cluster randomized rollout in which every site eventually receives the change (Hussey &amp; Hughes, 2007). Random order protects the comparison from the choice problem, and the plan to publish makes it research."}
+];
+var OPTS=["Evaluation","Quality improvement","Research"],i=0,score=0;
+function el(x){return document.getElementById(x)}
+function show(){
+  if(i>=S.length){el("prog").textContent="";el("stage").innerHTML='<div class="card"><strong>Finished.</strong> You matched the classification on '+score+' of '+S.length+'. Reopen any scenario you missed by refreshing the page and reasoning from the two questions above. Two of the eight are traps by design. In both, the wording of the project hides a decision that can change its classification.</div><button class="primary" id="again">Start over</button>';el("again").onclick=function(){i=0;score=0;show()};return}
+  var s=S[i];el("prog").textContent="Scenario "+(i+1)+" of "+S.length;
+  el("stage").innerHTML='<div class="card"><p>'+s.t+'</p><div class="opts" id="opts"></div><div id="fb"></div></div>';
+  var o=el("opts");
+  OPTS.forEach(function(x){var b=document.createElement("button");b.textContent=x;b.onclick=function(){choose(x,b)};o.appendChild(b)});
+}
+function choose(x,b){
+  var s=S[i],ok=x===s.a;if(ok)score++;
+  Array.prototype.forEach.call(el("opts").children,function(c){c.disabled=true;if(c.textContent===x)c.className="sel"});
+  el("fb").innerHTML='<div class="fb '+(ok?"right":"wrong")+'"><strong>'+(ok?"Matches.":"Not quite.")+'</strong> Classification: '+s.a+'. '+s.why+'</div><p style="margin-top:10px"><button class="primary" id="next">'+(i+1<S.length?"Next scenario":"See summary")+'</button></p>';
+  el("next").onclick=function(){i++;show()};
+}
+show();
+})();
+</script>
+</body>
+</html>
