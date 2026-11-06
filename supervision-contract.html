@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Supervision Contract Tool</title>
+<style>
+  :root { --ink:#17251d; --green:#1e4d3a; --pale:#e8f1ee; --line:#7f9a8e; --focus:#b35900; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:#fff; color:var(--ink); font:17px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+  main { max-width:820px; margin:0 auto; padding:16px 16px 48px; }
+  h1,h2 { font-family:Georgia,"Playfair Display",serif; color:var(--green); line-height:1.25; }
+  h1 { font-size:28px; margin:16px 0 8px; }
+  h2 { font-size:21px; margin:0 0 8px; }
+  fieldset { border:1px solid var(--line); border-radius:6px; margin:0 0 18px; padding:14px 16px 6px; background:#fff; }
+  legend { font-family:Georgia,"Playfair Display",serif; font-size:19px; color:var(--green); padding:0 6px; font-weight:bold; }
+  label { display:block; font-weight:600; margin:0 0 4px; }
+  .hint { display:block; font-weight:400; font-size:15px; color:#33443b; margin:0 0 4px; }
+  input[type=text], input[type=date], select, textarea { width:100%; font:inherit; color:var(--ink); border:1px solid #56685e; border-radius:4px; padding:8px 10px; background:#fff; }
+  textarea { min-height:84px; }
+  .field { margin:0 0 14px; }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:640px){ .row { grid-template-columns:1fr; } }
+  :focus-visible { outline:3px solid var(--focus); outline-offset:2px; }
+  .box { background:var(--pale); border-left:6px solid var(--green); padding:10px 14px; margin:0 0 18px; border-radius:4px; }
+  .checks label { font-weight:400; display:flex; gap:8px; align-items:flex-start; margin:0 0 4px; }
+  .checks input { margin-top:7px; }
+  button { font:inherit; font-weight:600; background:var(--green); color:#fff; border:2px solid var(--green); border-radius:6px; padding:9px 16px; margin:0 8px 8px 0; cursor:pointer; }
+  button.alt { background:#fff; color:var(--green); }
+  #status { min-height:1.6em; font-weight:600; color:var(--green); }
+  pre#out { white-space:pre-wrap; word-wrap:break-word; font:15px/1.5 ui-monospace,Menlo,Consolas,monospace; background:#f5f7f8; border:1px solid var(--line); border-radius:6px; padding:14px; }
+  .skip { position:absolute; left:-999px; top:0; background:#fff; padding:8px; }
+  .skip:focus { left:8px; z-index:10; }
+  @media print { .noprint, fieldset, .box { display:none !important; } pre#out { border:0; background:#fff; font-size:12pt; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#form">Skip to the form</a>
+<main>
+<h1>Supervision Contract Tool</h1>
+<div class="box noprint">
+  <p style="margin:0 0 8px;">Use this tool to draft a written supervision agreement with a research mentor, a clinical supervisor, or a junior trainee you supervise. Work through it with the other person. Each section is a conversation to have, and the contract records what you both agreed.</p>
+  <p style="margin:0 0 8px;">Everything you type stays in your browser. Nothing is sent or saved anywhere. Copy or download the text before you close the page.</p>
+  <p style="margin:0;">Do not enter patient, participant, or client information. If you supervise a junior trainee, write that trainee's role and not their name.</p>
+</div>
+
+<form id="form" class="noprint" onsubmit="return false" autocomplete="off">
+
+<fieldset>
+  <legend>1. Who is in this agreement</legend>
+  <div class="field"><label for="kind">Kind of supervision</label>
+    <select id="kind"><option>Research supervision</option><option>Clinical supervision</option><option>Research and clinical supervision</option></select></div>
+  <div class="row">
+    <div class="field"><label for="sup_name">Supervisor</label><input type="text" id="sup_name"></div>
+    <div class="field"><label for="sup_role">Supervisor's role and credentials<span class="hint">For example, associate professor, or licensed psychologist.</span></label><input type="text" id="sup_role"></div>
+  </div>
+  <div class="row">
+    <div class="field"><label for="ee_name">Supervisee<span class="hint">Use a role such as junior trainee if the supervisee is a trainee you supervise.</span></label><input type="text" id="ee_name"></div>
+    <div class="field"><label for="ee_role">Supervisee's role and level of training</label><input type="text" id="ee_role"></div>
+  </div>
+  <div class="field"><label for="sup_train">Supervisor's training and experience in supervision<span class="hint">The supervisee is entitled to know this. If a licensed supervisor oversees the supervisor, name that person.</span></label><textarea id="sup_train"></textarea></div>
+  <div class="field"><label for="start">Start date</label><input type="date" id="start"></div>
+</fieldset>
+
+<fieldset>
+  <legend>2. Goals</legend>
+  <div class="field"><label for="prog_goals">Program goals this supervision serves<span class="hint">For example, a research product, a clinical competency, or a milestone due this year.</span></label><textarea id="prog_goals"></textarea></div>
+  <div class="field"><label for="g1">Learning goal 1<span class="hint">State it as something observable, with a date.</span></label><input type="text" id="g1"></div>
+  <div class="field"><label for="g2">Learning goal 2</label><input type="text" id="g2"></div>
+  <div class="field"><label for="g3">Learning goal 3</label><input type="text" id="g3"></div>
+</fieldset>
+
+<fieldset>
+  <legend>3. Roles and responsibilities</legend>
+  <div class="field"><label for="sup_resp">What the supervisor will do<span class="hint">For example, prepare for meetings, give timely feedback, protect time, and model the work.</span></label><textarea id="sup_resp"></textarea></div>
+  <div class="field"><label for="ee_resp">What the supervisee will do<span class="hint">For example, prepare an agenda, bring uncertainty and evidence, and follow through on agreed tasks.</span></label><textarea id="ee_resp"></textarea></div>
+  <div class="field"><label for="acct">Who is responsible for what, and to whom<span class="hint">For clinical work, name who holds responsibility for each case. The client's welfare comes first, and the supervisee's development comes second.</span></label><textarea id="acct"></textarea></div>
+</fieldset>
+
+<fieldset>
+  <legend>4. How supervision will run</legend>
+  <div class="row">
+    <div class="field"><label for="freq">How often<span class="hint">For example, weekly.</span></label><input type="text" id="freq"></div>
+    <div class="field"><label for="len">How long</label><input type="text" id="len"></div>
+  </div>
+  <div class="row">
+    <div class="field"><label for="fmt">Format</label><select id="fmt"><option>Individual</option><option>Group</option><option>Individual and group</option></select></div>
+    <div class="field"><label for="where">Where, or by what technology</label><input type="text" id="where"></div>
+  </div>
+  <div class="field"><label for="cancel">Cancelling and rescheduling</label><input type="text" id="cancel"></div>
+  <div class="field"><label for="backup">Leave and backup supervision<span class="hint">Who steps in when the supervisor is away, and how to reach that person.</span></label><textarea id="backup"></textarea></div>
+  <fieldset class="checks" style="border:0;padding:0;margin:0 0 10px;">
+    <legend style="font-size:17px;padding:0;">Methods the supervisor may use. Check all that apply.</legend>
+    <label><input type="checkbox" class="meth" value="Live observation of sessions or work"> Live observation of sessions or work</label>
+    <label><input type="checkbox" class="meth" value="Audio or video review"> Audio or video review</label>
+    <label><input type="checkbox" class="meth" value="Review of work samples chosen by the supervisor, not only by the supervisee"> Review of work samples chosen by the supervisor, not only by the supervisee</label>
+    <label><input type="checkbox" class="meth" value="Case or project discussion"> Case or project discussion</label>
+    <label><input type="checkbox" class="meth" value="Session-by-session outcome and alliance data brought to meetings"> Session-by-session outcome and alliance data brought to meetings</label>
+    <label><input type="checkbox" class="meth" value="Co-work or modeling"> Co-work or modeling</label>
+    <label><input type="checkbox" class="meth" value="Role play or rehearsal"> Role play or rehearsal</label>
+    <label><input type="checkbox" class="meth" value="Review of drafts and written products"> Review of drafts and written products</label>
+  </fieldset>
+  <div class="field"><label for="rec">If recordings or distance supervision are used<span class="hint">How recordings are stored, who sees them, and how security is kept.</span></label><textarea id="rec"></textarea></div>
+</fieldset>
+
+<fieldset>
+  <legend>5. Evaluation and feedback</legend>
+  <div class="field"><label for="eval_sched">When and how the supervisee is evaluated<span class="hint">Give the schedule and the forms or criteria. Evaluation is part of supervision, and the supervisee should know it from the first meeting.</span></label><textarea id="eval_sched"></textarea></div>
+  <div class="field"><label for="fb">How feedback will be given<span class="hint">Describe a process that is timely and specific. The supervisee receives this at the beginning of supervision.</span></label><textarea id="fb"></textarea></div>
+  <div class="field"><label for="concern">If a concern about performance arises<span class="hint">For example, the concern is named early, documented with dates and specific behaviors, and a written plan with timelines follows. Say who else is told and what steps follow.</span></label><textarea id="concern"></textarea></div>
+</fieldset>
+
+<fieldset>
+  <legend>6. Confidentiality and documentation</legend>
+  <div class="field"><label for="conf">What is kept confidential and the limits of confidentiality<span class="hint">Name what the supervisor must share with program leaders, a licensed supervisor, or an outside party.</span></label><textarea id="conf"></textarea></div>
+  <div class="field"><label for="doc">What is documented and where<span class="hint">For example, meeting notes, training logs, and signed forms.</span></label><textarea id="doc"></textarea></div>
+  <div class="field"><label for="ethics">Ethics code, policies, insurance, and liability<span class="hint">Name the ethics code that binds both of you, the program and site policies that apply, and the liability coverage each person carries.</span></label><textarea id="ethics"></textarea></div>
+</fieldset>
+
+<fieldset>
+  <legend>7. Emergencies and disagreements</legend>
+  <div class="field"><label for="crisis">If something urgent happens<span class="hint">For patient safety, a legal duty, a boundary question, or a research emergency, say who to contact first, how to reach that person, and who is the backup. Take these questions to the responsible supervisor the same day.</span></label><textarea id="crisis"></textarea></div>
+  <div class="field"><label for="disagree">If you disagree<span class="hint">Say how you will raise it with each other, and who a third person is if you cannot resolve it.</span></label><textarea id="disagree"></textarea></div>
+  <div class="field"><label for="review">When this agreement will be reviewed and revised</label><input type="text" id="review"></div>
+</fieldset>
+
+<div class="noprint">
+  <button type="button" id="make">Preview the contract</button>
+</div>
+</form>
+
+<section aria-labelledby="outh" id="outsec" hidden>
+  <h2 id="outh" class="noprint">Your contract text</h2>
+  <div class="noprint">
+    <button type="button" id="copy">Copy the text</button>
+    <button type="button" class="alt" id="dl">Download as a text file</button>
+    <button type="button" class="alt" id="pr">Print</button>
+  </div>
+  <p id="status" role="status" aria-live="polite" class="noprint"></p>
+  <pre id="out" tabindex="0" aria-label="Contract text"></pre>
+  <p class="noprint" style="font-size:15px;">Read the text with the other person, make changes, and then both of you sign. The signature lines sit at the bottom of the text.</p>
+</section>
+
+<hr class="noprint">
+<p class="noprint" style="font-size:15px;">This tool follows the elements that the American Psychological Association (2014) guidelines for clinical supervision and Gonsalvez (2014) list for a written supervision agreement, together with the feedback-process requirement in Standard 7.06 of the APA Ethics Code. It is a drafting aid. Your program, your site, and your supervisor decide what the agreement must contain.</p>
+</main>
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  function v(id){var e=$(id); return e ? e.value.trim() : '';}
+  function line(label,val){ return label + '\n' + (val || '[not yet decided]') + '\n\n'; }
+  function fmtDate(s){ if(!s) return '[not yet decided]'; var p=s.split('-'); if(p.length!==3) return s; var m=['January','February','March','April','May','June','July','August','September','October','November','December']; return m[+p[1]-1]+' '+(+p[2])+', '+p[0]; }
+  function build(){
+    var meth=[].slice.call(document.querySelectorAll('.meth')).filter(function(c){return c.checked;}).map(function(c){return '  - '+c.value;});
+    var t='SUPERVISION CONTRACT\n====================\n\n';
+    t+='Kind of supervision\n'+v('kind')+'\n\n';
+    t+='SUPERVISOR\n'+(v('sup_name')||'[name]')+(v('sup_role')?', '+v('sup_role'):'')+'\n\n';
+    t+='SUPERVISEE\n'+(v('ee_name')||'[name or role]')+(v('ee_role')?', '+v('ee_role'):'')+'\n\n';
+    t+=line('Supervisor\'s training and experience in supervision',v('sup_train'));
+    t+='Start date\n'+fmtDate(v('start'))+'\n\n';
+    t+='GOALS\n-----\n';
+    t+=line('Program goals this supervision serves',v('prog_goals'));
+    var gs=[v('g1'),v('g2'),v('g3')].filter(Boolean);
+    t+='Learning goals\n'+(gs.length?gs.map(function(g,i){return (i+1)+'. '+g;}).join('\n'):'[not yet decided]')+'\n\n';
+    t+='ROLES AND RESPONSIBILITIES\n--------------------------\n';
+    t+=line('The supervisor will',v('sup_resp'));
+    t+=line('The supervisee will',v('ee_resp'));
+    t+=line('Responsibility and accountability',v('acct'));
+    t+='HOW SUPERVISION WILL RUN\n------------------------\n';
+    t+='Frequency and length\n'+(v('freq')||'[frequency]')+', '+(v('len')||'[length]')+'\n\n';
+    t+='Format and place\n'+v('fmt')+(v('where')?', '+v('where'):'')+'\n\n';
+    t+=line('Cancelling and rescheduling',v('cancel'));
+    t+=line('Leave and backup supervision',v('backup'));
+    t+='Methods\n'+(meth.length?meth.join('\n'):'[not yet decided]')+'\n\n';
+    t+=line('Recordings and distance supervision',v('rec'));
+    t+='EVALUATION AND FEEDBACK\n-----------------------\n';
+    t+=line('When and how the supervisee is evaluated',v('eval_sched'));
+    t+=line('How feedback will be given',v('fb'));
+    t+=line('If a concern about performance arises',v('concern'));
+    t+='CONFIDENTIALITY AND DOCUMENTATION\n---------------------------------\n';
+    t+=line('Confidentiality and its limits',v('conf'));
+    t+=line('Documentation',v('doc'));
+    t+=line('Ethics code, policies, insurance, and liability',v('ethics'));
+    t+='EMERGENCIES AND DISAGREEMENTS\n----------------------------\n';
+    t+=line('If something urgent happens',v('crisis'));
+    t+=line('If we disagree',v('disagree'));
+    t+=line('Review and revision',v('review'));
+    t+='SIGNATURES\n----------\n\nSupervisor: ______________________________   Date: ______________\n\nSupervisee: ______________________________   Date: ______________\n';
+    return t;
+  }
+  function say(m){ $('status').textContent=m; }
+  $('make').addEventListener('click',function(){
+    $('out').textContent=build(); $('outsec').hidden=false; say('The contract text is ready below.');
+    $('outh').scrollIntoView(); $('outh').setAttribute('tabindex','-1'); $('outh').focus();
+  });
+  $('copy').addEventListener('click',function(){
+    var t=$('out').textContent;
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(function(){say('Copied to the clipboard.');},function(){say('Copy did not work. Select the text and copy it by hand.');}); }
+    else { var r=document.createRange(); r.selectNodeContents($('out')); var s=window.getSelection(); s.removeAllRanges(); s.addRange(r); say('The text is selected. Press Control+C or Command+C to copy it.'); }
+  });
+  $('dl').addEventListener('click',function(){
+    var b=new Blob([$('out').textContent],{type:'text/plain'}); var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='Supervision-Contract.txt'; document.body.appendChild(a); a.click(); a.remove(); say('The file was downloaded.');
+  });
+  $('pr').addEventListener('click',function(){ window.print(); });
+})();
+</script>
+</body>
+</html>
